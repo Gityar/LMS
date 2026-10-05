@@ -68,8 +68,8 @@
         <button onclick="switchTab('learning')" id="nav-learning" class="px-3.5 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1">
           <span>🩺</span> My Clinical Learning
         </button>
-        <button onclick="switchTab('sheets')" id="nav-sheets" class="px-3.5 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Google Sheets
+        <button onclick="switchTab('sheets')" id="nav-sheets" class="hidden px-3.5 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5 text-indigo-700 bg-indigo-50/50">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span> ⚙️ Database Admin
         </button>
       </nav>
 
@@ -131,9 +131,9 @@
           <div class="text-xs text-indigo-600 font-semibold mt-1">80% Passing Threshold</div>
         </div>
         <div class="glass-card rounded-xl p-5 shadow-sm">
-          <div class="text-xs font-medium text-slate-500">Google Sheet Status</div>
-          <div class="text-2xl font-bold text-slate-900 mt-1 text-emerald-600">Live</div>
-          <div class="text-xs text-slate-500 font-semibold mt-1">13 Database Sheets</div>
+          <div class="text-xs font-medium text-slate-500">Accreditation Status</div>
+          <div class="text-2xl font-bold text-slate-900 mt-1 text-emerald-600">Active</div>
+          <div class="text-xs text-slate-500 font-semibold mt-1">CPD Clinical Standard</div>
         </div>
       </div>
 
@@ -1086,6 +1086,21 @@
             Register
           </button>
         `;
+      }
+
+      // Only expose the Google Sheets Database Admin tab to logged-in administrators
+      const sheetsNav = document.getElementById('nav-sheets');
+      if (sheetsNav) {
+        if (currentUser && currentUser.role === 'admin') {
+          sheetsNav.classList.remove('hidden');
+        } else {
+          sheetsNav.classList.add('hidden');
+          // If a guest was viewing the sheets tab, return to dashboard
+          const sheetsTab = document.getElementById('tab-sheets');
+          if (sheetsTab && !sheetsTab.classList.contains('hidden')) {
+            switchTab('dashboard');
+          }
+        }
       }
 
       renderLearningTab();
@@ -2312,6 +2327,14 @@
     }
 
     function switchTab(tab) {
+      if (tab === 'sheets') {
+        if (!currentUser || currentUser.role !== 'admin') {
+          showToast('Administrator authentication required to access database settings.', 'err');
+          openLoginModal();
+          return;
+        }
+      }
+
       ['dashboard', 'courses', 'quiz', 'learning', 'sheets'].forEach(t => {
         const sec = document.getElementById('tab-' + t);
         const nav = document.getElementById('nav-' + t);
