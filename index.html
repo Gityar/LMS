@@ -43,43 +43,38 @@
       <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
       <span class="truncate">Database: <strong class="font-mono text-emerald-300">1TQcak2SNQ3oT9DBz_nyrOzVh8fWfNRVsWqt7Rk_1uTA</strong></span>
     </div>
-    <div class="flex items-center gap-3 flex-shrink-0">
-      <span class="hidden sm:inline text-indigo-300">Admin: <strong>yaregalsemanew@gmail.com</strong></span>
-      <button id="admin-lock-btn" onclick="toggleAdminAuthPrompt()" class="px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 text-[10px] font-bold uppercase tracking-wider border border-amber-500/40 flex items-center gap-1 transition cursor-pointer">
-        <span id="admin-lock-icon">🔒</span> <span id="admin-lock-text">Admin Protected (Click to Unlock)</span>
-      </button>
+    <div class="flex items-center gap-3 flex-shrink-0" id="top-user-banner">
+      <!-- Injected by JavaScript -->
     </div>
   </div>
 
   <!-- NAVIGATION BAR -->
   <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
         <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-200 font-bold text-lg">
           👶
         </div>
         <div>
           <h1 class="font-bold text-slate-900 text-base leading-tight">Neonatal Nursing LMS</h1>
-          <p class="text-xs text-slate-500 font-medium">Authoring & Clinical NICU Portal</p>
+          <p class="text-xs text-slate-500 font-medium">Clinical NICU Portal & Learning Hub</p>
         </div>
       </div>
 
       <nav class="hidden md:flex items-center gap-1 text-sm font-medium text-slate-600">
         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-3.5 py-1.5 rounded-lg text-indigo-600 bg-indigo-50 font-semibold transition">Dashboard</button>
-        <button onclick="switchTab('courses')" id="nav-courses" class="px-3.5 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition">Courses & Modules</button>
+        <button onclick="switchTab('courses')" id="nav-courses" class="px-3.5 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition">Courses</button>
         <button onclick="switchTab('quiz')" id="nav-quiz" class="px-3.5 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition">Assessments</button>
+        <button onclick="switchTab('learning')" id="nav-learning" class="px-3.5 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1">
+          <span>🩺</span> My Clinical Learning
+        </button>
         <button onclick="switchTab('sheets')" id="nav-sheets" class="px-3.5 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Google Sheets Sync
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Google Sheets
         </button>
       </nav>
 
-      <div class="flex items-center gap-2 sm:gap-3">
-        <button onclick="openCourseModal()" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-indigo-600 text-white rounded-lg shadow-sm hover:bg-indigo-700 transition">
-          <span>+ Add Course</span>
-        </button>
-        <button onclick="openSheetLink()" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition">
-          📊 Open Sheet
-        </button>
+      <div class="flex items-center gap-2 sm:gap-3" id="header-auth-actions">
+        <!-- Auth buttons or user profile injected by JS -->
       </div>
     </div>
   </header>
@@ -268,7 +263,246 @@
       </div>
     </section>
 
+    <!-- ==================== TAB: MY CLINICAL LEARNING ==================== -->
+    <section id="tab-learning" class="space-y-6 hidden">
+      <div id="learning-guest-view" class="glass-card rounded-2xl p-8 sm:p-12 text-center max-w-xl mx-auto space-y-4 border border-slate-200">
+        <div class="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-3xl mx-auto shadow-sm">
+          🩺
+        </div>
+        <h3 class="text-xl font-bold text-slate-900">Sign In to Track Your Clinical Progress</h3>
+        <p class="text-xs text-slate-500 leading-relaxed max-w-md mx-auto">
+          Enroll in clinical NICU courses, take accredited NRP assessments, view your quiz scores, and generate your clinical certificate of competency.
+        </p>
+        <div class="flex items-center justify-center gap-3 pt-2">
+          <button onclick="openLoginModal()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-md shadow-indigo-200 transition">
+            Sign In Now
+          </button>
+          <button onclick="openRegisterModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition">
+            Register as a Nurse
+          </button>
+        </div>
+      </div>
+
+      <div id="learning-user-view" class="space-y-6 hidden">
+        <!-- Learner Banner Card -->
+        <div class="glass-card rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-indigo-200" id="learning-avatar">
+              TN
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="font-bold text-slate-900 text-lg" id="learning-user-name">Nurse Tigist Mengistu</h3>
+                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-700" id="learning-user-role">Learner</span>
+              </div>
+              <p class="text-xs text-slate-500" id="learning-user-hospital">Tikur Anbessa Specialized Hospital • NICU Unit</p>
+              <p class="text-[11px] text-slate-400 font-mono mt-0.5" id="learning-user-email">nurse.tigist@hospital.et</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="switchTab('courses')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-sm transition">
+              + Browse Courses to Enroll
+            </button>
+          </div>
+        </div>
+
+        <!-- Progress Overview -->
+        <div class="grid sm:grid-cols-3 gap-4 text-xs">
+          <div class="glass-card rounded-xl p-4 border border-slate-200">
+            <div class="text-slate-500 font-medium">Enrolled Courses</div>
+            <div class="text-2xl font-bold text-slate-900 mt-1" id="learning-enrolled-count">1</div>
+            <div class="text-indigo-600 font-semibold mt-1">Active Curriculum</div>
+          </div>
+          <div class="glass-card rounded-xl p-4 border border-slate-200">
+            <div class="text-slate-500 font-medium">Completed Lessons</div>
+            <div class="text-2xl font-bold text-slate-900 mt-1" id="learning-completed-lessons">3</div>
+            <div class="text-emerald-600 font-semibold mt-1">Protocols & Simulations</div>
+          </div>
+          <div class="glass-card rounded-xl p-4 border border-slate-200">
+            <div class="text-slate-500 font-medium">Exam Certificates</div>
+            <div class="text-2xl font-bold text-slate-900 mt-1" id="learning-certificates-count">1</div>
+            <div class="text-amber-600 font-semibold mt-1">Passing Grade >= 80%</div>
+          </div>
+        </div>
+
+        <!-- Enrolled Courses List -->
+        <div class="space-y-3">
+          <h4 class="font-bold text-slate-900 text-sm">My Active Enrolled Courses</h4>
+          <div id="learning-courses-list" class="space-y-3">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Exam Attempts History -->
+        <div class="space-y-3 pt-4 border-t border-slate-200">
+          <h4 class="font-bold text-slate-900 text-sm">Clinical Assessment History</h4>
+          <div id="learning-attempts-list" class="space-y-2">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
+
+  <!-- ==================== MODAL: USER SIGN IN ==================== -->
+  <div id="modal-user-login" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="font-bold text-slate-900 text-base">Sign In to LMS</h3>
+          <p class="text-xs text-slate-500">Access courses, enrollments & certificates</p>
+        </div>
+        <button onclick="closeLoginModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <!-- Quick 1-click Demo Account Selector -->
+      <div class="space-y-1.5">
+        <label class="text-[11px] font-semibold text-slate-500 block">Quick Demo Logins:</label>
+        <div class="grid grid-cols-3 gap-1.5">
+          <button type="button" onclick="fillLoginForm('yaregalsemanew@gmail.com', 'Admin@2026')" class="p-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded-lg truncate border border-indigo-200">
+            👤 Admin
+          </button>
+          <button type="button" onclick="fillLoginForm('almaz@neonatal.et', 'Instructor@2026')" class="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-lg truncate border border-emerald-200">
+            👩‍⚕️ Instructor
+          </button>
+          <button type="button" onclick="fillLoginForm('nurse.tigist@hospital.et', 'Learner@2026')" class="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 text-[10px] font-bold rounded-lg truncate border border-amber-200">
+            👶 Nurse
+          </button>
+        </div>
+      </div>
+
+      <form onsubmit="handleUserLogin(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Email Address</label>
+          <input type="email" id="login-email" required placeholder="nurse@hospital.et" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Password</label>
+          <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div id="login-error-msg" class="hidden text-rose-600 text-[11px] font-semibold">
+          Invalid email or password.
+        </div>
+
+        <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs shadow-md shadow-indigo-200 transition">
+          Sign In
+        </button>
+      </form>
+
+      <div class="text-center pt-2 border-t border-slate-100 text-xs text-slate-500">
+        Don't have an account? 
+        <button onclick="closeLoginModal(); openRegisterModal();" class="text-indigo-600 font-bold hover:underline">
+          Register as Nurse
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: USER REGISTRATION ==================== -->
+  <div id="modal-user-register" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="font-bold text-slate-900 text-base">Register New Nurse</h3>
+          <p class="text-xs text-slate-500">Ethiopian Neonatal Clinical Registry</p>
+        </div>
+        <button onclick="closeRegisterModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <form onsubmit="handleUserRegister(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Full Name</label>
+          <input type="text" id="reg-name" required placeholder="e.g. Nurse Hana Bekele" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Email Address</label>
+          <input type="email" id="reg-email" required placeholder="hana.b@hospital.et" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Hospital / NICU Facility</label>
+          <input type="text" id="reg-hospital" required placeholder="e.g. Tikur Anbessa Hospital" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Role</label>
+          <select id="reg-role" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white">
+            <option value="learner">Nurse / Learner</option>
+            <option value="instructor">Clinical Instructor</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Create Password</label>
+          <input type="password" id="reg-password" required minlength="6" placeholder="At least 6 characters" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white">
+        </div>
+
+        <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs shadow-md shadow-indigo-200 transition">
+          Register & Log In
+        </button>
+      </form>
+
+      <div class="text-center pt-2 border-t border-slate-100 text-xs text-slate-500">
+        Already registered? 
+        <button onclick="closeRegisterModal(); openLoginModal();" class="text-indigo-600 font-bold hover:underline">
+          Sign In
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: CLINICAL CERTIFICATE ==================== -->
+  <div id="modal-certificate" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl border-4 border-amber-200 text-center space-y-6 relative overflow-hidden">
+      <div class="absolute -right-12 -top-12 w-36 h-36 bg-amber-100 rounded-full blur-2xl pointer-events-none"></div>
+
+      <div class="flex justify-between items-start">
+        <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center text-2xl mx-auto shadow-xs">
+          🏆
+        </div>
+        <button onclick="closeCertificateModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <div class="space-y-1">
+        <div class="text-[10px] font-extrabold uppercase tracking-widest text-amber-700">Official Clinical Competency</div>
+        <h3 class="text-2xl font-extrabold text-slate-900 tracking-tight">Certificate of Completion</h3>
+        <p class="text-xs text-slate-500">Ethiopian Neonatal Care Clinical Program</p>
+      </div>
+
+      <div class="py-2 border-y border-slate-100 space-y-1">
+        <div class="text-xs text-slate-400 font-medium">This is to certify that</div>
+        <div class="text-xl font-extrabold text-indigo-900" id="cert-learner-name">Nurse Tigist Mengistu</div>
+        <div class="text-xs text-slate-600 max-w-md mx-auto pt-1 leading-relaxed">
+          Has successfully mastered the clinical protocol and passed the examination for
+        </div>
+        <div class="text-sm font-bold text-slate-800" id="cert-course-name">Neonatal Resuscitation Program (NRP)</div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 text-left text-xs bg-slate-50 p-4 rounded-2xl border border-slate-200">
+        <div>
+          <span class="text-slate-400 block text-[10px]">Score Achieved:</span>
+          <span class="font-extrabold text-emerald-700 text-base" id="cert-score">100% (Passed)</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block text-[10px]">Verified By:</span>
+          <span class="font-bold text-slate-800">Sr. Almaz & Dr. Dawit</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-center gap-3">
+        <button onclick="window.print()" class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-xl shadow-sm transition">
+          🖨️ Print Certificate
+        </button>
+        <button onclick="closeCertificateModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ==================== MODAL: ADMIN PASSWORD PROTECTION ==================== -->
   <div id="modal-admin-auth" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
@@ -624,16 +858,43 @@
       'Assignments', 'Assignment_Submissions', 'Assessments', 'Questions', 'Assessment_Attempts'
     ];
 
+    // DEFAULT USER ACCOUNTS (Matching database)
+    const DEFAULT_USERS = [
+      { id: 'USR-ADMIN-01', fullName: 'Yaregal Semanew', email: 'yaregalsemanew@gmail.com', password: 'Admin@2026', role: 'admin', hospital: 'Ethiopian Neonatal Center', avatar: 'YS' },
+      { id: 'USR-INST-01', fullName: 'Sister Almaz', email: 'almaz@neonatal.et', password: 'Instructor@2026', role: 'instructor', hospital: 'Gondar Teaching Hospital', avatar: 'SA' },
+      { id: 'USR-NURSE-01', fullName: 'Nurse Tigist Mengistu', email: 'nurse.tigist@hospital.et', password: 'Learner@2026', role: 'learner', hospital: 'Tikur Anbessa Hospital', avatar: 'TM' }
+    ];
+
+    const DEFAULT_ENROLLMENTS = [
+      { id: 'ENR-01', courseId: 'CRS-NRP-01', userId: 'USR-NURSE-01', progress: 50, enrolledDate: '2026-10-01' }
+    ];
+
+    const DEFAULT_ATTEMPTS = [
+      { id: 'ATT-01', userId: 'USR-NURSE-01', learnerName: 'Nurse Tigist Mengistu', courseId: 'CRS-NRP-01', courseTitle: 'Neonatal Resuscitation Program (NRP)', score: 4, total: 4, percentage: 100, passed: true, date: '2026-10-01' }
+    ];
+
     // STORAGE STATE
     let courses = JSON.parse(localStorage.getItem('lms_courses')) || DEFAULT_COURSES;
     let lessons = JSON.parse(localStorage.getItem('lms_lessons')) || DEFAULT_LESSONS;
     let questions = JSON.parse(localStorage.getItem('lms_questions')) || DEFAULT_QUESTIONS;
+    let users = JSON.parse(localStorage.getItem('lms_users')) || DEFAULT_USERS;
+    let currentUser = JSON.parse(localStorage.getItem('lms_current_user')) || null;
+    let enrollments = JSON.parse(localStorage.getItem('lms_enrollments')) || DEFAULT_ENROLLMENTS;
+    let attempts = JSON.parse(localStorage.getItem('lms_attempts')) || DEFAULT_ATTEMPTS;
     let userAnswers = {};
 
     function saveState() {
       localStorage.setItem('lms_courses', JSON.stringify(courses));
       localStorage.setItem('lms_lessons', JSON.stringify(lessons));
       localStorage.setItem('lms_questions', JSON.stringify(questions));
+      localStorage.setItem('lms_users', JSON.stringify(users));
+      localStorage.setItem('lms_enrollments', JSON.stringify(enrollments));
+      localStorage.setItem('lms_attempts', JSON.stringify(attempts));
+      if (currentUser) {
+        localStorage.setItem('lms_current_user', JSON.stringify(currentUser));
+      } else {
+        localStorage.removeItem('lms_current_user');
+      }
       updateCounts();
     }
 
@@ -662,6 +923,347 @@
         toast.classList.add('opacity-0');
         setTimeout(() => toast.remove(), 300);
       }, 3000);
+    }
+
+    // ==================== USER AUTHENTICATION & SESSIONS ====================
+    function renderAuthUI() {
+      const topBanner = document.getElementById('top-user-banner');
+      const headerActions = document.getElementById('header-auth-actions');
+
+      if (currentUser) {
+        const roleColor = currentUser.role === 'admin' ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' :
+                          currentUser.role === 'instructor' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' :
+                          'bg-amber-500/20 text-amber-300 border-amber-500/30';
+        const roleLabel = currentUser.role.toUpperCase();
+
+        topBanner.innerHTML = `
+          <span class="hidden sm:inline text-indigo-200">Session: <strong>${currentUser.fullName}</strong></span>
+          <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${roleColor}">${roleLabel}</span>
+          ${currentUser.role === 'admin' ? `
+            <button id="admin-lock-btn" onclick="toggleAdminAuthPrompt()" class="px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 text-[10px] font-bold uppercase tracking-wider border border-amber-500/40 flex items-center gap-1 transition cursor-pointer">
+              <span id="admin-lock-icon">🔒</span> <span id="admin-lock-text">Admin Protected</span>
+            </button>
+          ` : ''}
+          <button onclick="logoutUser()" class="text-rose-300 hover:text-rose-100 text-xs font-semibold hover:underline">Sign Out</button>
+        `;
+
+        headerActions.innerHTML = `
+          ${(currentUser.role === 'admin' || currentUser.role === 'instructor') ? `
+            <button onclick="openCourseModal()" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-indigo-600 text-white rounded-lg shadow-sm hover:bg-indigo-700 transition">
+              <span>+ Add Course</span>
+            </button>
+          ` : ''}
+          <div class="flex items-center gap-2 pl-2 border-l border-slate-200">
+            <div class="w-8 h-8 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-xs cursor-pointer" onclick="switchTab('learning')" title="${currentUser.fullName}">
+              ${currentUser.avatar || currentUser.fullName.substring(0, 2).toUpperCase()}
+            </div>
+            <div class="hidden sm:block text-left text-xs">
+              <div class="font-bold text-slate-800 leading-tight">${currentUser.fullName.split(' ')[0]}</div>
+              <div class="text-[10px] text-slate-500 capitalize">${currentUser.role}</div>
+            </div>
+            <button onclick="logoutUser()" title="Sign Out" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition text-xs">
+              🚪
+            </button>
+          </div>
+        `;
+      } else {
+        topBanner.innerHTML = `
+          <span class="hidden sm:inline text-indigo-300">Welcome, Guest Nurse</span>
+          <button onclick="openLoginModal()" class="px-2.5 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider border border-white/20 transition">
+            Sign In
+          </button>
+          <button onclick="openRegisterModal()" class="px-2.5 py-1 rounded bg-indigo-500 hover:bg-indigo-400 text-white text-[10px] font-bold uppercase tracking-wider transition">
+            Register as Nurse
+          </button>
+        `;
+
+        headerActions.innerHTML = `
+          <button onclick="openLoginModal()" class="px-3.5 py-1.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold rounded-lg transition">
+            Sign In
+          </button>
+          <button onclick="openRegisterModal()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg shadow-sm transition">
+            Register
+          </button>
+        `;
+      }
+
+      renderLearningTab();
+      updateAdminStatusBadge();
+    }
+
+    function openLoginModal() {
+      document.getElementById('login-error-msg').classList.add('hidden');
+      document.getElementById('modal-user-login').classList.remove('hidden');
+    }
+
+    function closeLoginModal() {
+      document.getElementById('modal-user-login').classList.add('hidden');
+    }
+
+    function openRegisterModal() {
+      document.getElementById('modal-user-register').classList.remove('hidden');
+    }
+
+    function closeRegisterModal() {
+      document.getElementById('modal-user-register').classList.add('hidden');
+    }
+
+    function fillLoginForm(email, pwd) {
+      document.getElementById('login-email').value = email;
+      document.getElementById('login-password').value = pwd;
+    }
+
+    function handleUserLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim().toLowerCase();
+      const pwd = document.getElementById('login-password').value;
+
+      const found = users.find(u => u.email.toLowerCase() === email && u.password === pwd);
+
+      if (found) {
+        currentUser = found;
+        if (found.role === 'admin') {
+          isAdminAuthenticated = true;
+          sessionStorage.setItem('lms_admin_auth', 'true');
+        }
+        saveState();
+        closeLoginModal();
+        renderAuthUI();
+        renderCourses();
+        showToast(`Welcome back, ${found.fullName}!`);
+      } else {
+        document.getElementById('login-error-msg').classList.remove('hidden');
+      }
+    }
+
+    function handleUserRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim().toLowerCase();
+      const hospital = document.getElementById('reg-hospital').value.trim();
+      const role = document.getElementById('reg-role').value;
+      const pwd = document.getElementById('reg-password').value;
+
+      if (users.some(u => u.email.toLowerCase() === email)) {
+        alert('An account with this email address already exists. Please log in.');
+        return;
+      }
+
+      const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'RN';
+
+      const newUser = {
+        id: 'USR-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+        fullName: name,
+        email,
+        hospital: hospital || 'NICU Clinical Hospital',
+        role,
+        password: pwd,
+        avatar: initials
+      };
+
+      users.push(newUser);
+      currentUser = newUser;
+      saveState();
+
+      // Push newly registered user to Google Sheets Users table if URL configured
+      const webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (webAppUrl) {
+        fetch(webAppUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'appendRecord',
+            sheetKey: 'users',
+            records: [{
+              'User_ID': newUser.id,
+              'Full_Name': newUser.fullName,
+              'Email': newUser.email,
+              'Password_Hash': newUser.password,
+              'Role': newUser.role,
+              'Registration_Date': new Date().toISOString(),
+              'Account_Status': 'active',
+              'Last_Login': new Date().toISOString()
+            }]
+          }),
+          mode: 'no-cors'
+        }).catch(() => {});
+      }
+
+      closeRegisterModal();
+      renderAuthUI();
+      renderCourses();
+      showToast(`Registration complete! Welcome, ${name}.`);
+    }
+
+    function logoutUser() {
+      currentUser = null;
+      isAdminAuthenticated = false;
+      sessionStorage.removeItem('lms_admin_auth');
+      saveState();
+      renderAuthUI();
+      renderCourses();
+      showToast('You have been logged out.');
+    }
+
+    // ==================== LEARNING PORTFOLIO & ENROLLMENT ====================
+    function enrollInCourse(courseId) {
+      if (!currentUser) {
+        showToast('Please log in as a nurse/learner to enroll.', 'err');
+        openLoginModal();
+        return;
+      }
+
+      const existing = enrollments.find(e => e.courseId === courseId && e.userId === currentUser.id);
+      if (existing) {
+        showToast('You are already enrolled in this course.');
+        switchTab('learning');
+        return;
+      }
+
+      const newEnrollment = {
+        id: 'ENR-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+        courseId,
+        userId: currentUser.id,
+        progress: 0,
+        enrolledDate: new Date().toISOString().split('T')[0]
+      };
+
+      enrollments.push(newEnrollment);
+      saveState();
+      renderCourses();
+      renderLearningTab();
+      showToast('Enrolled successfully! View it in My Clinical Learning.');
+      switchTab('learning');
+
+      // Sync enrollment to Google Sheets
+      const webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (webAppUrl) {
+        fetch(webAppUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'appendRecord',
+            sheetKey: 'enrollments',
+            records: [{
+              'Enrollment_ID': newEnrollment.id,
+              'Learner_ID': currentUser.id,
+              'Learner_Name': currentUser.fullName,
+              'Course_ID': courseId,
+              'Enrollment_Date': newEnrollment.enrolledDate,
+              'Completion_Status': 'in_progress',
+              'Progress_Percentage': 0,
+              'Last_Accessed': new Date().toISOString()
+            }]
+          }),
+          mode: 'no-cors'
+        }).catch(() => {});
+      }
+    }
+
+    function renderLearningTab() {
+      const guestView = document.getElementById('learning-guest-view');
+      const userView = document.getElementById('learning-user-view');
+      if (!guestView || !userView) return;
+
+      if (!currentUser) {
+        guestView.classList.remove('hidden');
+        userView.classList.add('hidden');
+        return;
+      }
+
+      guestView.classList.add('hidden');
+      userView.classList.remove('hidden');
+
+      document.getElementById('learning-user-name').innerText = currentUser.fullName;
+      document.getElementById('learning-user-role').innerText = currentUser.role;
+      document.getElementById('learning-user-hospital').innerText = currentUser.hospital || 'NICU Hospital';
+      document.getElementById('learning-user-email').innerText = currentUser.email;
+      document.getElementById('learning-avatar').innerText = currentUser.avatar || 'RN';
+
+      const myEnrollments = enrollments.filter(e => e.userId === currentUser.id);
+      const myAttempts = attempts.filter(a => a.userId === currentUser.id);
+      const passedAttempts = myAttempts.filter(a => a.passed);
+
+      document.getElementById('learning-enrolled-count').innerText = myEnrollments.length;
+      document.getElementById('learning-completed-lessons').innerText = myEnrollments.length * 2 + 1;
+      document.getElementById('learning-certificates-count').innerText = passedAttempts.length;
+
+      // Render Enrolled Courses
+      const coursesContainer = document.getElementById('learning-courses-list');
+      if (myEnrollments.length === 0) {
+        coursesContainer.innerHTML = '<div class="text-xs text-slate-400 p-4 border border-dashed border-slate-200 rounded-xl text-center">You have not enrolled in any courses yet. Click "Browse Courses" above to enroll.</div>';
+      } else {
+        coursesContainer.innerHTML = myEnrollments.map(enr => {
+          const c = courses.find(course => course.id === enr.courseId) || { title: enr.courseId, category: 'Clinical', instructor: 'Sister Almaz', modules: 3 };
+          return `
+            <div class="glass-card rounded-xl p-4 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700">${c.category}</span>
+                  <h5 class="font-bold text-slate-900 text-sm">${c.title}</h5>
+                </div>
+                <div class="flex items-center gap-3 text-xs text-slate-500">
+                  <span>Instructor: ${c.instructor}</span>
+                  <span>•</span>
+                  <span>Enrolled: ${enr.enrolledDate}</span>
+                </div>
+                <div class="w-full sm:w-64 bg-slate-100 rounded-full h-2 mt-2">
+                  <div class="bg-indigo-600 h-2 rounded-full" style="width: ${Math.max(enr.progress, 30)}%"></div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="openLessonsModal('${enr.courseId}')" class="px-3.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-lg transition">
+                  📖 View Lessons
+                </button>
+                <button onclick="switchTab('quiz')" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-lg transition">
+                  Take Exam
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Render Assessment Attempts
+      const attemptsContainer = document.getElementById('learning-attempts-list');
+      if (myAttempts.length === 0) {
+        attemptsContainer.innerHTML = '<div class="text-xs text-slate-400 p-4 border border-dashed border-slate-200 rounded-xl text-center">No exam attempts recorded yet. Take the NRP Clinical Quiz to earn your certificate.</div>';
+      } else {
+        attemptsContainer.innerHTML = myAttempts.map(att => `
+          <div class="bg-white border border-slate-200 rounded-xl p-3.5 flex items-center justify-between shadow-2xs">
+            <div>
+              <div class="flex items-center gap-2">
+                <h5 class="font-bold text-slate-900 text-xs">${att.courseTitle || 'Neonatal Resuscitation Program (NRP)'}</h5>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${att.passed ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                  ${att.passed ? 'PASSED' : 'NEEDS REVIEW'}
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-0.5">Score: ${att.score}/${att.total} (${att.percentage}%) • Date: ${att.date}</p>
+            </div>
+            ${att.passed ? `
+              <button onclick="openCertificateModal('${att.courseTitle}', '${att.percentage}%')" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-semibold text-xs rounded-lg shadow-2xs transition flex items-center gap-1">
+                <span>🏆</span> Certificate
+              </button>
+            ` : `
+              <button onclick="switchTab('quiz')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition">
+                Retake Exam
+              </button>
+            `}
+          </div>
+        `).join('');
+      }
+    }
+
+    function openCertificateModal(courseTitle = 'Neonatal Resuscitation Program (NRP)', score = '100%') {
+      const learnerName = currentUser ? currentUser.fullName : 'Nurse Clinician';
+      document.getElementById('cert-learner-name').innerText = learnerName;
+      document.getElementById('cert-course-name').innerText = courseTitle;
+      document.getElementById('cert-score').innerText = score + ' (Competency Passed)';
+      document.getElementById('modal-certificate').classList.remove('hidden');
+    }
+
+    function closeCertificateModal() {
+      document.getElementById('modal-certificate').classList.add('hidden');
     }
 
     // ==================== ADMIN PASSWORD PROTECTION LAYER ====================
@@ -759,6 +1361,57 @@
 
       const createCardHtml = (c) => {
         const courseLessons = lessons.filter(l => l.courseId === c.id);
+        const isEnrolled = currentUser ? enrollments.some(e => e.courseId === c.id && e.userId === currentUser.id) : false;
+
+        let actionsHtml = '';
+        if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'instructor')) {
+          actionsHtml = `
+            <div class="flex items-center gap-1.5 pt-1">
+              <button onclick="openLessonsModal('${c.id}')" class="flex-1 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-lg transition text-center">
+                📚 Lessons (${courseLessons.length})
+              </button>
+              <button onclick="editCourse('${c.id}')" title="Edit Course" class="p-1.5 hover:bg-slate-100 text-slate-600 rounded-lg transition">
+                ✏️
+              </button>
+              <button onclick="deleteCourse('${c.id}')" title="Delete Course" class="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition">
+                🗑️
+              </button>
+            </div>
+          `;
+        } else if (currentUser && currentUser.role === 'learner') {
+          if (isEnrolled) {
+            actionsHtml = `
+              <div class="flex items-center gap-1.5 pt-1">
+                <button onclick="openLessonsModal('${c.id}')" class="flex-1 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold text-xs rounded-lg transition text-center flex items-center justify-center gap-1">
+                  <span>✓ Enrolled</span> • Study Lessons (${courseLessons.length})
+                </button>
+              </div>
+            `;
+          } else {
+            actionsHtml = `
+              <div class="flex items-center gap-1.5 pt-1">
+                <button onclick="enrollInCourse('${c.id}')" class="flex-1 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-lg transition text-center shadow-xs">
+                  ➕ Enroll in Course
+                </button>
+                <button onclick="openLessonsModal('${c.id}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition">
+                  Preview
+                </button>
+              </div>
+            `;
+          }
+        } else {
+          actionsHtml = `
+            <div class="flex items-center gap-1.5 pt-1">
+              <button onclick="openLoginModal()" class="flex-1 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-lg transition text-center shadow-xs">
+                🔑 Sign In to Enroll
+              </button>
+              <button onclick="openLessonsModal('${c.id}')" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition">
+                Preview
+              </button>
+            </div>
+          `;
+        }
+
         return `
           <div class="glass-card rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between border border-slate-200">
             <div>
@@ -776,18 +1429,7 @@
                 <span class="font-semibold text-indigo-600">${courseLessons.length} Lessons • ${c.modules} Modules</span>
               </div>
 
-              <!-- Admin action buttons -->
-              <div class="flex items-center gap-1.5 pt-1">
-                <button onclick="openLessonsModal('${c.id}')" class="flex-1 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-lg transition text-center">
-                  📚 Lessons (${courseLessons.length})
-                </button>
-                <button onclick="editCourse('${c.id}')" title="Edit Course" class="p-1.5 hover:bg-slate-100 text-slate-600 rounded-lg transition">
-                  ✏️
-                </button>
-                <button onclick="deleteCourse('${c.id}')" title="Delete Course" class="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition">
-                  🗑️
-                </button>
-              </div>
+              ${actionsHtml}
             </div>
           </div>
         `;
@@ -1126,7 +1768,7 @@
         box.innerHTML = `
           <div class="text-xl">🎉</div>
           <div class="font-bold text-sm">Competency Passed (${scorePercent}%)</div>
-          <p class="text-[11px]">Score recorded. Ready for Clinical NICU practice.</p>
+          <p class="text-[11px]">Score calculated. Ready for Clinical NICU practice.</p>
         `;
       } else {
         box.className = 'rounded-xl p-4 border text-center space-y-1 bg-rose-50 border-rose-200 text-rose-800';
@@ -1135,6 +1777,70 @@
           <div class="font-bold text-sm">Score: ${scorePercent}% (Passing: 80%)</div>
           <p class="text-[11px]">Review the clinical protocols and re-test.</p>
         `;
+      }
+
+      if (!currentUser) {
+        box.innerHTML += `
+          <div class="pt-3 border-t border-slate-200 mt-2">
+            <p class="text-[11px] text-slate-600 mb-1.5 font-medium">To save your score to your clinical portfolio & generate your accredited certificate:</p>
+            <button onclick="openLoginModal()" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-lg shadow-sm">
+              Sign In or Register as Nurse
+            </button>
+          </div>
+        `;
+      } else {
+        const newAttempt = {
+          id: 'ATT-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+          userId: currentUser.id,
+          learnerName: currentUser.fullName,
+          courseId: 'CRS-NRP-01',
+          courseTitle: 'Neonatal Resuscitation Program (NRP)',
+          score: correctCount,
+          total: questions.length,
+          percentage: scorePercent,
+          passed: passed,
+          date: new Date().toISOString().split('T')[0]
+        };
+        attempts.unshift(newAttempt);
+        saveState();
+        renderLearningTab();
+
+        // Push attempt to Google Sheets
+        const webAppUrl = localStorage.getItem('lms_web_app_url');
+        if (webAppUrl) {
+          fetch(webAppUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'appendRecord',
+              sheetKey: 'attempts',
+              records: [{
+                'Attempt_ID': newAttempt.id,
+                'Assessment_ID': 'ASM-NRP-01',
+                'Learner_ID': currentUser.id,
+                'Learner_Name': currentUser.fullName,
+                'Course_ID': 'CRS-NRP-01',
+                'Attempt_Number': 1,
+                'Score': correctCount,
+                'Percentage': scorePercent,
+                'Passed': passed ? 'YES' : 'NO',
+                'Submitted_Date': new Date().toISOString(),
+                'Answers_JSON': JSON.stringify(userAnswers)
+              }]
+            }),
+            mode: 'no-cors'
+          }).catch(() => {});
+        }
+
+        if (passed) {
+          box.innerHTML += `
+            <div class="pt-3 border-t border-emerald-200 mt-2">
+              <button onclick="openCertificateModal('Neonatal Resuscitation Program (NRP)', '${scorePercent}%')" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5 mx-auto">
+                <span>🏆</span> View Clinical Certificate of Competency
+              </button>
+            </div>
+          `;
+        }
       }
     }
 
@@ -1223,7 +1929,12 @@
           courses = [...DEFAULT_COURSES];
           lessons = [...DEFAULT_LESSONS];
           questions = [...DEFAULT_QUESTIONS];
+          users = [...DEFAULT_USERS];
+          currentUser = null;
+          enrollments = [...DEFAULT_ENROLLMENTS];
+          attempts = [...DEFAULT_ATTEMPTS];
           saveState();
+          renderAuthUI();
           renderCourses();
           renderQuizEditor();
           showToast('Reset to default curriculum.');
@@ -1236,7 +1947,7 @@
     }
 
     function switchTab(tab) {
-      ['dashboard', 'courses', 'quiz', 'sheets'].forEach(t => {
+      ['dashboard', 'courses', 'quiz', 'learning', 'sheets'].forEach(t => {
         const sec = document.getElementById('tab-' + t);
         const nav = document.getElementById('nav-' + t);
         if (sec) sec.classList.add('hidden');
@@ -1251,6 +1962,11 @@
       if (activeNav) {
         activeNav.className = 'px-3.5 py-1.5 rounded-lg text-indigo-600 bg-indigo-50 font-semibold transition';
       }
+
+      if (tab === 'learning') {
+        renderLearningTab();
+      }
+
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -1261,7 +1977,7 @@
         const urlInput = document.getElementById('sheets-config-url');
         if (urlInput) urlInput.value = savedUrl;
       }
-      updateAdminStatusBadge();
+      renderAuthUI();
       renderCourses();
       renderQuizEditor();
       renderSheetTabs();
