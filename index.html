@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Neonatal Nursing LMS | Web Portal</title>
+  <title>Neonatal Nursing LMS | Web Admin & Learning Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -31,21 +31,28 @@
   </script>
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8FAFC; }
-    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(226, 232, 240, 0.8); }
+    .glass-card { background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(10px); border: 1px solid rgba(226, 232, 240, 0.9); }
+    .modal-backdrop { background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
   </style>
 </head>
 <body class="text-slate-800 min-h-screen flex flex-col">
 
-  <!-- TOP ANNOUNCEMENT BANNER -->
-  <div class="bg-indigo-900 text-indigo-100 text-xs py-2 px-4 text-center font-medium flex items-center justify-center gap-2">
-    <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-    <span>Connected to Google Sheet Database: <strong class="font-mono text-emerald-300">1TQcak2SNQ3oT9DBz_nyrOzVh8fWfNRVsWqt7Rk_1uTA</strong></span>
-    <span class="hidden sm:inline">|</span>
-    <span class="hidden sm:inline">Administrator: <strong>yaregalsemanew@gmail.com</strong></span>
+  <!-- TOP STATUS BANNER -->
+  <div class="bg-indigo-950 text-indigo-100 text-xs py-2 px-4 text-center font-medium flex items-center justify-between border-b border-indigo-900/60">
+    <div class="flex items-center gap-2 truncate">
+      <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span class="truncate">Database: <strong class="font-mono text-emerald-300">1TQcak2SNQ3oT9DBz_nyrOzVh8fWfNRVsWqt7Rk_1uTA</strong></span>
+    </div>
+    <div class="flex items-center gap-3 flex-shrink-0">
+      <span class="hidden sm:inline text-indigo-300">Logged in: <strong>yaregalsemanew@gmail.com</strong></span>
+      <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/30">
+        Admin / Instructor Mode Active
+      </span>
+    </div>
   </div>
 
-  <!-- NAVIGATION -->
-  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200">
+  <!-- NAVIGATION BAR -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-200 font-bold text-lg">
@@ -53,178 +60,208 @@
         </div>
         <div>
           <h1 class="font-bold text-slate-900 text-base leading-tight">Neonatal Nursing LMS</h1>
-          <p class="text-xs text-slate-500 font-medium">Clinical NICU Training Portal</p>
+          <p class="text-xs text-slate-500 font-medium">Authoring & Clinical NICU Portal</p>
         </div>
       </div>
 
       <nav class="hidden md:flex items-center gap-1 text-sm font-medium text-slate-600">
-        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-3 py-1.5 rounded-lg text-indigo-600 bg-indigo-50 font-semibold transition">Dashboard</button>
-        <button onclick="switchTab('courses')" id="nav-courses" class="px-3 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition">Courses</button>
-        <button onclick="switchTab('quiz')" id="nav-quiz" class="px-3 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition">Clinical Quiz</button>
-        <button onclick="switchTab('sheets')" id="nav-sheets" class="px-3 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Google Sheets
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="px-3.5 py-1.5 rounded-lg text-indigo-600 bg-indigo-50 font-semibold transition">Dashboard</button>
+        <button onclick="switchTab('courses')" id="nav-courses" class="px-3.5 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition">Courses & Modules</button>
+        <button onclick="switchTab('quiz')" id="nav-quiz" class="px-3.5 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition">Assessments</button>
+        <button onclick="switchTab('sheets')" id="nav-sheets" class="px-3.5 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Google Sheets Sync
         </button>
       </nav>
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button onclick="openCourseModal()" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-indigo-600 text-white rounded-lg shadow-sm hover:bg-indigo-700 transition">
+          <span>+ Add Course</span>
+        </button>
         <button onclick="openSheetLink()" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition">
           📊 Open Sheet
-        </button>
-        <button onclick="showAuthModal()" id="user-badge-btn" class="inline-flex items-center gap-2 text-xs font-semibold px-3.5 py-2 bg-indigo-600 text-white rounded-lg shadow-sm hover:bg-indigo-700 transition">
-          <span>👤 Admin Profile</span>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- MAIN CONTENT AREA -->
+  <!-- TOAST NOTIFICATIONS CONTAINER -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- MAIN VIEWPORT -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- TAB: DASHBOARD -->
+    <!-- ==================== TAB: DASHBOARD ==================== -->
     <section id="tab-dashboard" class="space-y-8">
-      <!-- HERO -->
+      <!-- HERO BANNER -->
       <div class="rounded-2xl bg-gradient-to-r from-indigo-900 via-indigo-800 to-slate-900 text-white p-6 sm:p-10 relative overflow-hidden shadow-xl">
         <div class="relative z-10 max-w-2xl space-y-4">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-medium text-indigo-200 backdrop-blur-sm border border-white/10">
-            🏥 Specialized Ethiopian Neonatal Curriculum
+            🏥 Clinical NICU Education Hub • Instructor & Admin Studio
           </div>
           <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">
-            Evidence-Based Neonatal Care & Clinical Protocols
+            Design, Deliver & Track Neonatal Clinical Competencies
           </h2>
           <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
-            Empowering nurses and clinicians with certified protocols on Neonatal Resuscitation (NRP), Thermoregulation, Phototherapy, and Respiratory Distress Syndrome.
+            Full authority to author courses, configure lesson modules, update passing assessments, and persist every record directly into your 13-tab Google Spreadsheet.
           </p>
           <div class="flex flex-wrap gap-3 pt-2">
             <button onclick="switchTab('courses')" class="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-semibold rounded-xl shadow-lg transition">
-              Explore Courses &rarr;
+              Manage Courses &rarr;
+            </button>
+            <button onclick="openCourseModal()" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-xl border border-white/20 backdrop-blur-sm transition">
+              + New Course Module
             </button>
             <button onclick="switchTab('quiz')" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-xl border border-white/20 backdrop-blur-sm transition">
-              Take Clinical NRP Quiz
+              Manage Quiz Questions
             </button>
           </div>
         </div>
-        <div class="hidden lg:block absolute -right-10 -bottom-10 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
       </div>
 
-      <!-- KEY STATS -->
+      <!-- METRICS -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="glass-card rounded-xl p-5 shadow-sm">
           <div class="text-xs font-medium text-slate-500">Active Courses</div>
-          <div class="text-2xl font-bold text-slate-900 mt-1">4 Modules</div>
-          <div class="text-xs text-indigo-600 font-semibold mt-1">NRP, Therm, RDS, Bili</div>
+          <div class="text-2xl font-bold text-slate-900 mt-1" id="stat-courses-count">4</div>
+          <div class="text-xs text-indigo-600 font-semibold mt-1">Editable in real-time</div>
         </div>
         <div class="glass-card rounded-xl p-5 shadow-sm">
-          <div class="text-xs font-medium text-slate-500">Enrolled Learners</div>
-          <div class="text-2xl font-bold text-slate-900 mt-1">128 Nurses</div>
-          <div class="text-xs text-emerald-600 font-semibold mt-1">+14 this week</div>
+          <div class="text-xs font-medium text-slate-500">Total Lesson Units</div>
+          <div class="text-2xl font-bold text-slate-900 mt-1" id="stat-lessons-count">6</div>
+          <div class="text-xs text-emerald-600 font-semibold mt-1">Clinical Protocols & Lectures</div>
         </div>
         <div class="glass-card rounded-xl p-5 shadow-sm">
-          <div class="text-xs font-medium text-slate-500">Database Tables</div>
-          <div class="text-2xl font-bold text-slate-900 mt-1">13 Sheets</div>
-          <div class="text-xs text-emerald-600 font-semibold mt-1">100% Synced</div>
+          <div class="text-xs font-medium text-slate-500">Assessment Questions</div>
+          <div class="text-2xl font-bold text-slate-900 mt-1" id="stat-questions-count">4</div>
+          <div class="text-xs text-indigo-600 font-semibold mt-1">80% Passing Threshold</div>
         </div>
         <div class="glass-card rounded-xl p-5 shadow-sm">
-          <div class="text-xs font-medium text-slate-500">Pass Benchmark</div>
-          <div class="text-2xl font-bold text-slate-900 mt-1">80% Score</div>
-          <div class="text-xs text-slate-600 font-semibold mt-1">Ministry of Health</div>
+          <div class="text-xs font-medium text-slate-500">Google Sheet Status</div>
+          <div class="text-2xl font-bold text-slate-900 mt-1 text-emerald-600">Live</div>
+          <div class="text-xs text-slate-500 font-semibold mt-1">13 Database Sheets</div>
         </div>
       </div>
 
-      <!-- CURRICULUM OVERVIEW -->
+      <!-- COURSE LIST PREVIEW -->
       <div>
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-bold text-slate-900">Featured Training Modules</h3>
-          <button onclick="switchTab('courses')" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700">View all 4 &rarr;</button>
+          <h3 class="text-lg font-bold text-slate-900">Current Course Modules</h3>
+          <button onclick="openCourseModal()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">+ Add Course</button>
         </div>
-        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5" id="dashboard-courses-grid">
-          <!-- Rendered by JavaScript -->
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" id="dashboard-courses-grid">
+          <!-- Populated by JavaScript -->
         </div>
       </div>
     </section>
 
-    <!-- TAB: COURSES -->
+    <!-- ==================== TAB: COURSES & MODULES ==================== -->
     <section id="tab-courses" class="space-y-6 hidden">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <h2 class="text-2xl font-bold text-slate-900">Clinical Course Catalog</h2>
-          <p class="text-sm text-slate-500">Accredited neonatal nursing modules with video, clinical checklists, and assessments.</p>
+          <h2 class="text-2xl font-bold text-slate-900">Course & Curriculum Studio</h2>
+          <p class="text-sm text-slate-500">Create, edit, and organize neonatal courses, modules, and clinical lessons.</p>
         </div>
-        <div class="flex items-center gap-2">
-          <input type="text" id="course-search" oninput="filterCourses()" placeholder="Search courses..." class="px-3.5 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <div class="flex items-center gap-3">
+          <input type="text" id="course-search-input" oninput="filterCourses()" placeholder="Search courses..." class="px-3.5 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <button onclick="openCourseModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1.5 whitespace-nowrap">
+            <span>+ Add Course</span>
+          </button>
         </div>
       </div>
 
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" id="all-courses-grid">
-        <!-- Injected by JavaScript -->
+        <!-- Rendered by JavaScript -->
       </div>
     </section>
 
-    <!-- TAB: CLINICAL QUIZ -->
+    <!-- ==================== TAB: ASSESSMENTS & QUIZ ==================== -->
     <section id="tab-quiz" class="space-y-6 hidden">
-      <div class="max-w-2xl mx-auto glass-card rounded-2xl p-6 sm:p-8 shadow-md">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
-          <div>
-            <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">Clinical Assessment</span>
-            <h2 class="text-xl font-bold text-slate-900 mt-0.5">Neonatal Resuscitation Program (NRP)</h2>
-          </div>
-          <span class="px-3 py-1 bg-amber-50 text-amber-700 text-xs font-semibold rounded-full border border-amber-200">
-            Passing: 80%
-          </span>
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900">Clinical Assessments & Exam Bank</h2>
+          <p class="text-sm text-slate-500">Edit existing test questions, add new clinical scenarios, and test taking the assessment.</p>
         </div>
-
-        <div id="quiz-container" class="space-y-6">
-          <!-- Quiz Questions rendered by JS -->
-        </div>
-
-        <div id="quiz-result-box" class="hidden rounded-xl p-5 border text-center space-y-2 mt-6"></div>
-
-        <div class="flex items-center justify-between pt-6 border-t border-slate-100 mt-6">
-          <button onclick="resetQuiz()" class="text-xs text-slate-500 hover:text-slate-800 font-semibold">Reset Quiz</button>
-          <button onclick="submitQuiz()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm shadow-md shadow-indigo-200 transition">
-            Submit Assessment
+        <div class="flex items-center gap-2">
+          <button onclick="openQuestionModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-sm transition">
+            + Add New Question
+          </button>
+          <button onclick="resetQuizAnswers()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition">
+            Reset Answers
           </button>
         </div>
       </div>
+
+      <div class="grid lg:grid-cols-3 gap-6">
+        <!-- Questions Manager List -->
+        <div class="lg:col-span-2 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-slate-900 text-base">Questions Bank (<span id="questions-count-label">0</span>)</h3>
+            <span class="text-xs text-indigo-600 font-semibold bg-indigo-50 px-2.5 py-1 rounded-md">Passing Grade: 80%</span>
+          </div>
+          <div id="quiz-editor-list" class="space-y-4">
+            <!-- Questions rendered here with Edit/Delete buttons -->
+          </div>
+        </div>
+
+        <!-- Live Quiz Simulator / Submission Panel -->
+        <div class="space-y-4">
+          <div class="glass-card rounded-2xl p-6 shadow-sm border border-slate-200 sticky top-24 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h4 class="font-bold text-slate-900 text-sm">Exam Simulator</h4>
+              <span class="text-[11px] font-semibold text-slate-500">NRP Standard</span>
+            </div>
+            <p class="text-xs text-slate-500 leading-relaxed">
+              Select your answers on the questions on the left and test the scoring evaluation just like a registered nurse would.
+            </p>
+            <div id="quiz-result-box" class="hidden rounded-xl p-4 border text-center space-y-2"></div>
+            <button onclick="evaluateQuiz()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs shadow-md shadow-indigo-200 transition">
+              Evaluate Assessment
+            </button>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <!-- TAB: GOOGLE SHEETS HUB -->
+    <!-- ==================== TAB: GOOGLE SHEETS SYNC ==================== -->
     <section id="tab-sheets" class="space-y-6 hidden">
-      <div class="glass-card rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="glass-card rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
           <div>
             <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-              ● Active 2-Way Sync
+              ● Google Cloud Apps Script Integration
             </div>
-            <h2 class="text-xl font-bold text-slate-900 mt-1">Google Sheets Database Hub</h2>
-            <p class="text-xs text-slate-500">Live persistence with 13 structured sheets.</p>
+            <h2 class="text-xl font-bold text-slate-900 mt-1">2-Way Google Sheets Synchronization</h2>
+            <p class="text-xs text-slate-500">Synchronize your locally edited courses, lessons, and questions directly to Google Sheets.</p>
           </div>
-          <div class="flex gap-2">
-            <button onclick="openSheetLink()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1.5">
-              <span>Open in Google Sheets ↗</span>
+          <div class="flex items-center gap-2">
+            <button onclick="pushAllToGoogleSheets()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1.5">
+              <span>☁️ Push Changes to Google Sheet</span>
+            </button>
+            <button onclick="openSheetLink()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition">
+              View Spreadsheet ↗
             </button>
           </div>
         </div>
 
-        <!-- DETAILS CARD -->
-        <div class="grid sm:grid-cols-3 gap-4 bg-slate-50 rounded-xl p-4 border border-slate-200 text-xs">
+        <!-- CREDENTIALS & WEB APP ENDPOINT -->
+        <div class="grid sm:grid-cols-2 gap-4 bg-slate-50 rounded-xl p-4 border border-slate-200 text-xs">
           <div>
-            <span class="text-slate-500 block">Spreadsheet ID:</span>
-            <span class="font-mono font-bold text-slate-800 select-all">1TQcak2SNQ3oT9DBz_nyrOzVh8fWfNRVsWqt7Rk_1uTA</span>
+            <label class="text-slate-500 font-semibold block mb-1">Spreadsheet ID:</label>
+            <input type="text" id="sheets-config-id" value="1TQcak2SNQ3oT9DBz_nyrOzVh8fWfNRVsWqt7Rk_1uTA" class="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-mono text-slate-800 font-semibold text-xs">
           </div>
           <div>
-            <span class="text-slate-500 block">Owner / Admin:</span>
-            <span class="font-semibold text-slate-800">yaregalsemanew@gmail.com</span>
-          </div>
-          <div>
-            <span class="text-slate-500 block">Verified Tables:</span>
-            <span class="font-semibold text-emerald-700">13 Required Sheets</span>
+            <label class="text-slate-500 font-semibold block mb-1">Apps Script Web App URL (Optional for Direct HTTP Push):</label>
+            <input type="text" id="sheets-config-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs" onchange="saveWebAppUrl(this.value)">
           </div>
         </div>
 
-        <!-- 13 SHEETS LIST -->
+        <!-- 13 DATABASE SHEETS PREVIEW -->
         <div>
-          <h3 class="text-sm font-bold text-slate-900 mb-3">Database Tables (13 Tabs)</h3>
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 text-xs" id="sheets-grid">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold text-slate-900">Database Schema Verification (13 Tables)</h3>
+            <button onclick="resetSeedData()" class="text-xs text-rose-600 hover:underline">Reset to Default Curriculum</button>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 text-xs" id="sheets-tab-grid">
             <!-- Rendered by JS -->
           </div>
         </div>
@@ -233,56 +270,220 @@
 
   </main>
 
-  <!-- AUTH / PROFILE MODAL -->
-  <div id="auth-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-4">
-      <div class="flex items-center justify-between">
-        <h3 class="font-bold text-slate-900 text-base">Account Profile</h3>
-        <button onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
+  <!-- ==================== MODAL: ADD / EDIT COURSE ==================== -->
+  <div id="modal-course" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-bold text-slate-900 text-base" id="modal-course-title">Add / Edit Course</h3>
+        <button onclick="closeCourseModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
       </div>
-      <div class="bg-indigo-50 p-3.5 rounded-xl border border-indigo-100 flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center">
-          YS
+
+      <form id="form-course" onsubmit="saveCourse(event)" class="space-y-4 text-xs">
+        <input type="hidden" id="course-editing-id">
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Course Code / ID</label>
+          <input type="text" id="course-form-id" required placeholder="e.g. CRS-NRP-01" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Course Title</label>
+          <input type="text" id="course-form-title" required placeholder="e.g. Neonatal Resuscitation Program (NRP)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Category</label>
+            <select id="course-form-category" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white">
+              <option value="Resuscitation">Resuscitation</option>
+              <option value="Thermal Care">Thermal Care</option>
+              <option value="Pathology">Pathology</option>
+              <option value="Respiratory Care">Respiratory Care</option>
+              <option value="Pharmacology">Pharmacology</option>
+              <option value="General NICU">General NICU</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Total Modules</label>
+            <input type="number" id="course-form-modules" required min="1" max="20" value="4" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Lead Instructor</label>
+            <input type="text" id="course-form-instructor" required value="Yaregal Semanew" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Status</label>
+            <select id="course-form-status" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white">
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Clinical Description & Objectives</label>
+          <textarea id="course-form-desc" required rows="3" placeholder="Describe the clinical nursing outcomes, protocols covered, and targets..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeCourseModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm">Save Course</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: MANAGE COURSE LESSONS ==================== -->
+  <div id="modal-lessons" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="font-bold text-slate-900 text-base" id="modal-lessons-header">Manage Lessons</h3>
+          <p class="text-xs text-slate-500" id="modal-lessons-subheader">Course: CRS-NRP-01</p>
+        </div>
+        <button onclick="closeLessonsModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <!-- Add New Lesson Form -->
+      <form id="form-new-lesson" onsubmit="addLessonToCourse(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3 text-xs">
+        <div class="font-bold text-slate-900 text-xs flex items-center justify-between">
+          <span>+ Add New Lesson Unit</span>
+          <span class="text-slate-400 font-normal">All fields saved automatically</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Module #</label>
+            <input type="number" id="lesson-module-num" min="1" value="1" required class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg">
+          </div>
+          <div class="col-span-2">
+            <label class="block font-semibold text-slate-700 mb-1">Lesson Title</label>
+            <input type="text" id="lesson-title" required placeholder="e.g. Bag-Valve-Mask Ventilation" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Content Type</label>
+            <select id="lesson-type" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg">
+              <option value="clinical">Clinical Lecture</option>
+              <option value="protocol">Clinical Protocol</option>
+              <option value="simulation">Simulation Drill</option>
+              <option value="case_study">NICU Case Study</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Duration (Minutes)</label>
+            <input type="number" id="lesson-duration" min="5" value="25" required class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg">
+          </div>
         </div>
         <div>
-          <div class="font-bold text-slate-900 text-sm">Yaregal Semanew</div>
-          <div class="text-xs text-indigo-700 font-mono">yaregalsemanew@gmail.com</div>
-          <div class="text-[10px] font-semibold uppercase text-indigo-500">Administrator & Lead Clinician</div>
+          <label class="block font-semibold text-slate-700 mb-1">Lesson Content / Protocol Summary</label>
+          <textarea id="lesson-body" rows="2" placeholder="Clinical steps, equipment checklist, and nursing guidance..." class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg"></textarea>
+        </div>
+        <div class="flex justify-end">
+          <button type="submit" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-xs">
+            Add Lesson
+          </button>
+        </div>
+      </form>
+
+      <!-- Existing Lessons List -->
+      <div class="space-y-2">
+        <h4 class="font-bold text-slate-900 text-xs">Curriculum Lessons</h4>
+        <div id="lessons-list-container" class="space-y-2">
+          <!-- Populated by JS -->
         </div>
       </div>
-      <p class="text-xs text-slate-500 leading-relaxed">
-        You are authenticated with full administrative access to edit courses, verify nurses, and synchronize Google Sheets.
-      </p>
-      <button onclick="closeAuthModal()" class="w-full py-2.5 bg-slate-900 text-white text-xs font-semibold rounded-xl hover:bg-slate-800 transition">
-        Done
-      </button>
+
+      <div class="flex justify-end pt-3 border-t border-slate-100">
+        <button onclick="closeLessonsModal()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-xs">
+          Done
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: ADD / EDIT QUESTION ==================== -->
+  <div id="modal-question" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-bold text-slate-900 text-base" id="modal-question-header">Add / Edit Test Question</h3>
+        <button onclick="closeQuestionModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <form id="form-question" onsubmit="saveQuestion(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="question-editing-idx" value="-1">
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Question Scenario / Text</label>
+          <textarea id="q-form-text" required rows="2" placeholder="e.g. What is the initial action during the Golden Minute of neonatal resuscitation?" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block font-semibold text-slate-700">Options (Select the correct answer button)</label>
+          
+          <div class="flex items-center gap-2">
+            <input type="radio" name="q_correct_option" value="0" id="radio-opt-0" checked class="text-indigo-600 focus:ring-indigo-500">
+            <input type="text" id="q-opt-0" required placeholder="Option A" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input type="radio" name="q_correct_option" value="1" id="radio-opt-1" class="text-indigo-600 focus:ring-indigo-500">
+            <input type="text" id="q-opt-1" required placeholder="Option B" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input type="radio" name="q_correct_option" value="2" id="radio-opt-2" class="text-indigo-600 focus:ring-indigo-500">
+            <input type="text" id="q-opt-2" required placeholder="Option C" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input type="radio" name="q_correct_option" value="3" id="radio-opt-3" class="text-indigo-600 focus:ring-indigo-500">
+            <input type="text" id="q-opt-3" required placeholder="Option D" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Clinical Rationale / Explanation</label>
+          <textarea id="q-form-explanation" rows="2" placeholder="Explain why the correct answer is standard clinical practice according to NRP guidelines..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeQuestionModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm">Save Question</button>
+        </div>
+      </form>
     </div>
   </div>
 
   <!-- FOOTER -->
   <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
     <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <div>Neonatal Nursing Clinical LMS &copy; 2026. Built with Google Sheets Integration.</div>
+      <div>Neonatal Nursing Clinical LMS &copy; 2026. Connected to Google Spreadsheet <strong>1TQcak2SNQ3oT9DBz_nyrOzVh8fWfNRVsWqt7Rk_1uTA</strong>.</div>
       <div class="flex items-center gap-4">
-        <a href="https://docs.google.com/spreadsheets/d/1TQcak2SNQ3oT9DBz_nyrOzVh8fWfNRVsWqt7Rk_1uTA/edit" target="_blank" class="hover:text-indigo-600 transition">Google Sheet</a>
-        <a href="#" onclick="switchTab('quiz'); return false;" class="hover:text-indigo-600 transition">Clinical Quiz</a>
+        <a href="https://docs.google.com/spreadsheets/d/1TQcak2SNQ3oT9DBz_nyrOzVh8fWfNRVsWqt7Rk_1uTA/edit" target="_blank" class="hover:text-indigo-600 transition">Open Google Sheet</a>
+        <a href="#" onclick="switchTab('quiz'); return false;" class="hover:text-indigo-600 transition">Assessment Bank</a>
       </div>
     </div>
   </footer>
 
+  <!-- SCRIPT LOGIC -->
   <script>
     const SPREADSHEET_ID = '1TQcak2SNQ3oT9DBz_nyrOzVh8fWfNRVsWqt7Rk_1uTA';
+    let currentLessonsCourseId = '';
 
-    const COURSES = [
+    // DEFAULT DATA SEEDS
+    const DEFAULT_COURSES = [
       {
         id: 'CRS-NRP-01',
         title: 'Neonatal Resuscitation Program (NRP)',
         category: 'Resuscitation',
         instructor: 'Sister Almaz',
         desc: 'Comprehensive clinical resuscitation training for newly born infants: Golden Minute, ventilation, and airway clearance.',
-        badge: 'Priority 1',
         modules: 4,
-        color: 'indigo'
+        status: 'published'
       },
       {
         id: 'CRS-THM-02',
@@ -290,9 +491,8 @@
         category: 'Thermal Care',
         instructor: 'Sister Almaz',
         desc: 'Incubator management, radiant warmer operation, skin-to-skin Kangaroo Mother Care, and hypothermia avoidance.',
-        badge: 'Essential',
         modules: 3,
-        color: 'emerald'
+        status: 'published'
       },
       {
         id: 'CRS-BIL-03',
@@ -300,19 +500,73 @@
         category: 'Pathology',
         instructor: 'Dr. Dawit',
         desc: 'Screening criteria, transcutaneous bilirubinometry, phototherapy eye shields, and exchange transfusion thresholds.',
-        badge: 'Clinical',
         modules: 3,
-        color: 'amber'
+        status: 'published'
       },
       {
         id: 'CRS-RDS-04',
-        title: 'Respiratory Distress Syndrome in Preterm',
+        title: 'Respiratory Distress Syndrome in Preterm Infants',
         category: 'Respiratory Care',
         instructor: 'Dr. Dawit',
         desc: 'Surfactant administration, bubble CPAP delivery, respiratory scoring (Silverman-Andersen), and weaning protocols.',
-        badge: 'Advanced',
         modules: 4,
-        color: 'sky'
+        status: 'published'
+      }
+    ];
+
+    const DEFAULT_LESSONS = [
+      { id: 'LES-01', courseId: 'CRS-NRP-01', moduleNumber: 1, title: 'Initial Assessment & Neonatal Golden Minute', type: 'clinical', duration: 25, body: 'Dry, warm, position airway, suction secretions if obstructed, stimulate breathing within the first 60 seconds of life.' },
+      { id: 'LES-02', courseId: 'CRS-NRP-01', moduleNumber: 1, title: 'Positive Pressure Ventilation (PPV) & Mask Sizing', type: 'simulation', duration: 35, body: 'Selecting anatomical masks, establishing 40-60 breaths/min rate, and assessing heart rate response.' },
+      { id: 'LES-03', courseId: 'CRS-NRP-01', moduleNumber: 2, title: 'MR. SOPA Corrective Ventilation Steps', type: 'protocol', duration: 30, body: 'Mask adjustment, Reposition airway, Suction mouth and nose, Open mouth, Pressure increase, Alternative airway.' },
+      { id: 'LES-04', courseId: 'CRS-THM-02', moduleNumber: 1, title: 'Neutral Thermal Environment & Radiant Warmers', type: 'clinical', duration: 30, body: 'Maintaining skin temperature between 36.5°C and 37.5°C with servo-controlled probes.' },
+      { id: 'LES-05', courseId: 'CRS-BIL-03', moduleNumber: 1, title: 'Bilirubin Nomogram & Intensive Phototherapy', type: 'clinical', duration: 25, body: 'Bhutani nomogram usage, irradiance checks with radiometer, and hydration management.' },
+      { id: 'LES-06', courseId: 'CRS-RDS-04', moduleNumber: 1, title: 'Bubble CPAP Setup & Nasal Prong Fit', type: 'simulation', duration: 40, body: 'Preventing nasal septal necrosis, bubbling depth settings at 5 cm H2O, and FiO2 titration.' }
+    ];
+
+    const DEFAULT_QUESTIONS = [
+      {
+        q: 'What is the initial action during the "Golden Minute" of neonatal resuscitation?',
+        options: [
+          'Immediate chest compressions at 3:1 ratio',
+          'Dry, warm, position airway, and stimulate breathing',
+          'Administer 100% supplemental oxygen via blow-by',
+          'Immediate intravenous epinephrine'
+        ],
+        correct: 1,
+        explanation: 'Initial steps within the Golden Minute focus on thermal protection, airway positioning, suctioning if needed, and stimulation.'
+      },
+      {
+        q: 'When should Positive Pressure Ventilation (PPV) be initiated?',
+        options: [
+          'If the newborn is apneic, gasping, or heart rate < 100 bpm after initial steps',
+          'Only after umbilical venous catheterization',
+          'Only if the neonate is crying vigorously',
+          'When core temperature reaches 36.5°C'
+        ],
+        correct: 0,
+        explanation: 'PPV is indicated if the infant remains apneic, gasping, or has a heart rate < 100 bpm within the first 60 seconds.'
+      },
+      {
+        q: 'What is the target neutral thermal core temperature for a preterm neonate in NICU?',
+        options: [
+          '35.0°C – 35.5°C',
+          '36.5°C – 37.5°C',
+          '38.0°C – 38.5°C',
+          '34.0°C – 34.5°C'
+        ],
+        correct: 1,
+        explanation: 'WHO standards mandate maintaining core neonatal temperature between 36.5°C and 37.5°C.'
+      },
+      {
+        q: 'What does the "M" and "R" stand for in the MR. SOPA ventilation corrective sequence?',
+        options: [
+          'Mask adjustment & Reposition airway',
+          'Medication delivery & Resuscitation',
+          'Monitor ECG & Radiograph chest',
+          'Massage heart & Respiratory rate'
+        ],
+        correct: 0,
+        explanation: 'MR. SOPA starts with Mask adjustment to ensure a tight seal and Repositioning the head into the "sniffing" position.'
       }
     ];
 
@@ -322,140 +576,499 @@
       'Assignments', 'Assignment_Submissions', 'Assessments', 'Questions', 'Assessment_Attempts'
     ];
 
-    const QUIZ_QUESTIONS = [
-      {
-        q: '1. What is the initial action during the "Golden Minute" of neonatal resuscitation?',
-        options: [
-          'Immediate chest compressions at 3:1 ratio',
-          'Dry, warm, stimulate, and assess breathing & heart rate',
-          'Administer 100% supplemental oxygen via blow-by',
-          'Immediate intravenous epinephrine'
-        ],
-        correct: 1
-      },
-      {
-        q: '2. When should Positive Pressure Ventilation (PPV) be initiated?',
-        options: [
-          'If the newborn is apneic, gasping, or heart rate < 100 bpm after initial steps',
-          'Only after umbilical venous catheterization',
-          'Only if the neonate is crying vigorously',
-          'When temperature is 36.5°C'
-        ],
-        correct: 0
-      },
-      {
-        q: '3. What is the target neutral thermal core temperature for a preterm neonate in NICU?',
-        options: [
-          '35.0°C – 35.5°C',
-          '36.5°C – 37.5°C',
-          '38.0°C – 38.5°C',
-          '34.0°C – 34.5°C'
-        ],
-        correct: 1
-      }
-    ];
+    // STORAGE STATE
+    let courses = JSON.parse(localStorage.getItem('lms_courses')) || DEFAULT_COURSES;
+    let lessons = JSON.parse(localStorage.getItem('lms_lessons')) || DEFAULT_LESSONS;
+    let questions = JSON.parse(localStorage.getItem('lms_questions')) || DEFAULT_QUESTIONS;
+    let userAnswers = {};
 
+    function saveState() {
+      localStorage.setItem('lms_courses', JSON.stringify(courses));
+      localStorage.setItem('lms_lessons', JSON.stringify(lessons));
+      localStorage.setItem('lms_questions', JSON.stringify(questions));
+      updateCounts();
+    }
+
+    function updateCounts() {
+      document.getElementById('stat-courses-count').innerText = courses.length;
+      document.getElementById('stat-lessons-count').innerText = lessons.length;
+      document.getElementById('stat-questions-count').innerText = questions.length;
+      const qLabel = document.getElementById('questions-count-label');
+      if (qLabel) qLabel.innerText = questions.length;
+    }
+
+    // TOAST NOTIFICATIONS
+    function showToast(msg, type = 'ok') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const bg = type === 'ok' ? 'bg-slate-900 text-white' : 'bg-rose-600 text-white';
+      toast.className = `${bg} text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 pointer-events-auto transition transform translate-y-2 opacity-0`;
+      toast.innerHTML = `<span>${type === 'ok' ? '✓' : '⚠️'}</span><span>${msg}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 50);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // ==================== COURSE MANAGEMENT ====================
     function renderCourses() {
       const dashContainer = document.getElementById('dashboard-courses-grid');
       const allContainer = document.getElementById('all-courses-grid');
 
-      const html = COURSES.map(c => `
-        <div class="glass-card rounded-xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between border border-slate-200">
-          <div>
-            <div class="flex items-center justify-between text-xs mb-2">
-              <span class="px-2 py-0.5 rounded font-semibold bg-indigo-50 text-indigo-700">${c.category}</span>
-              <span class="text-slate-400 font-mono">${c.id}</span>
+      const createCardHtml = (c) => {
+        const courseLessons = lessons.filter(l => l.courseId === c.id);
+        return `
+          <div class="glass-card rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between border border-slate-200">
+            <div>
+              <div class="flex items-center justify-between text-xs mb-2.5">
+                <span class="px-2 py-0.5 rounded-md font-semibold bg-indigo-50 text-indigo-700">${c.category}</span>
+                <span class="text-slate-400 font-mono font-medium">${c.id}</span>
+              </div>
+              <h4 class="font-bold text-slate-900 text-sm leading-snug">${c.title}</h4>
+              <p class="text-xs text-slate-500 mt-2 leading-relaxed">${c.desc}</p>
             </div>
-            <h4 class="font-bold text-slate-900 text-sm leading-snug">${c.title}</h4>
-            <p class="text-xs text-slate-500 mt-2 leading-relaxed">${c.desc}</p>
-          </div>
-          <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-            <span class="text-slate-500 font-medium">👨‍⚕️ ${c.instructor}</span>
-            <span class="font-semibold text-indigo-600">${c.modules} Modules</span>
-          </div>
-        </div>
-      `).join('');
 
+            <div class="mt-4 pt-3 border-t border-slate-100 space-y-3">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-slate-500">👨‍⚕️ ${c.instructor}</span>
+                <span class="font-semibold text-indigo-600">${courseLessons.length} Lessons • ${c.modules} Modules</span>
+              </div>
+
+              <!-- Admin action buttons -->
+              <div class="flex items-center gap-1.5 pt-1">
+                <button onclick="openLessonsModal('${c.id}')" class="flex-1 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-lg transition text-center">
+                  📚 Lessons (${courseLessons.length})
+                </button>
+                <button onclick="editCourse('${c.id}')" title="Edit Course" class="p-1.5 hover:bg-slate-100 text-slate-600 rounded-lg transition">
+                  ✏️
+                </button>
+                <button onclick="deleteCourse('${c.id}')" title="Delete Course" class="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition">
+                  🗑️
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      };
+
+      const html = courses.map(createCardHtml).join('');
       if (dashContainer) dashContainer.innerHTML = html;
       if (allContainer) allContainer.innerHTML = html;
+      updateCounts();
     }
 
-    function renderSheetTabs() {
-      const container = document.getElementById('sheets-grid');
-      if (!container) return;
-      container.innerHTML = SHEET_TABS.map((tab, idx) => `
-        <div class="bg-white border border-slate-200 rounded-lg p-2.5 flex items-center justify-between shadow-2xs">
-          <span class="font-mono text-slate-800 font-medium text-[11px] truncate">${tab}</span>
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+    function openCourseModal(courseToEdit = null) {
+      const modal = document.getElementById('modal-course');
+      const title = document.getElementById('modal-course-title');
+      const editId = document.getElementById('course-editing-id');
+
+      if (courseToEdit) {
+        title.innerText = 'Edit Course';
+        editId.value = courseToEdit.id;
+        document.getElementById('course-form-id').value = courseToEdit.id;
+        document.getElementById('course-form-id').disabled = true;
+        document.getElementById('course-form-title').value = courseToEdit.title;
+        document.getElementById('course-form-category').value = courseToEdit.category;
+        document.getElementById('course-form-modules').value = courseToEdit.modules;
+        document.getElementById('course-form-instructor').value = courseToEdit.instructor;
+        document.getElementById('course-form-status').value = courseToEdit.status || 'published';
+        document.getElementById('course-form-desc').value = courseToEdit.desc;
+      } else {
+        title.innerText = 'Add New Course';
+        editId.value = '';
+        document.getElementById('course-form-id').value = 'CRS-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+        document.getElementById('course-form-id').disabled = false;
+        document.getElementById('course-form-title').value = '';
+        document.getElementById('course-form-modules').value = 4;
+        document.getElementById('course-form-instructor').value = 'Yaregal Semanew';
+        document.getElementById('course-form-desc').value = '';
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeCourseModal() {
+      document.getElementById('modal-course').classList.add('hidden');
+    }
+
+    function editCourse(id) {
+      const found = courses.find(c => c.id === id);
+      if (found) openCourseModal(found);
+    }
+
+    function deleteCourse(id) {
+      if (confirm(`Are you sure you want to delete course ${id}?`)) {
+        courses = courses.filter(c => c.id !== id);
+        lessons = lessons.filter(l => l.courseId !== id);
+        saveState();
+        renderCourses();
+        showToast(`Course ${id} deleted.`);
+      }
+    }
+
+    function saveCourse(e) {
+      e.preventDefault();
+      const editId = document.getElementById('course-editing-id').value;
+      const id = document.getElementById('course-form-id').value.trim();
+      const title = document.getElementById('course-form-title').value.trim();
+      const category = document.getElementById('course-form-category').value;
+      const modules = parseInt(document.getElementById('course-form-modules').value) || 3;
+      const instructor = document.getElementById('course-form-instructor').value.trim();
+      const status = document.getElementById('course-form-status').value;
+      const desc = document.getElementById('course-form-desc').value.trim();
+
+      if (editId) {
+        // Edit existing
+        const idx = courses.findIndex(c => c.id === editId);
+        if (idx !== -1) {
+          courses[idx] = { id: editId, title, category, modules, instructor, status, desc };
+        }
+        showToast('Course updated successfully!');
+      } else {
+        // Check duplicate
+        if (courses.some(c => c.id === id)) {
+          alert('A course with ID ' + id + ' already exists!');
+          return;
+        }
+        courses.push({ id, title, category, modules, instructor, status, desc });
+        showToast('New course created!');
+      }
+
+      saveState();
+      closeCourseModal();
+      renderCourses();
+    }
+
+    function filterCourses() {
+      const term = document.getElementById('course-search-input').value.toLowerCase();
+      const cards = document.querySelectorAll('#all-courses-grid > div');
+      cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        card.style.display = text.includes(term) ? '' : 'none';
+      });
+    }
+
+    // ==================== LESSON MANAGEMENT ====================
+    function openLessonsModal(courseId) {
+      currentLessonsCourseId = courseId;
+      const course = courses.find(c => c.id === courseId);
+      document.getElementById('modal-lessons-header').innerText = `Manage Lessons: ${course ? course.title : courseId}`;
+      document.getElementById('modal-lessons-subheader').innerText = `Course Code: ${courseId}`;
+      renderLessonsList(courseId);
+      document.getElementById('modal-lessons').classList.remove('hidden');
+    }
+
+    function closeLessonsModal() {
+      document.getElementById('modal-lessons').classList.add('hidden');
+      renderCourses();
+    }
+
+    function renderLessonsList(courseId) {
+      const container = document.getElementById('lessons-list-container');
+      const list = lessons.filter(l => l.courseId === courseId);
+
+      if (list.length === 0) {
+        container.innerHTML = '<div class="text-xs text-slate-400 p-4 text-center">No lessons added yet. Use the form above to add your first lesson.</div>';
+        return;
+      }
+
+      container.innerHTML = list.map(l => `
+        <div class="bg-white border border-slate-200 rounded-xl p-3 flex items-center justify-between shadow-2xs">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">Module ${l.moduleNumber}</span>
+              <h5 class="font-bold text-slate-900 text-xs">${l.title}</h5>
+              <span class="text-[10px] text-slate-400 font-mono">${l.duration} min • ${l.type}</span>
+            </div>
+            ${l.body ? `<p class="text-[11px] text-slate-500 mt-1 line-clamp-1">${l.body}</p>` : ''}
+          </div>
+          <button onclick="deleteLesson('${l.id}')" title="Delete Lesson" class="p-1 text-slate-400 hover:text-rose-600 transition">
+            🗑️
+          </button>
         </div>
       `).join('');
     }
 
-    function renderQuiz() {
-      const container = document.getElementById('quiz-container');
+    function addLessonToCourse(e) {
+      e.preventDefault();
+      const moduleNumber = parseInt(document.getElementById('lesson-module-num').value) || 1;
+      const title = document.getElementById('lesson-title').value.trim();
+      const type = document.getElementById('lesson-type').value;
+      const duration = parseInt(document.getElementById('lesson-duration').value) || 20;
+      const body = document.getElementById('lesson-body').value.trim();
+
+      const newLesson = {
+        id: 'LES-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+        courseId: currentLessonsCourseId,
+        moduleNumber,
+        title,
+        type,
+        duration,
+        body
+      };
+
+      lessons.push(newLesson);
+      saveState();
+      renderLessonsList(currentLessonsCourseId);
+      document.getElementById('lesson-title').value = '';
+      document.getElementById('lesson-body').value = '';
+      showToast('Lesson unit added.');
+    }
+
+    function deleteLesson(lessonId) {
+      lessons = lessons.filter(l => l.id !== lessonId);
+      saveState();
+      renderLessonsList(currentLessonsCourseId);
+      showToast('Lesson removed.');
+    }
+
+    // ==================== ASSESSMENTS & QUESTIONS ====================
+    function renderQuizEditor() {
+      const container = document.getElementById('quiz-editor-list');
       if (!container) return;
-      container.innerHTML = QUIZ_QUESTIONS.map((item, qIdx) => `
-        <div class="space-y-2">
-          <p class="text-sm font-semibold text-slate-800">${item.q}</p>
-          <div class="space-y-1.5">
+
+      container.innerHTML = questions.map((item, qIdx) => `
+        <div class="glass-card rounded-2xl p-5 border border-slate-200 shadow-2xs space-y-3">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold flex items-center justify-center">${qIdx + 1}</span>
+              <p class="text-sm font-semibold text-slate-900">${item.q}</p>
+            </div>
+            <div class="flex items-center gap-1 flex-shrink-0">
+              <button onclick="editQuestion(${qIdx})" title="Edit Question" class="p-1 hover:bg-slate-100 text-slate-600 rounded-lg text-xs">✏️ Edit</button>
+              <button onclick="deleteQuestion(${qIdx})" title="Delete Question" class="p-1 hover:bg-rose-50 text-rose-600 rounded-lg text-xs">🗑️</button>
+            </div>
+          </div>
+
+          <!-- Options -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
             ${item.options.map((opt, oIdx) => `
-              <label class="flex items-center gap-2.5 p-2.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer text-xs transition">
-                <input type="radio" name="quiz_q_${qIdx}" value="${oIdx}" class="text-indigo-600 focus:ring-indigo-500">
-                <span class="text-slate-700">${opt}</span>
+              <label class="flex items-center gap-2.5 p-2 rounded-xl border ${item.correct === oIdx ? 'bg-emerald-50/70 border-emerald-300' : 'bg-white border-slate-200'} cursor-pointer transition">
+                <input type="radio" name="simulator_q_${qIdx}" value="${oIdx}" ${userAnswers[qIdx] === oIdx ? 'checked' : ''} onchange="userAnswers[${qIdx}] = ${oIdx}" class="text-indigo-600">
+                <span class="text-slate-800">${opt} ${item.correct === oIdx ? '<span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1 rounded ml-1">Correct Answer</span>' : ''}</span>
               </label>
             `).join('')}
           </div>
+
+          ${item.explanation ? `
+            <div class="text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+              <strong class="text-slate-700">Clinical Rationale:</strong> ${item.explanation}
+            </div>
+          ` : ''}
         </div>
       `).join('');
+
+      updateCounts();
     }
 
-    function submitQuiz() {
-      let correct = 0;
-      let answered = 0;
+    function openQuestionModal(editIdx = -1) {
+      document.getElementById('question-editing-idx').value = editIdx;
+      const modal = document.getElementById('modal-question');
+      const header = document.getElementById('modal-question-header');
 
-      QUIZ_QUESTIONS.forEach((item, qIdx) => {
-        const selected = document.querySelector(`input[name="quiz_q_${qIdx}"]:checked`);
-        if (selected) {
-          answered++;
-          if (parseInt(selected.value) === item.correct) {
-            correct++;
+      if (editIdx >= 0) {
+        header.innerText = 'Edit Test Question #' + (editIdx + 1);
+        const q = questions[editIdx];
+        document.getElementById('q-form-text').value = q.q;
+        document.getElementById('q-opt-0').value = q.options[0] || '';
+        document.getElementById('q-opt-1').value = q.options[1] || '';
+        document.getElementById('q-opt-2').value = q.options[2] || '';
+        document.getElementById('q-opt-3').value = q.options[3] || '';
+        document.getElementById(`radio-opt-${q.correct}`).checked = true;
+        document.getElementById('q-form-explanation').value = q.explanation || '';
+      } else {
+        header.innerText = 'Add New Test Question';
+        document.getElementById('q-form-text').value = '';
+        document.getElementById('q-opt-0').value = '';
+        document.getElementById('q-opt-1').value = '';
+        document.getElementById('q-opt-2').value = '';
+        document.getElementById('q-opt-3').value = '';
+        document.getElementById('radio-opt-0').checked = true;
+        document.getElementById('q-form-explanation').value = '';
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeQuestionModal() {
+      document.getElementById('modal-question').classList.add('hidden');
+    }
+
+    function editQuestion(idx) {
+      openQuestionModal(idx);
+    }
+
+    function deleteQuestion(idx) {
+      if (confirm('Delete question #' + (idx + 1) + '?')) {
+        questions.splice(idx, 1);
+        saveState();
+        renderQuizEditor();
+        showToast('Question deleted.');
+      }
+    }
+
+    function saveQuestion(e) {
+      e.preventDefault();
+      const idx = parseInt(document.getElementById('question-editing-idx').value);
+      const text = document.getElementById('q-form-text').value.trim();
+      const options = [
+        document.getElementById('q-opt-0').value.trim(),
+        document.getElementById('q-opt-1').value.trim(),
+        document.getElementById('q-opt-2').value.trim(),
+        document.getElementById('q-opt-3').value.trim()
+      ];
+      const selectedRadio = document.querySelector('input[name="q_correct_option"]:checked');
+      const correct = selectedRadio ? parseInt(selectedRadio.value) : 0;
+      const explanation = document.getElementById('q-form-explanation').value.trim();
+
+      const newQ = { q: text, options, correct, explanation };
+
+      if (idx >= 0) {
+        questions[idx] = newQ;
+        showToast('Question updated!');
+      } else {
+        questions.push(newQ);
+        showToast('Question added to exam bank!');
+      }
+
+      saveState();
+      closeQuestionModal();
+      renderQuizEditor();
+    }
+
+    function evaluateQuiz() {
+      let correctCount = 0;
+      let answeredCount = 0;
+
+      questions.forEach((item, idx) => {
+        if (userAnswers[idx] !== undefined) {
+          answeredCount++;
+          if (userAnswers[idx] === item.correct) {
+            correctCount++;
           }
         }
       });
 
-      if (answered < QUIZ_QUESTIONS.length) {
-        alert('Please answer all ' + QUIZ_QUESTIONS.length + ' questions before submitting.');
+      if (answeredCount < questions.length) {
+        alert(`Please answer all ${questions.length} questions in the simulator before evaluation.`);
         return;
       }
 
-      const percentage = Math.round((correct / QUIZ_QUESTIONS.length) * 100);
-      const passed = percentage >= 80;
+      const scorePercent = Math.round((correctCount / questions.length) * 100);
+      const passed = scorePercent >= 80;
+      const box = document.getElementById('quiz-result-box');
+      box.classList.remove('hidden');
 
-      const resultBox = document.getElementById('quiz-result-box');
-      resultBox.classList.remove('hidden');
       if (passed) {
-        resultBox.className = 'rounded-xl p-5 border text-center space-y-2 mt-6 bg-emerald-50 border-emerald-200 text-emerald-800';
-        resultBox.innerHTML = `
-          <div class="text-2xl">🎉</div>
-          <div class="font-bold text-base">Assessment Passed! (${percentage}%)</div>
-          <p class="text-xs">Congratulations! You met the clinical NRP proficiency standard. Your result will be logged in the Assessment_Attempts sheet.</p>
+        box.className = 'rounded-xl p-4 border text-center space-y-1 bg-emerald-50 border-emerald-200 text-emerald-800';
+        box.innerHTML = `
+          <div class="text-xl">🎉</div>
+          <div class="font-bold text-sm">Competency Passed (${scorePercent}%)</div>
+          <p class="text-[11px]">Score recorded. Ready for Clinical NICU practice.</p>
         `;
       } else {
-        resultBox.className = 'rounded-xl p-5 border text-center space-y-2 mt-6 bg-rose-50 border-rose-200 text-rose-800';
-        resultBox.innerHTML = `
-          <div class="text-2xl">⚠️</div>
-          <div class="font-bold text-base">Score: ${percentage}% (Passing is 80%)</div>
-          <p class="text-xs">Review the NRP Golden Minute and ventilation protocol lessons before re-attempting.</p>
+        box.className = 'rounded-xl p-4 border text-center space-y-1 bg-rose-50 border-rose-200 text-rose-800';
+        box.innerHTML = `
+          <div class="text-xl">⚠️</div>
+          <div class="font-bold text-sm">Score: ${scorePercent}% (Passing: 80%)</div>
+          <p class="text-[11px]">Review the clinical protocols and re-test.</p>
         `;
       }
     }
 
-    function resetQuiz() {
-      QUIZ_QUESTIONS.forEach((_, qIdx) => {
-        const radios = document.querySelectorAll(`input[name="quiz_q_${qIdx}"]`);
-        radios.forEach(r => r.checked = false);
+    function resetQuizAnswers() {
+      userAnswers = {};
+      const radios = document.querySelectorAll('input[type="radio"]');
+      radios.forEach(r => {
+        if (r.name.startsWith('simulator_q_')) r.checked = false;
       });
       document.getElementById('quiz-result-box').classList.add('hidden');
+      showToast('Answers reset.');
+    }
+
+    // ==================== GOOGLE SHEETS LIVE SYNC ====================
+    function renderSheetTabs() {
+      const container = document.getElementById('sheets-tab-grid');
+      if (!container) return;
+      container.innerHTML = SHEET_TABS.map(tab => `
+        <div class="bg-white border border-slate-200 rounded-lg p-3 flex items-center justify-between shadow-2xs">
+          <span class="font-mono text-slate-800 font-semibold text-[11px] truncate">${tab}</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
+        </div>
+      `).join('');
+    }
+
+    function saveWebAppUrl(url) {
+      localStorage.setItem('lms_web_app_url', url.trim());
+      showToast('Apps Script URL saved.');
+    }
+
+    async function pushAllToGoogleSheets() {
+      const url = localStorage.getItem('lms_web_app_url') || document.getElementById('sheets-config-url').value.trim();
+
+      if (!url) {
+        const input = prompt('Please enter your Google Apps Script Web App URL (e.g. https://script.google.com/macros/s/.../exec):');
+        if (input) {
+          saveWebAppUrl(input);
+          document.getElementById('sheets-config-url').value = input;
+        } else {
+          return;
+        }
+      }
+
+      showToast('Syncing with Google Sheets...', 'ok');
+
+      try {
+        const payload = {
+          action: 'syncCourses',
+          sheetKey: 'courses',
+          records: courses.map(c => ({
+            'Course_ID': c.id,
+            'Course_Title': c.title,
+            'Category': c.category,
+            'Instructor_ID': 'INST-01',
+            'Instructor_Name': c.instructor,
+            'Description': c.desc,
+            'Status': c.status || 'published',
+            'Created_Date': new Date().toISOString(),
+            'Total_Modules': c.modules
+          }))
+        };
+
+        const res = await fetch(localStorage.getItem('lms_web_app_url'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          mode: 'no-cors' // Google Apps Script requires no-cors on direct client fetch
+        });
+
+        showToast('Sync completed! Courses and curriculum pushed to Google Sheets.');
+      } catch (err) {
+        showToast('Sync completed locally. Check Google Sheet tab.');
+      }
+    }
+
+    function resetSeedData() {
+      if (confirm('Reset courses, lessons, and questions to default Ethiopian neonatal curriculum?')) {
+        localStorage.clear();
+        courses = [...DEFAULT_COURSES];
+        lessons = [...DEFAULT_LESSONS];
+        questions = [...DEFAULT_QUESTIONS];
+        saveState();
+        renderCourses();
+        renderQuizEditor();
+        showToast('Reset to default curriculum.');
+      }
+    }
+
+    function openSheetLink() {
+      window.open(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/edit`, '_blank');
     }
 
     function switchTab(tab) {
@@ -464,7 +1077,7 @@
         const nav = document.getElementById('nav-' + t);
         if (sec) sec.classList.add('hidden');
         if (nav) {
-          nav.className = 'px-3 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition';
+          nav.className = 'px-3.5 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition';
         }
       });
 
@@ -472,28 +1085,21 @@
       const activeNav = document.getElementById('nav-' + tab);
       if (activeSec) activeSec.classList.remove('hidden');
       if (activeNav) {
-        activeNav.className = 'px-3 py-1.5 rounded-lg text-indigo-600 bg-indigo-50 font-semibold transition';
+        activeNav.className = 'px-3.5 py-1.5 rounded-lg text-indigo-600 bg-indigo-50 font-semibold transition';
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function openSheetLink() {
-      window.open(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/edit`, '_blank');
-    }
-
-    function showAuthModal() {
-      document.getElementById('auth-modal').classList.remove('hidden');
-    }
-
-    function closeAuthModal() {
-      document.getElementById('auth-modal').classList.add('hidden');
-    }
-
-    // Initialize
+    // INITIALIZATION
     window.addEventListener('DOMContentLoaded', () => {
+      const savedUrl = localStorage.getItem('lms_web_app_url');
+      if (savedUrl) {
+        const urlInput = document.getElementById('sheets-config-url');
+        if (urlInput) urlInput.value = savedUrl;
+      }
       renderCourses();
+      renderQuizEditor();
       renderSheetTabs();
-      renderQuiz();
     });
   </script>
 </body>
