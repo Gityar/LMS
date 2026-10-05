@@ -44,10 +44,10 @@
       <span class="truncate">Database: <strong class="font-mono text-emerald-300">1TQcak2SNQ3oT9DBz_nyrOzVh8fWfNRVsWqt7Rk_1uTA</strong></span>
     </div>
     <div class="flex items-center gap-3 flex-shrink-0">
-      <span class="hidden sm:inline text-indigo-300">Logged in: <strong>yaregalsemanew@gmail.com</strong></span>
-      <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/30">
-        Admin / Instructor Mode Active
-      </span>
+      <span class="hidden sm:inline text-indigo-300">Admin: <strong>yaregalsemanew@gmail.com</strong></span>
+      <button id="admin-lock-btn" onclick="toggleAdminAuthPrompt()" class="px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 text-[10px] font-bold uppercase tracking-wider border border-amber-500/40 flex items-center gap-1 transition cursor-pointer">
+        <span id="admin-lock-icon">🔒</span> <span id="admin-lock-text">Admin Protected (Click to Unlock)</span>
+      </button>
     </div>
   </div>
 
@@ -269,6 +269,54 @@
     </section>
 
   </main>
+
+  <!-- ==================== MODAL: ADMIN PASSWORD PROTECTION ==================== -->
+  <div id="modal-admin-auth" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-base">🔒</span>
+          <div>
+            <h3 class="font-bold text-slate-900 text-sm">Admin Verification Required</h3>
+            <p class="text-[11px] text-slate-500">yaregalsemanew@gmail.com</p>
+          </div>
+        </div>
+        <button onclick="closeAdminAuthModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <p class="text-xs text-slate-600 leading-relaxed">
+        Please enter the administrator password to authorize editing courses, lessons, and assessment content.
+      </p>
+
+      <form id="form-admin-auth" onsubmit="verifyAdminPassword(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Admin Password</label>
+          <div class="relative">
+            <input type="password" id="admin-password-input" required placeholder="Enter password (Admin@2026)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono text-xs pr-8">
+            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs">
+              👁️
+            </button>
+          </div>
+          <div id="admin-auth-error" class="hidden text-rose-600 text-[11px] font-semibold mt-1">
+            Incorrect password. Please try again.
+          </div>
+        </div>
+
+        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-[11px] text-slate-500">
+          🔑 Master Admin Default: <strong class="text-slate-800 font-mono">Admin@2026</strong>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeAdminAuthModal()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg">
+            Cancel
+          </button>
+          <button type="submit" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-sm">
+            Unlock & Proceed
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- ==================== MODAL: ADD / EDIT COURSE ==================== -->
   <div id="modal-course" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
@@ -616,6 +664,94 @@
       }, 3000);
     }
 
+    // ==================== ADMIN PASSWORD PROTECTION LAYER ====================
+    const ADMIN_MASTER_PASSWORD = 'Admin@2026';
+    let isAdminAuthenticated = sessionStorage.getItem('lms_admin_auth') === 'true';
+    let pendingAdminAction = null;
+
+    function updateAdminStatusBadge() {
+      const lockIcon = document.getElementById('admin-lock-icon');
+      const lockText = document.getElementById('admin-lock-text');
+      const lockBtn = document.getElementById('admin-lock-btn');
+      if (!lockBtn) return;
+
+      if (isAdminAuthenticated) {
+        if (lockIcon) lockIcon.innerText = '🔓';
+        if (lockText) lockText.innerText = 'Admin Unlocked (Lock)';
+        lockBtn.className = 'px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/40 flex items-center gap-1 transition cursor-pointer';
+      } else {
+        if (lockIcon) lockIcon.innerText = '🔒';
+        if (lockText) lockText.innerText = 'Admin Protected (Click to Unlock)';
+        lockBtn.className = 'px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 text-[10px] font-bold uppercase tracking-wider border border-amber-500/40 flex items-center gap-1 transition cursor-pointer';
+      }
+    }
+
+    function toggleAdminAuthPrompt() {
+      if (isAdminAuthenticated) {
+        if (confirm('Lock admin session? You will need to enter the password again to edit curriculum.')) {
+          isAdminAuthenticated = false;
+          sessionStorage.removeItem('lms_admin_auth');
+          updateAdminStatusBadge();
+          showToast('Admin session locked.');
+        }
+      } else {
+        requireAdminAuth(() => {
+          showToast('Admin access granted.');
+        });
+      }
+    }
+
+    function requireAdminAuth(actionCallback) {
+      if (isAdminAuthenticated) {
+        actionCallback();
+        return;
+      }
+      pendingAdminAction = actionCallback;
+      const modal = document.getElementById('modal-admin-auth');
+      const input = document.getElementById('admin-password-input');
+      const err = document.getElementById('admin-auth-error');
+      if (err) err.classList.add('hidden');
+      if (input) input.value = '';
+      if (modal) modal.classList.remove('hidden');
+      setTimeout(() => input && input.focus(), 100);
+    }
+
+    function closeAdminAuthModal() {
+      const modal = document.getElementById('modal-admin-auth');
+      if (modal) modal.classList.add('hidden');
+      pendingAdminAction = null;
+    }
+
+    function togglePasswordVisibility() {
+      const input = document.getElementById('admin-password-input');
+      if (input) {
+        input.type = input.type === 'password' ? 'text' : 'password';
+      }
+    }
+
+    function verifyAdminPassword(e) {
+      e.preventDefault();
+      const input = document.getElementById('admin-password-input');
+      const password = input ? input.value.trim() : '';
+
+      if (password === ADMIN_MASTER_PASSWORD) {
+        isAdminAuthenticated = true;
+        sessionStorage.setItem('lms_admin_auth', 'true');
+        closeAdminAuthModal();
+        updateAdminStatusBadge();
+        showToast('Admin access verified!', 'ok');
+        if (pendingAdminAction) {
+          const callback = pendingAdminAction;
+          pendingAdminAction = null;
+          callback();
+        }
+      } else {
+        const err = document.getElementById('admin-auth-error');
+        if (err) err.classList.remove('hidden');
+        if (input) input.select();
+      }
+    }
+
     // ==================== COURSE MANAGEMENT ====================
     function renderCourses() {
       const dashContainer = document.getElementById('dashboard-courses-grid');
@@ -664,6 +800,12 @@
     }
 
     function openCourseModal(courseToEdit = null) {
+      requireAdminAuth(() => {
+        openCourseModalInternal(courseToEdit);
+      });
+    }
+
+    function openCourseModalInternal(courseToEdit = null) {
       const modal = document.getElementById('modal-course');
       const title = document.getElementById('modal-course-title');
       const editId = document.getElementById('course-editing-id');
@@ -703,13 +845,15 @@
     }
 
     function deleteCourse(id) {
-      if (confirm(`Are you sure you want to delete course ${id}?`)) {
-        courses = courses.filter(c => c.id !== id);
-        lessons = lessons.filter(l => l.courseId !== id);
-        saveState();
-        renderCourses();
-        showToast(`Course ${id} deleted.`);
-      }
+      requireAdminAuth(() => {
+        if (confirm(`Are you sure you want to delete course ${id}?`)) {
+          courses = courses.filter(c => c.id !== id);
+          lessons = lessons.filter(l => l.courseId !== id);
+          saveState();
+          renderCourses();
+          showToast(`Course ${id} deleted.`);
+        }
+      });
     }
 
     function saveCourse(e) {
@@ -797,35 +941,39 @@
 
     function addLessonToCourse(e) {
       e.preventDefault();
-      const moduleNumber = parseInt(document.getElementById('lesson-module-num').value) || 1;
-      const title = document.getElementById('lesson-title').value.trim();
-      const type = document.getElementById('lesson-type').value;
-      const duration = parseInt(document.getElementById('lesson-duration').value) || 20;
-      const body = document.getElementById('lesson-body').value.trim();
+      requireAdminAuth(() => {
+        const moduleNumber = parseInt(document.getElementById('lesson-module-num').value) || 1;
+        const title = document.getElementById('lesson-title').value.trim();
+        const type = document.getElementById('lesson-type').value;
+        const duration = parseInt(document.getElementById('lesson-duration').value) || 20;
+        const body = document.getElementById('lesson-body').value.trim();
 
-      const newLesson = {
-        id: 'LES-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
-        courseId: currentLessonsCourseId,
-        moduleNumber,
-        title,
-        type,
-        duration,
-        body
-      };
+        const newLesson = {
+          id: 'LES-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+          courseId: currentLessonsCourseId,
+          moduleNumber,
+          title,
+          type,
+          duration,
+          body
+        };
 
-      lessons.push(newLesson);
-      saveState();
-      renderLessonsList(currentLessonsCourseId);
-      document.getElementById('lesson-title').value = '';
-      document.getElementById('lesson-body').value = '';
-      showToast('Lesson unit added.');
+        lessons.push(newLesson);
+        saveState();
+        renderLessonsList(currentLessonsCourseId);
+        document.getElementById('lesson-title').value = '';
+        document.getElementById('lesson-body').value = '';
+        showToast('Lesson unit added.');
+      });
     }
 
     function deleteLesson(lessonId) {
-      lessons = lessons.filter(l => l.id !== lessonId);
-      saveState();
-      renderLessonsList(currentLessonsCourseId);
-      showToast('Lesson removed.');
+      requireAdminAuth(() => {
+        lessons = lessons.filter(l => l.id !== lessonId);
+        saveState();
+        renderLessonsList(currentLessonsCourseId);
+        showToast('Lesson removed.');
+      });
     }
 
     // ==================== ASSESSMENTS & QUESTIONS ====================
@@ -868,6 +1016,12 @@
     }
 
     function openQuestionModal(editIdx = -1) {
+      requireAdminAuth(() => {
+        openQuestionModalInternal(editIdx);
+      });
+    }
+
+    function openQuestionModalInternal(editIdx = -1) {
       document.getElementById('question-editing-idx').value = editIdx;
       const modal = document.getElementById('modal-question');
       const header = document.getElementById('modal-question-header');
@@ -905,12 +1059,14 @@
     }
 
     function deleteQuestion(idx) {
-      if (confirm('Delete question #' + (idx + 1) + '?')) {
-        questions.splice(idx, 1);
-        saveState();
-        renderQuizEditor();
-        showToast('Question deleted.');
-      }
+      requireAdminAuth(() => {
+        if (confirm('Delete question #' + (idx + 1) + '?')) {
+          questions.splice(idx, 1);
+          saveState();
+          renderQuizEditor();
+          showToast('Question deleted.');
+        }
+      });
     }
 
     function saveQuestion(e) {
@@ -1009,7 +1165,13 @@
       showToast('Apps Script URL saved.');
     }
 
-    async function pushAllToGoogleSheets() {
+    function pushAllToGoogleSheets() {
+      requireAdminAuth(() => {
+        doPushAllToGoogleSheets();
+      });
+    }
+
+    async function doPushAllToGoogleSheets() {
       const url = localStorage.getItem('lms_web_app_url') || document.getElementById('sheets-config-url').value.trim();
 
       if (!url) {
@@ -1041,7 +1203,7 @@
           }))
         };
 
-        const res = await fetch(localStorage.getItem('lms_web_app_url'), {
+        await fetch(localStorage.getItem('lms_web_app_url'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
@@ -1055,16 +1217,18 @@
     }
 
     function resetSeedData() {
-      if (confirm('Reset courses, lessons, and questions to default Ethiopian neonatal curriculum?')) {
-        localStorage.clear();
-        courses = [...DEFAULT_COURSES];
-        lessons = [...DEFAULT_LESSONS];
-        questions = [...DEFAULT_QUESTIONS];
-        saveState();
-        renderCourses();
-        renderQuizEditor();
-        showToast('Reset to default curriculum.');
-      }
+      requireAdminAuth(() => {
+        if (confirm('Reset courses, lessons, and questions to default Ethiopian neonatal curriculum?')) {
+          localStorage.clear();
+          courses = [...DEFAULT_COURSES];
+          lessons = [...DEFAULT_LESSONS];
+          questions = [...DEFAULT_QUESTIONS];
+          saveState();
+          renderCourses();
+          renderQuizEditor();
+          showToast('Reset to default curriculum.');
+        }
+      });
     }
 
     function openSheetLink() {
@@ -1097,6 +1261,7 @@
         const urlInput = document.getElementById('sheets-config-url');
         if (urlInput) urlInput.value = savedUrl;
       }
+      updateAdminStatusBadge();
       renderCourses();
       renderQuizEditor();
       renderSheetTabs();
