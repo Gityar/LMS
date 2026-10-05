@@ -99,15 +99,15 @@
           <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
             Full authority to author courses, configure lesson modules, update passing assessments, and persist every record directly into your 13-tab Google Spreadsheet.
           </p>
-          <div class="flex flex-wrap gap-3 pt-2">
+          <div class="flex flex-wrap gap-3 pt-2" id="hero-banner-actions">
             <button onclick="switchTab('courses')" class="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-semibold rounded-xl shadow-lg transition">
               Manage Courses &rarr;
             </button>
-            <button onclick="openCourseModal()" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-xl border border-white/20 backdrop-blur-sm transition">
+            <button onclick="openCourseModal()" id="btn-hero-new-course" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-xl border border-white/20 backdrop-blur-sm transition">
               + New Course Module
             </button>
-            <button onclick="switchTab('quiz')" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-xl border border-white/20 backdrop-blur-sm transition">
-              Manage Quiz Questions
+            <button onclick="switchTab('quiz')" id="btn-hero-quiz" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-xl border border-white/20 backdrop-blur-sm transition">
+              Manage Quiz & Settings
             </button>
           </div>
         </div>
@@ -128,7 +128,7 @@
         <div class="glass-card rounded-xl p-5 shadow-sm">
           <div class="text-xs font-medium text-slate-500">Assessment Questions</div>
           <div class="text-2xl font-bold text-slate-900 mt-1" id="stat-questions-count">4</div>
-          <div class="text-xs text-indigo-600 font-semibold mt-1">80% Passing Threshold</div>
+          <div class="text-xs text-indigo-600 font-semibold mt-1" id="stat-passing-label">80% Passing Threshold</div>
         </div>
         <div class="glass-card rounded-xl p-5 shadow-sm">
           <div class="text-xs font-medium text-slate-500">Accreditation Status</div>
@@ -141,7 +141,7 @@
       <div>
         <div class="flex items-center justify-between mb-4">
           <h3 class="text-lg font-bold text-slate-900">Current Course Modules</h3>
-          <button onclick="openCourseModal()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">+ Add Course</button>
+          <button onclick="openCourseModal()" id="btn-add-course-dash" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">+ Add Course</button>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" id="dashboard-courses-grid">
           <!-- Populated by JavaScript -->
@@ -158,7 +158,7 @@
         </div>
         <div class="flex items-center gap-3">
           <input type="text" id="course-search-input" oninput="filterCourses()" placeholder="Search courses..." class="px-3.5 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-          <button onclick="openCourseModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1.5 whitespace-nowrap">
+          <button onclick="openCourseModal()" id="btn-add-course-page" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1.5 whitespace-nowrap">
             <span>+ Add Course</span>
           </button>
         </div>
@@ -174,16 +174,60 @@
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
           <h2 class="text-2xl font-bold text-slate-900">Clinical Assessments & Exam Bank</h2>
-          <p class="text-sm text-slate-500">Edit existing test questions, add new clinical scenarios, and test taking the assessment.</p>
+          <p class="text-sm text-slate-500">Configure passing thresholds, edit questions, add clinical scenarios, and evaluate learners.</p>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="openQuestionModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-sm transition">
-            + Add New Question
+          <button onclick="openQuestionModal()" id="btn-add-question-quiz" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1">
+            <span>+ Add New Question</span>
           </button>
           <button onclick="resetQuizAnswers()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition">
             Reset Answers
           </button>
         </div>
+      </div>
+
+      <!-- INSTRUCTOR & ADMIN ASSESSMENT SETTINGS PANEL -->
+      <div id="assessment-settings-panel" class="hidden glass-card rounded-2xl p-5 border border-indigo-200 bg-indigo-50/50 space-y-4 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-indigo-100 pb-3">
+          <div class="flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm shadow-xs">⚙️</span>
+            <div>
+              <h3 class="font-bold text-slate-900 text-sm">Assessment & Examination Configuration</h3>
+              <p class="text-[11px] text-slate-500">Configure passing score percentage and certification criteria (Admin & Instructor Only)</p>
+            </div>
+          </div>
+          <button onclick="saveAssessmentSettingsForm(event)" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5 self-start sm:self-auto">
+            <span>💾 Save Exam Settings</span>
+          </button>
+        </div>
+
+        <form id="form-assessment-settings" onsubmit="saveAssessmentSettingsForm(event)" class="grid sm:grid-cols-3 gap-4 text-xs">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Passing Score Threshold (%)</label>
+            <div class="flex items-center gap-2">
+              <input type="number" id="setting-passing-score" min="50" max="100" step="5" value="80" required class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg font-mono font-bold text-indigo-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <span class="text-xs font-bold text-slate-600">%</span>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1">Minimum score required to issue Certificate of Competency</p>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Assessment Title</label>
+            <input type="text" id="setting-exam-title" value="Neonatal Resuscitation Program (NRP) Competency Exam" required class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <p class="text-[10px] text-slate-400 mt-1">Official title printed on certificates and synced to Google Sheets</p>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Linked Course</label>
+            <select id="setting-linked-course" class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none">
+              <option value="CRS-NRP-01">CRS-NRP-01: Neonatal Resuscitation Program (NRP)</option>
+              <option value="CRS-THM-02">CRS-THM-02: Thermal Care & Warm Chain Protocols</option>
+              <option value="CRS-RDS-03">CRS-RDS-03: Respiratory Distress & Bubble CPAP</option>
+              <option value="CRS-SEP-04">CRS-SEP-04: Neonatal Sepsis & Antimicrobial Stewardship</option>
+            </select>
+            <p class="text-[10px] text-slate-400 mt-1">Persisted in Google Sheets Assessments table</p>
+          </div>
+        </form>
       </div>
 
       <div class="grid lg:grid-cols-3 gap-6">
@@ -730,12 +774,13 @@
         <button onclick="closeLessonsModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
       </div>
 
-      <!-- Add New Lesson Form -->
-      <form id="form-new-lesson" onsubmit="addLessonToCourse(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3 text-xs">
-        <div class="font-bold text-slate-900 text-xs flex items-center justify-between">
-          <span>+ Add New Lesson Unit</span>
-          <span class="text-slate-400 font-normal">All fields saved automatically</span>
-        </div>
+      <!-- Add New Lesson Form (Admin & Instructor Only) -->
+      <div id="form-new-lesson-container">
+        <form id="form-new-lesson" onsubmit="addLessonToCourse(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3 text-xs">
+          <div class="font-bold text-slate-900 text-xs flex items-center justify-between">
+            <span>+ Add New Lesson Unit</span>
+            <span class="text-slate-400 font-normal">All fields saved automatically</span>
+          </div>
         <div class="grid grid-cols-3 gap-2">
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Module #</label>
@@ -771,6 +816,7 @@
           </button>
         </div>
       </form>
+      </div>
 
       <!-- Existing Lessons List -->
       <div class="space-y-2">
@@ -982,7 +1028,17 @@
     let currentUser = JSON.parse(localStorage.getItem('lms_current_user')) || null;
     let enrollments = JSON.parse(localStorage.getItem('lms_enrollments')) || DEFAULT_ENROLLMENTS;
     let attempts = JSON.parse(localStorage.getItem('lms_attempts')) || DEFAULT_ATTEMPTS;
+    let assessmentSettings = JSON.parse(localStorage.getItem('lms_assessment_settings')) || {
+      id: 'ASM-NRP-01',
+      courseId: 'CRS-NRP-01',
+      title: 'Neonatal Resuscitation Program (NRP) Competency Exam',
+      passingScore: 80
+    };
     let userAnswers = {};
+
+    function canManageCurriculum() {
+      return currentUser && (currentUser.role === 'admin' || currentUser.role === 'instructor');
+    }
 
     function saveState() {
       localStorage.setItem('lms_courses', JSON.stringify(courses));
@@ -991,6 +1047,7 @@
       localStorage.setItem('lms_users', JSON.stringify(users));
       localStorage.setItem('lms_enrollments', JSON.stringify(enrollments));
       localStorage.setItem('lms_attempts', JSON.stringify(attempts));
+      localStorage.setItem('lms_assessment_settings', JSON.stringify(assessmentSettings));
       if (currentUser) {
         localStorage.setItem('lms_current_user', JSON.stringify(currentUser));
       } else {
@@ -1000,11 +1057,18 @@
     }
 
     function updateCounts() {
-      document.getElementById('stat-courses-count').innerText = courses.length;
-      document.getElementById('stat-lessons-count').innerText = lessons.length;
-      document.getElementById('stat-questions-count').innerText = questions.length;
+      const cEl = document.getElementById('stat-courses-count');
+      if (cEl) cEl.innerText = courses.length;
+      const lEl = document.getElementById('stat-lessons-count');
+      if (lEl) lEl.innerText = lessons.length;
+      const qEl = document.getElementById('stat-questions-count');
+      if (qEl) qEl.innerText = questions.length;
       const qLabel = document.getElementById('questions-count-label');
       if (qLabel) qLabel.innerText = questions.length;
+      const passLabel = document.getElementById('stat-passing-label');
+      if (passLabel) passLabel.innerText = `${assessmentSettings.passingScore}% Passing Threshold`;
+      const badgeLabel = document.getElementById('quiz-passing-grade-badge');
+      if (badgeLabel) badgeLabel.innerText = `Passing Grade: ${assessmentSettings.passingScore}%`;
     }
 
     // TOAST NOTIFICATIONS
@@ -1042,14 +1106,14 @@
           <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${roleColor}">${roleLabel}</span>
           ${currentUser.role === 'admin' ? `
             <button id="admin-lock-btn" onclick="toggleAdminAuthPrompt()" class="px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 text-[10px] font-bold uppercase tracking-wider border border-amber-500/40 flex items-center gap-1 transition cursor-pointer">
-              <span id="admin-lock-icon">🔒</span> <span id="admin-lock-text">Admin Protected</span>
+              <span id="admin-lock-icon">🔒</span> <span id="admin-lock-text">Admin Master</span>
             </button>
           ` : ''}
           <button onclick="logoutUser()" class="text-rose-300 hover:text-rose-100 text-xs font-semibold hover:underline">Sign Out</button>
         `;
 
         headerActions.innerHTML = `
-          ${(currentUser.role === 'admin' || currentUser.role === 'instructor') ? `
+          ${canManageCurriculum() ? `
             <button onclick="openCourseModal()" class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-indigo-600 text-white rounded-lg shadow-sm hover:bg-indigo-700 transition">
               <span>+ Add Course</span>
             </button>
@@ -1088,6 +1152,62 @@
         `;
       }
 
+      // Update hero banner buttons based on privileges
+      const heroActions = document.getElementById('hero-banner-actions');
+      if (heroActions) {
+        if (canManageCurriculum()) {
+          heroActions.innerHTML = `
+            <button onclick="switchTab('courses')" class="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-semibold rounded-xl shadow-lg transition">
+              Manage Courses &rarr;
+            </button>
+            <button onclick="openCourseModal()" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-xl border border-white/20 backdrop-blur-sm transition">
+              + New Course Module
+            </button>
+            <button onclick="switchTab('quiz')" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-xl border border-white/20 backdrop-blur-sm transition">
+              ⚙️ Exam Settings & Questions
+            </button>
+          `;
+        } else {
+          heroActions.innerHTML = `
+            <button onclick="switchTab('courses')" class="px-5 py-2.5 bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-semibold rounded-xl shadow-lg transition">
+              Browse Clinical Courses &rarr;
+            </button>
+            <button onclick="switchTab('learning')" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-xl border border-white/20 backdrop-blur-sm transition">
+              🩺 My Learning Portfolio
+            </button>
+            <button onclick="switchTab('quiz')" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-semibold rounded-xl border border-white/20 backdrop-blur-sm transition">
+              📝 Take Competency Exam
+            </button>
+          `;
+        }
+      }
+
+      // Adapt course buttons
+      const dashAddCourse = document.getElementById('btn-add-course-dash');
+      if (dashAddCourse) dashAddCourse.style.display = canManageCurriculum() ? 'inline-block' : 'none';
+
+      const pageAddCourse = document.getElementById('btn-add-course-page');
+      if (pageAddCourse) pageAddCourse.style.display = canManageCurriculum() ? 'inline-flex' : 'none';
+
+      const addQBtn = document.getElementById('btn-add-question-quiz');
+      if (addQBtn) addQBtn.style.display = canManageCurriculum() ? 'inline-flex' : 'none';
+
+      // Adapt assessment settings panel (only for Admin & Instructor)
+      const settingsPanel = document.getElementById('assessment-settings-panel');
+      if (settingsPanel) {
+        if (canManageCurriculum()) {
+          settingsPanel.classList.remove('hidden');
+          const passInput = document.getElementById('setting-passing-score');
+          if (passInput) passInput.value = assessmentSettings.passingScore;
+          const titleInput = document.getElementById('setting-exam-title');
+          if (titleInput) titleInput.value = assessmentSettings.title;
+          const linkedCourse = document.getElementById('setting-linked-course');
+          if (linkedCourse) linkedCourse.value = assessmentSettings.courseId || 'CRS-NRP-01';
+        } else {
+          settingsPanel.classList.add('hidden');
+        }
+      }
+
       // Only expose the Google Sheets Database Admin tab to logged-in administrators
       const sheetsNav = document.getElementById('nav-sheets');
       if (sheetsNav) {
@@ -1095,7 +1215,6 @@
           sheetsNav.classList.remove('hidden');
         } else {
           sheetsNav.classList.add('hidden');
-          // If a guest was viewing the sheets tab, return to dashboard
           const sheetsTab = document.getElementById('tab-sheets');
           if (sheetsTab && !sheetsTab.classList.contains('hidden')) {
             switchTab('dashboard');
@@ -1104,6 +1223,7 @@
       }
 
       renderLearningTab();
+      renderQuizEditor();
       updateAdminStatusBadge();
     }
 
@@ -1684,6 +1804,14 @@
     }
 
     function requireAdminAuth(actionCallback) {
+      if (canManageCurriculum()) {
+        actionCallback();
+        return;
+      }
+      if (currentUser && currentUser.role === 'learner') {
+        showToast('Permission Denied: Learners do not have permission to modify courses, lessons, or exams.', 'err');
+        return;
+      }
       if (isAdminAuthenticated) {
         actionCallback();
         return;
@@ -1924,8 +2052,13 @@
     function openLessonsModal(courseId) {
       currentLessonsCourseId = courseId;
       const course = courses.find(c => c.id === courseId);
-      document.getElementById('modal-lessons-header').innerText = `Manage Lessons: ${course ? course.title : courseId}`;
-      document.getElementById('modal-lessons-subheader').innerText = `Course Code: ${courseId}`;
+      const isManager = canManageCurriculum();
+      document.getElementById('modal-lessons-header').innerText = isManager ? `Manage Lessons: ${course ? course.title : courseId}` : `Study Curriculum: ${course ? course.title : courseId}`;
+      document.getElementById('modal-lessons-subheader').innerText = `Course Code: ${courseId} • ${isManager ? 'Instructor Studio' : 'Learner Syllabus'}`;
+
+      const formContainer = document.getElementById('form-new-lesson-container');
+      if (formContainer) formContainer.style.display = isManager ? 'block' : 'none';
+
       renderLessonsList(courseId);
       document.getElementById('modal-lessons').classList.remove('hidden');
     }
@@ -1940,23 +2073,25 @@
       const list = lessons.filter(l => l.courseId === courseId);
 
       if (list.length === 0) {
-        container.innerHTML = '<div class="text-xs text-slate-400 p-4 text-center">No lessons added yet. Use the form above to add your first lesson.</div>';
+        container.innerHTML = '<div class="text-xs text-slate-400 p-4 text-center">No lessons added yet.</div>';
         return;
       }
 
       container.innerHTML = list.map(l => `
-        <div class="bg-white border border-slate-200 rounded-xl p-3 flex items-center justify-between shadow-2xs">
-          <div>
+        <div class="bg-white border border-slate-200 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-start justify-between gap-3 shadow-2xs">
+          <div class="space-y-1.5 flex-1">
             <div class="flex items-center gap-2">
-              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">Module ${l.moduleNumber}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700">Module ${l.moduleNumber}</span>
               <h5 class="font-bold text-slate-900 text-xs">${l.title}</h5>
               <span class="text-[10px] text-slate-400 font-mono">${l.duration} min • ${l.type}</span>
             </div>
-            ${l.body ? `<p class="text-[11px] text-slate-500 mt-1 line-clamp-1">${l.body}</p>` : ''}
+            ${l.body ? `<div class="text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100 leading-relaxed font-normal">${l.body}</div>` : ''}
           </div>
-          <button onclick="deleteLesson('${l.id}')" title="Delete Lesson" class="p-1 text-slate-400 hover:text-rose-600 transition">
-            🗑️
-          </button>
+          ${canManageCurriculum() ? `
+            <button onclick="deleteLesson('${l.id}')" title="Delete Lesson" class="self-end sm:self-auto p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition text-xs flex items-center gap-1">
+              <span>🗑️</span> <span class="sm:hidden text-[10px]">Delete</span>
+            </button>
+          ` : ''}
         </div>
       `).join('');
     }
@@ -1999,40 +2134,110 @@
     }
 
     // ==================== ASSESSMENTS & QUESTIONS ====================
+    function saveAssessmentSettingsForm(e) {
+      if (e) e.preventDefault();
+      if (!canManageCurriculum()) {
+        showToast('Permission Denied: Only Instructors and Admins can update assessment settings.', 'err');
+        return;
+      }
+      const score = parseInt(document.getElementById('setting-passing-score').value) || 80;
+      const title = document.getElementById('setting-exam-title').value.trim() || 'Neonatal Clinical Assessment';
+      const courseId = document.getElementById('setting-linked-course').value;
+
+      assessmentSettings.passingScore = score;
+      assessmentSettings.title = title;
+      assessmentSettings.courseId = courseId;
+      saveState();
+
+      // Sync to Google Sheets Assessments tab if URL is configured
+      const webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (webAppUrl) {
+        fetch(webAppUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'appendRecord',
+            sheetKey: 'assessments',
+            records: [{
+              'Assessment_ID': assessmentSettings.id || 'ASM-NRP-01',
+              'Course_ID': courseId,
+              'Title': title,
+              'Passing_Score': score,
+              'Total_Questions': questions.length
+            }]
+          }),
+          mode: 'no-cors'
+        }).catch(() => {});
+      }
+
+      renderQuizEditor();
+      renderLearningTab();
+      updateCounts();
+      showToast(`Assessment settings saved! Passing score set to ${score}%.`, 'ok');
+    }
+
     function renderQuizEditor() {
       const container = document.getElementById('quiz-editor-list');
       if (!container) return;
 
-      container.innerHTML = questions.map((item, qIdx) => `
-        <div class="glass-card rounded-2xl p-5 border border-slate-200 shadow-2xs space-y-3">
-          <div class="flex items-start justify-between gap-3">
-            <div class="flex items-center gap-2">
-              <span class="w-6 h-6 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold flex items-center justify-center">${qIdx + 1}</span>
-              <p class="text-sm font-semibold text-slate-900">${item.q}</p>
-            </div>
-            <div class="flex items-center gap-1 flex-shrink-0">
-              <button onclick="editQuestion(${qIdx})" title="Edit Question" class="p-1 hover:bg-slate-100 text-slate-600 rounded-lg text-xs">✏️ Edit</button>
-              <button onclick="deleteQuestion(${qIdx})" title="Delete Question" class="p-1 hover:bg-rose-50 text-rose-600 rounded-lg text-xs">🗑️</button>
-            </div>
-          </div>
+      const isManager = canManageCurriculum();
+      const hasEvaluated = !!userAnswers['_evaluated'];
 
-          <!-- Options -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-            ${item.options.map((opt, oIdx) => `
-              <label class="flex items-center gap-2.5 p-2 rounded-xl border ${item.correct === oIdx ? 'bg-emerald-50/70 border-emerald-300' : 'bg-white border-slate-200'} cursor-pointer transition">
-                <input type="radio" name="simulator_q_${qIdx}" value="${oIdx}" ${userAnswers[qIdx] === oIdx ? 'checked' : ''} onchange="userAnswers[${qIdx}] = ${oIdx}" class="text-indigo-600">
-                <span class="text-slate-800">${opt} ${item.correct === oIdx ? '<span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1 rounded ml-1">Correct Answer</span>' : ''}</span>
-              </label>
-            `).join('')}
-          </div>
+      container.innerHTML = questions.map((item, qIdx) => {
+        const isAnswered = userAnswers[qIdx] !== undefined;
 
-          ${item.explanation ? `
-            <div class="text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-              <strong class="text-slate-700">Clinical Rationale:</strong> ${item.explanation}
+        return `
+          <div class="glass-card rounded-2xl p-5 border border-slate-200 shadow-2xs space-y-3">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold flex items-center justify-center">${qIdx + 1}</span>
+                <p class="text-sm font-semibold text-slate-900">${item.q}</p>
+              </div>
+              ${isManager ? `
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                  <button onclick="editQuestion(${qIdx})" title="Edit Question" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold rounded-lg text-xs transition">✏️ Edit</button>
+                  <button onclick="deleteQuestion(${qIdx})" title="Delete Question" class="p-1 px-2 hover:bg-rose-50 text-rose-600 rounded-lg text-xs transition">🗑️</button>
+                </div>
+              ` : ''}
             </div>
-          ` : ''}
-        </div>
-      `).join('');
+
+            <!-- Options -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              ${item.options.map((opt, oIdx) => {
+                const isOptionCorrect = item.correct === oIdx;
+                const isSelected = userAnswers[qIdx] === oIdx;
+                let borderClass = 'bg-white border-slate-200 hover:border-slate-300';
+                let labelExtra = '';
+
+                if (isManager || hasEvaluated) {
+                  if (isOptionCorrect) {
+                    borderClass = 'bg-emerald-50/80 border-emerald-400 text-emerald-950 font-medium';
+                    labelExtra = '<span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded ml-1">✓ Correct Answer</span>';
+                  } else if (isSelected && !isOptionCorrect) {
+                    borderClass = 'bg-rose-50/80 border-rose-300 text-rose-950';
+                    labelExtra = '<span class="text-[10px] font-bold text-rose-700 bg-rose-100 px-1.5 py-0.5 rounded ml-1">✗ Incorrect</span>';
+                  }
+                } else if (isSelected) {
+                  borderClass = 'bg-indigo-50/60 border-indigo-400 text-indigo-950 font-semibold';
+                }
+
+                return `
+                  <label class="flex items-center gap-2.5 p-2.5 rounded-xl border ${borderClass} cursor-pointer transition">
+                    <input type="radio" name="simulator_q_${qIdx}" value="${oIdx}" ${isSelected ? 'checked' : ''} onchange="userAnswers[${qIdx}] = ${oIdx}" class="text-indigo-600 focus:ring-indigo-500">
+                    <span class="text-slate-800 flex-1">${opt} ${labelExtra}</span>
+                  </label>
+                `;
+              }).join('')}
+            </div>
+
+            ${(isManager || hasEvaluated) && item.explanation ? `
+              <div class="text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100 leading-relaxed">
+                <strong class="text-indigo-900 font-semibold">Clinical Rationale:</strong> ${item.explanation}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
 
       updateCounts();
     }
@@ -2093,6 +2298,10 @@
 
     function saveQuestion(e) {
       e.preventDefault();
+      if (!canManageCurriculum()) {
+        showToast('Permission Denied: Only Instructors and Admins can save questions.', 'err');
+        return;
+      }
       const idx = parseInt(document.getElementById('question-editing-idx').value);
       const text = document.getElementById('q-form-text').value.trim();
       const options = [
@@ -2109,15 +2318,48 @@
 
       if (idx >= 0) {
         questions[idx] = newQ;
-        showToast('Question updated!');
+        showToast('Question #' + (idx + 1) + ' updated successfully!', 'ok');
       } else {
         questions.push(newQ);
-        showToast('Question added to exam bank!');
+        showToast('New question added to exam bank!', 'ok');
+      }
+
+      // Sync to Google Sheets Questions table if URL configured
+      const webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (webAppUrl) {
+        fetch(webAppUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'appendRecord',
+            sheetKey: 'questions',
+            records: [{
+              'Question_ID': 'QST-' + (idx >= 0 ? idx + 1 : questions.length),
+              'Assessment_ID': assessmentSettings.id || 'ASM-NRP-01',
+              'Question_Text': text,
+              'Option_A': options[0],
+              'Option_B': options[1],
+              'Option_C': options[2],
+              'Option_D': options[3],
+              'Correct_Option_Index': correct,
+              'Explanation': explanation
+            }]
+          }),
+          mode: 'no-cors'
+        }).catch(() => {});
       }
 
       saveState();
       closeQuestionModal();
       renderQuizEditor();
+    }
+
+    function resetQuizAnswers() {
+      userAnswers = {};
+      const box = document.getElementById('quiz-result-box');
+      if (box) box.classList.add('hidden');
+      renderQuizEditor();
+      showToast('Assessment inputs reset.');
     }
 
     function evaluateQuiz() {
@@ -2134,12 +2376,16 @@
       });
 
       if (answeredCount < questions.length) {
-        alert(`Please answer all ${questions.length} questions in the simulator before evaluation.`);
+        alert(`Please answer all ${questions.length} questions before evaluation.`);
         return;
       }
 
       const scorePercent = Math.round((correctCount / questions.length) * 100);
-      const passed = scorePercent >= 80;
+      const threshold = assessmentSettings.passingScore || 80;
+      const passed = scorePercent >= threshold;
+      userAnswers['_evaluated'] = true;
+      renderQuizEditor();
+
       const box = document.getElementById('quiz-result-box');
       box.classList.remove('hidden');
 
@@ -2148,13 +2394,13 @@
         box.innerHTML = `
           <div class="text-xl">🎉</div>
           <div class="font-bold text-sm">Competency Passed (${scorePercent}%)</div>
-          <p class="text-[11px]">Score calculated. Ready for Clinical NICU practice.</p>
+          <p class="text-[11px]">Met the passing threshold of ${threshold}%. Ready for Clinical NICU practice.</p>
         `;
       } else {
         box.className = 'rounded-xl p-4 border text-center space-y-1 bg-rose-50 border-rose-200 text-rose-800';
         box.innerHTML = `
           <div class="text-xl">⚠️</div>
-          <div class="font-bold text-sm">Score: ${scorePercent}% (Passing: 80%)</div>
+          <div class="font-bold text-sm">Score: ${scorePercent}% (Passing Required: ${threshold}%)</div>
           <p class="text-[11px]">Review the clinical protocols and re-test.</p>
         `;
       }
