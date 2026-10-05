@@ -1,0 +1,6 @@
+{
+  "name": "Neonatal LMS",
+  "description": "Neonatal Nursing Learning Management System for managing courses, lessons, assessments, quizzes, assignments, and learner progress.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
