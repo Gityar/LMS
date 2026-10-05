@@ -51,6 +51,23 @@ function setupAllSheets() {
 }
 
 /**
+ * Diagnostic & Authorization Helper:
+ * Run this function once in Apps Script to trigger the "Review Permissions" dialog for MailApp
+ */
+function testSendEmail() {
+  var testEmail = "yaregalsemanew@gmail.com";
+  MailApp.sendEmail({
+    to: testEmail,
+    subject: "✅ Neonatal Nursing LMS - Email Dispatch Test",
+    htmlBody: "<div style='font-family: Arial, sans-serif; padding: 20px;'>" +
+      "<h3>Email service is working!</h3>" +
+      "<p>Your Google Apps Script backend has authorized MailApp and can successfully dispatch password reset codes.</p>" +
+      "</div>"
+  });
+  Logger.log("Test email successfully dispatched to " + testEmail);
+}
+
+/**
  * Helper: Find or create sheet
  */
 function getTargetSheet(ss, sheetKey) {

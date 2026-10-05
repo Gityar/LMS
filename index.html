@@ -242,11 +242,17 @@
         <div class="grid sm:grid-cols-2 gap-4 bg-slate-50 rounded-xl p-4 border border-slate-200 text-xs">
           <div>
             <label class="text-slate-500 font-semibold block mb-1">Spreadsheet ID:</label>
-            <input type="text" id="sheets-config-id" value="1TQcak2SNQ3oT9DBz_nyrOzVh8fWfNRVsWqt7Rk_1uTA" class="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-mono text-slate-800 font-semibold text-xs">
+            <input type="text" id="sheets-config-id" value="1TQcak2SNQ3oT9DBz_nyrOzVh8fWfNRVsWqt7Rk_1uTA" class="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-mono text-slate-800 font-semibold text-xs" readonly>
           </div>
           <div>
-            <label class="text-slate-500 font-semibold block mb-1">Apps Script Web App URL (Optional for Direct HTTP Push):</label>
-            <input type="text" id="sheets-config-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs" onchange="saveWebAppUrl(this.value)">
+            <label class="text-slate-500 font-semibold block mb-1">Apps Script Web App URL (Required for Email Dispatch & Sync):</label>
+            <div class="flex gap-2">
+              <input type="text" id="sheets-config-url" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-mono" onchange="saveWebAppUrl(this.value)">
+              <button onclick="testEmailDispatch()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1 shadow-2xs">
+                <span>📧</span> Test Email
+              </button>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1">Found in Apps Script under: Deploy &rarr; Manage deployments &rarr; Web app URL</p>
           </div>
         </div>
 
@@ -1236,6 +1242,32 @@
         btn.innerHTML = '<span>⏳ Sending code to your email...</span>';
       }
 
+      // Check for Google Apps Script Web App URL
+      let webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (!webAppUrl) {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>📧 Send Verification Code to Email</span>';
+        }
+        const inputUrl = prompt(
+          'Google Apps Script Web App URL is required to dispatch real emails to ' + user.email + '.\n\n' +
+          'Please paste your deployed Apps Script Web App URL (starts with https://script.google.com/macros/s/.../exec):'
+        );
+        if (inputUrl && inputUrl.trim().startsWith('http')) {
+          webAppUrl = inputUrl.trim();
+          saveWebAppUrl(webAppUrl);
+          const urlInput = document.getElementById('sheets-config-url');
+          if (urlInput) urlInput.value = webAppUrl;
+          if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳ Sending code to your email...</span>';
+          }
+        } else {
+          alert('Cannot send live email without your deployed Apps Script Web App URL. You can find this in Google Sheets > Extensions > Apps Script > Deploy > Manage deployments > Web app URL.');
+          return;
+        }
+      }
+
       // Generate cryptographically secure 6-digit numeric verification OTP
       const code = Math.floor(100000 + Math.random() * 900000).toString();
       const expiryTime = Date.now() + (15 * 60 * 1000); // 15 minutes expiry
@@ -1251,34 +1283,31 @@
       const resetLink = window.location.origin + window.location.pathname + '?email=' + encodeURIComponent(user.email) + '&code=' + code;
 
       // Send actual email via Google Apps Script MailApp
-      const webAppUrl = localStorage.getItem('lms_web_app_url');
-      if (webAppUrl) {
-        try {
-          await fetch(webAppUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'sendPasswordResetEmail',
-              email: user.email,
-              userName: user.fullName,
-              code: code,
-              resetLink: resetLink,
-              sheetKey: 'password_resets',
-              records: [{
-                'Reset_ID': 'RST-' + code,
-                'User_ID': user.id,
-                'Email': user.email,
-                'Reset_Token': code,
-                'Request_Date': new Date().toISOString(),
-                'Expiry_Date': new Date(expiryTime).toISOString(),
-                'Status': 'sent'
-              }]
-            }),
-            mode: 'no-cors'
-          });
-        } catch (err) {
-          console.warn('Apps script email dispatch', err);
-        }
+      try {
+        await fetch(webAppUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'sendPasswordResetEmail',
+            email: user.email,
+            userName: user.fullName,
+            code: code,
+            resetLink: resetLink,
+            sheetKey: 'password_resets',
+            records: [{
+              'Reset_ID': 'RST-' + code,
+              'User_ID': user.id,
+              'Email': user.email,
+              'Reset_Token': code,
+              'Request_Date': new Date().toISOString(),
+              'Expiry_Date': new Date(expiryTime).toISOString(),
+              'Status': 'sent'
+            }]
+          }),
+          mode: 'no-cors'
+        });
+      } catch (err) {
+        console.warn('Apps script email dispatch', err);
       }
 
       if (btn) {
@@ -1295,6 +1324,34 @@
 
       showToast(`Verification code sent to ${user.email}! Please check your inbox.`);
       startResendCooldown();
+    }
+
+    async function testEmailDispatch() {
+      const url = localStorage.getItem('lms_web_app_url') || document.getElementById('sheets-config-url').value.trim();
+      if (!url) {
+        alert('Please enter your Apps Script Web App URL first in the field on the left.');
+        return;
+      }
+      showToast('Dispatching test email to yaregalsemanew@gmail.com...', 'ok');
+      try {
+        await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'sendPasswordResetEmail',
+            email: 'yaregalsemanew@gmail.com',
+            userName: 'Admin Yaregal',
+            code: '998877',
+            resetLink: window.location.href,
+            sheetKey: 'password_resets',
+            records: []
+          }),
+          mode: 'no-cors'
+        });
+        alert('Test email request dispatched to your Google Apps Script! Check yaregalsemanew@gmail.com (and Spam). If not received, verify that your Apps Script is deployed with "Who has access: Anyone".');
+      } catch (err) {
+        alert('Failed to connect to Apps Script: ' + err.toString());
+      }
     }
 
     let resendTimer = null;
