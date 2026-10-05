@@ -890,10 +890,9 @@
   <!-- FOOTER -->
   <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
     <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <div>Neonatal Nursing Clinical LMS &copy; 2026. Connected to Google Spreadsheet <strong>1TQcak2SNQ3oT9DBz_nyrOzVh8fWfNRVsWqt7Rk_1uTA</strong>.</div>
-      <div class="flex items-center gap-4">
-        <a href="https://docs.google.com/spreadsheets/d/1TQcak2SNQ3oT9DBz_nyrOzVh8fWfNRVsWqt7Rk_1uTA/edit" target="_blank" class="hover:text-indigo-600 transition">Open Google Sheet</a>
-        <a href="#" onclick="switchTab('quiz'); return false;" class="hover:text-indigo-600 transition">Assessment Bank</a>
+      <div id="footer-text-left">Neonatal Nursing Clinical LMS &copy; 2026. Evidence-Based NICU Education & CPD Competency.</div>
+      <div class="flex items-center gap-4" id="footer-links-container">
+        <!-- Rendered dynamically by renderAuthUI based on user role -->
       </div>
     </div>
   </footer>
@@ -1219,6 +1218,53 @@
           if (sheetsTab && !sheetsTab.classList.contains('hidden')) {
             switchTab('dashboard');
           }
+        }
+      }
+
+      // Update footer links and visibility based on user role
+      const footerLinks = document.getElementById('footer-links-container');
+      const footerLeft = document.getElementById('footer-text-left');
+      if (footerLinks) {
+        if (currentUser && currentUser.role === 'admin') {
+          if (footerLeft) {
+            footerLeft.innerHTML = 'Neonatal Nursing Clinical LMS &copy; 2026. <span class="text-indigo-600 font-semibold">● Admin Database Active</span>';
+          }
+          footerLinks.innerHTML = `
+            <a href="https://docs.google.com/spreadsheets/d/1TQcak2SNQ3oT9DBz_nyrOzVh8fWfNRVsWqt7Rk_1uTA/edit" target="_blank" class="hover:text-indigo-600 transition flex items-center gap-1 font-semibold text-emerald-700">
+              <span>📊</span> Open Google Sheet ↗
+            </a>
+            <a href="#" onclick="switchTab('quiz'); return false;" class="hover:text-indigo-600 transition font-semibold">
+              ⚙️ Assessment Bank
+            </a>
+            <a href="#" onclick="switchTab('sheets'); return false;" class="hover:text-indigo-600 transition font-semibold">
+              ☁️ Database Admin
+            </a>
+          `;
+        } else if (currentUser && currentUser.role === 'instructor') {
+          if (footerLeft) {
+            footerLeft.innerHTML = 'Neonatal Nursing Clinical LMS &copy; 2026. <span class="text-emerald-700 font-semibold">Clinical Instructor Portal</span>';
+          }
+          footerLinks.innerHTML = `
+            <a href="#" onclick="switchTab('courses'); return false;" class="hover:text-indigo-600 transition font-semibold">
+              📚 Curriculum Studio
+            </a>
+            <a href="#" onclick="switchTab('quiz'); return false;" class="hover:text-indigo-600 transition font-semibold">
+              ⚙️ Assessment Bank
+            </a>
+          `;
+        } else {
+          // Learner or Guest: completely clean, no spreadsheet links or assessment bank
+          if (footerLeft) {
+            footerLeft.innerHTML = 'Neonatal Nursing Clinical LMS &copy; 2026. Evidence-Based NICU Education & CPD Competency.';
+          }
+          footerLinks.innerHTML = `
+            <a href="#" onclick="switchTab('courses'); return false;" class="hover:text-indigo-600 transition">
+              Clinical Courses
+            </a>
+            <a href="#" onclick="switchTab('learning'); return false;" class="hover:text-indigo-600 transition">
+              My Portfolio & Certificates
+            </a>
+          `;
         }
       }
 
