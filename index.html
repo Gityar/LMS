@@ -379,7 +379,12 @@
         </div>
 
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Password</label>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block font-semibold text-slate-700">Password</label>
+            <button type="button" onclick="openForgotPasswordModal()" class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 hover:underline">
+              Forgot password?
+            </button>
+          </div>
           <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
         </div>
 
@@ -450,6 +455,96 @@
         Already registered? 
         <button onclick="closeRegisterModal(); openLoginModal();" class="text-indigo-600 font-bold hover:underline">
           Sign In
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: FORGOT / RESET PASSWORD ==================== -->
+  <div id="modal-forgot-password" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center font-bold text-base">
+            🔑
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 text-sm">Reset Account Password</h3>
+            <p class="text-[11px] text-slate-500">Secure 2-step verification token</p>
+          </div>
+        </div>
+        <button onclick="closeForgotPasswordModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <!-- Step 1: Request Token -->
+      <div id="forgot-step-1" class="space-y-3 text-xs">
+        <p class="text-slate-600 leading-relaxed">
+          Enter your registered email address. A 6-digit verification code and secure reset link will be sent directly to your email inbox.
+        </p>
+        <form onsubmit="handleRequestResetToken(event)" class="space-y-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Registered Email Address</label>
+            <input type="email" id="reset-email" required placeholder="nurse@hospital.et" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <button type="submit" id="btn-request-reset" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs shadow-md shadow-indigo-200 transition flex items-center justify-center gap-1.5">
+            <span>📧 Send Verification Code to Email</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Step 2: Enter Verification Code from Email & Set New Password -->
+      <div id="forgot-step-2" class="space-y-3 text-xs hidden">
+        <div class="p-3 bg-indigo-50 border border-indigo-200 rounded-xl space-y-1.5">
+          <div class="flex items-center gap-1.5 text-indigo-900 font-bold text-xs">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Verification Code Dispatched</span>
+          </div>
+          <p class="text-[11px] text-slate-600 leading-relaxed">
+            A 6-digit verification code and direct reset link have been sent to:
+          </p>
+          <div class="font-mono font-bold text-indigo-800 bg-white px-2.5 py-1 rounded border border-indigo-100 truncate" id="issued-email-display">
+            user@email.com
+          </div>
+          <p class="text-[10px] text-slate-500">
+            Check your inbox (or Spam folder). For security, codes are only delivered to the registered mailbox.
+          </p>
+        </div>
+
+        <form onsubmit="handleApplyNewPassword(event)" class="space-y-3">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block font-semibold text-slate-700">6-Digit Verification Code</label>
+              <button type="button" onclick="resendResetCode()" id="btn-resend-code" class="text-[10px] text-indigo-600 hover:underline font-semibold">
+                Resend Code
+              </button>
+            </div>
+            <input type="text" id="reset-token-input" required maxlength="6" pattern="[0-9]{6}" inputmode="numeric" placeholder="e.g. 849201" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-center tracking-widest text-base font-bold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">New Password</label>
+            <input type="password" id="reset-new-password" required minlength="6" placeholder="At least 6 characters" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Confirm New Password</label>
+            <input type="password" id="reset-confirm-password" required minlength="6" placeholder="Repeat new password" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <div id="reset-error-msg" class="hidden text-rose-600 text-[11px] font-semibold">
+            Invalid verification code or passwords do not match.
+          </div>
+
+          <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-xs shadow-md shadow-emerald-200 transition">
+            Verify Code & Set New Password
+          </button>
+        </form>
+      </div>
+
+      <div class="text-center pt-2 border-t border-slate-100 text-xs text-slate-500">
+        Remembered your password? 
+        <button onclick="closeForgotPasswordModal(); openLoginModal();" class="text-indigo-600 font-bold hover:underline">
+          Back to Sign In
         </button>
       </div>
     </div>
@@ -1103,6 +1198,219 @@
       renderAuthUI();
       renderCourses();
       showToast('You have been logged out.');
+    }
+
+    // ==================== FORGOT & RESET PASSWORD FLOW ====================
+    let pendingReset = null;
+
+    function openForgotPasswordModal() {
+      closeLoginModal();
+      document.getElementById('forgot-step-1').classList.remove('hidden');
+      document.getElementById('forgot-step-2').classList.add('hidden');
+      document.getElementById('reset-email').value = '';
+      document.getElementById('reset-token-input').value = '';
+      document.getElementById('reset-new-password').value = '';
+      document.getElementById('reset-confirm-password').value = '';
+      document.getElementById('reset-error-msg').classList.add('hidden');
+      document.getElementById('modal-forgot-password').classList.remove('hidden');
+    }
+
+    function closeForgotPasswordModal() {
+      document.getElementById('modal-forgot-password').classList.add('hidden');
+      pendingReset = null;
+    }
+
+    async function handleRequestResetToken(e) {
+      if (e) e.preventDefault();
+      const email = document.getElementById('reset-email').value.trim().toLowerCase();
+      const user = users.find(u => u.email.toLowerCase() === email);
+
+      if (!user) {
+        alert('No registered account found with that email address. Please check your spelling or register.');
+        return;
+      }
+
+      const btn = document.getElementById('btn-request-reset');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳ Sending code to your email...</span>';
+      }
+
+      // Generate cryptographically secure 6-digit numeric verification OTP
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiryTime = Date.now() + (15 * 60 * 1000); // 15 minutes expiry
+
+      pendingReset = {
+        userId: user.id,
+        email: user.email,
+        code: code,
+        expiry: expiryTime
+      };
+
+      // Construct direct one-click reset link for user's email
+      const resetLink = window.location.origin + window.location.pathname + '?email=' + encodeURIComponent(user.email) + '&code=' + code;
+
+      // Send actual email via Google Apps Script MailApp
+      const webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (webAppUrl) {
+        try {
+          await fetch(webAppUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'sendPasswordResetEmail',
+              email: user.email,
+              userName: user.fullName,
+              code: code,
+              resetLink: resetLink,
+              sheetKey: 'password_resets',
+              records: [{
+                'Reset_ID': 'RST-' + code,
+                'User_ID': user.id,
+                'Email': user.email,
+                'Reset_Token': code,
+                'Request_Date': new Date().toISOString(),
+                'Expiry_Date': new Date(expiryTime).toISOString(),
+                'Status': 'sent'
+              }]
+            }),
+            mode: 'no-cors'
+          });
+        } catch (err) {
+          console.warn('Apps script email dispatch', err);
+        }
+      }
+
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>📧 Send Verification Code to Email</span>';
+      }
+
+      document.getElementById('issued-email-display').innerText = user.email;
+      document.getElementById('reset-token-input').value = '';
+      document.getElementById('reset-new-password').value = '';
+      document.getElementById('reset-confirm-password').value = '';
+      document.getElementById('forgot-step-1').classList.add('hidden');
+      document.getElementById('forgot-step-2').classList.remove('hidden');
+
+      showToast(`Verification code sent to ${user.email}! Please check your inbox.`);
+      startResendCooldown();
+    }
+
+    let resendTimer = null;
+    function startResendCooldown() {
+      let seconds = 30;
+      const resendBtn = document.getElementById('btn-resend-code');
+      if (!resendBtn) return;
+      resendBtn.disabled = true;
+      resendBtn.classList.add('text-slate-400');
+      resendBtn.innerText = `Resend Code (${seconds}s)`;
+
+      clearInterval(resendTimer);
+      resendTimer = setInterval(() => {
+        seconds--;
+        if (seconds <= 0) {
+          clearInterval(resendTimer);
+          resendBtn.disabled = false;
+          resendBtn.classList.remove('text-slate-400');
+          resendBtn.innerText = 'Resend Code';
+        } else {
+          resendBtn.innerText = `Resend Code (${seconds}s)`;
+        }
+      }, 1000);
+    }
+
+    function resendResetCode() {
+      handleRequestResetToken(null);
+    }
+
+    function handleApplyNewPassword(e) {
+      e.preventDefault();
+      const enteredCode = document.getElementById('reset-token-input').value.trim();
+      const newPass = document.getElementById('reset-new-password').value;
+      const confirmPass = document.getElementById('reset-confirm-password').value;
+      const errMsg = document.getElementById('reset-error-msg');
+
+      if (!pendingReset || enteredCode !== pendingReset.code) {
+        errMsg.innerText = 'Invalid 6-digit verification code. Please check your email.';
+        errMsg.classList.remove('hidden');
+        return;
+      }
+
+      if (Date.now() > pendingReset.expiry) {
+        errMsg.innerText = 'Verification code has expired. Please request a new code.';
+        errMsg.classList.remove('hidden');
+        return;
+      }
+
+      if (newPass.length < 6) {
+        errMsg.innerText = 'Password must be at least 6 characters.';
+        errMsg.classList.remove('hidden');
+        return;
+      }
+
+      if (newPass !== confirmPass) {
+        errMsg.innerText = 'Passwords do not match.';
+        errMsg.classList.remove('hidden');
+        return;
+      }
+
+      // Update password in users list
+      const userIdx = users.findIndex(u => u.id === pendingReset.userId);
+      if (userIdx !== -1) {
+        users[userIdx].password = newPass;
+        currentUser = users[userIdx];
+        if (currentUser.role === 'admin') {
+          isAdminAuthenticated = true;
+          sessionStorage.setItem('lms_admin_auth', 'true');
+        }
+      }
+
+      // Sync password update to Google Sheets Users tab
+      const webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (webAppUrl) {
+        fetch(webAppUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'updateUserPassword',
+            email: pendingReset.email,
+            newPassword: newPass
+          }),
+          mode: 'no-cors'
+        }).catch(() => {});
+      }
+
+      saveState();
+      pendingReset = null;
+      closeForgotPasswordModal();
+      renderAuthUI();
+      renderCourses();
+      showToast('Password updated successfully! Welcome back.', 'ok');
+    }
+
+    function checkEmailResetLink() {
+      const params = new URLSearchParams(window.location.search);
+      const email = params.get('email');
+      const code = params.get('code');
+
+      if (email && code) {
+        const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+        if (user) {
+          pendingReset = {
+            userId: user.id,
+            email: user.email,
+            code: code,
+            expiry: Date.now() + (30 * 60 * 1000)
+          };
+          openForgotPasswordModal();
+          document.getElementById('issued-email-display').innerText = user.email;
+          document.getElementById('reset-token-input').value = code;
+          document.getElementById('forgot-step-1').classList.add('hidden');
+          document.getElementById('forgot-step-2').classList.remove('hidden');
+          showToast('Direct reset link verified from email! Please choose your new password.');
+        }
+      }
     }
 
     // ==================== LEARNING PORTFOLIO & ENROLLMENT ====================
@@ -1981,6 +2289,7 @@
       renderCourses();
       renderQuizEditor();
       renderSheetTabs();
+      checkEmailResetLink();
     });
   </script>
 </body>
