@@ -57,6 +57,10 @@ fun LessonDetailScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showUploadResourceDialog by remember { mutableStateOf(false) }
 
+    var feedbackRating by remember { mutableStateOf(5) }
+    var feedbackComment by remember { mutableStateOf("") }
+    var isFeedbackSubmitted by remember { mutableStateOf(false) }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -303,6 +307,139 @@ fun LessonDetailScreen(
                                         }
                                     }
                                 }
+                            }
+                        }
+                    }
+                }
+
+                // Lesson Feedback & Rating Card (1 to 5 Stars & Comment to Google Sheet)
+                item {
+                    Card(
+                        shape = RoundedCornerShape(14.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("card_lesson_feedback")
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = null,
+                                    tint = Color(0xFFF59E0B),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Text(
+                                    text = "Lesson Feedback & Rating",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Rate this clinical lesson (1-5 stars) and leave a short comment. Your feedback is synced directly to the Google Sheet.",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                lineHeight = 16.sp
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            // 1-5 Star interactive selector
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                for (star in 1..5) {
+                                    IconButton(
+                                        onClick = {
+                                            feedbackRating = star
+                                            isFeedbackSubmitted = false
+                                        },
+                                        modifier = Modifier
+                                            .size(44.dp)
+                                            .testTag("btn_star_$star")
+                                    ) {
+                                        Icon(
+                                            imageVector = if (star <= feedbackRating) Icons.Default.Star else Icons.Default.StarBorder,
+                                            contentDescription = "$star stars",
+                                            tint = if (star <= feedbackRating) Color(0xFFF59E0B) else Color(0xFFCBD5E1),
+                                            modifier = Modifier.size(32.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            Text(
+                                text = when (feedbackRating) {
+                                    5 -> "Excellent (5/5) — Clear & actionable clinical protocol"
+                                    4 -> "Very Good (4/5) — Well explained"
+                                    3 -> "Good (3/5) — Adequate overview"
+                                    2 -> "Fair (2/5) — Needs more clinical detail"
+                                    else -> "Needs Improvement (1/5)"
+                                },
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.align(Alignment.CenterHorizontally)
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            OutlinedTextField(
+                                value = feedbackComment,
+                                onValueChange = { feedbackComment = it },
+                                label = { Text("Short comment or clinical note") },
+                                placeholder = { Text("E.g., Great ventilation corrective steps, clear explanation...") },
+                                minLines = 2,
+                                maxLines = 4,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("input_lesson_comment")
+                            )
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Button(
+                                onClick = {
+                                    viewModel.submitLessonFeedback(
+                                        lessonId = lesson.lessonId,
+                                        rating = feedbackRating,
+                                        comment = feedbackComment
+                                    )
+                                    isFeedbackSubmitted = true
+                                },
+                                shape = RoundedCornerShape(10.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(46.dp)
+                                    .testTag("btn_submit_lesson_feedback")
+                            ) {
+                                Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Submit Feedback to Google Sheet", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            }
+
+                            if (isFeedbackSubmitted) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "✓ Feedback recorded! Synced with Google Sheets.",
+                                    color = Color(0xFF059669),
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                                )
                             }
                         }
                     }

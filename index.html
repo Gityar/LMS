@@ -33,6 +33,48 @@
     body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8FAFC; }
     .glass-card { background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(10px); border: 1px solid rgba(226, 232, 240, 0.9); }
     .modal-backdrop { background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
+    .fmt-btn {
+      padding: 3px 7px;
+      border-radius: 6px;
+      background: #F1F5F9;
+      color: #334155;
+      font-size: 11px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      border: 1px solid #E2E8F0;
+      cursor: pointer;
+      user-select: none;
+    }
+    .fmt-btn:hover {
+      background: #E2E8F0;
+      color: #0F172A;
+      border-color: #CBD5E1;
+    }
+    .prose-rich {
+      line-height: 1.6;
+    }
+    .prose-rich table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin: 8px 0;
+    }
+    .prose-rich th {
+      background: #F1F5F9;
+      padding: 6px 10px;
+      border: 1px solid #CBD5E1;
+      font-weight: 700;
+      text-align: left;
+      color: #1E293B;
+    }
+    .prose-rich td {
+      padding: 6px 10px;
+      border: 1px solid #E2E8F0;
+      color: #334155;
+    }
   </style>
 </head>
 <body class="text-slate-800 min-h-screen flex flex-col">
@@ -43,8 +85,14 @@
       <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
       <span class="truncate">Evidence-Based NICU Clinical Education Portal</span>
     </div>
-    <div class="flex items-center gap-3 flex-shrink-0" id="top-user-banner">
-      <!-- Injected by JavaScript -->
+    <div class="flex items-center gap-2.5 flex-shrink-0">
+      <div id="network-status-badge" class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+        <span>Online · Auto-Sync</span>
+      </div>
+      <div class="flex items-center gap-3 flex-shrink-0" id="top-user-banner">
+        <!-- Injected by JavaScript -->
+      </div>
     </div>
   </div>
 
@@ -174,14 +222,23 @@
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
           <h2 class="text-2xl font-bold text-slate-900">Clinical Assessments & Exam Bank</h2>
-          <p class="text-sm text-slate-500">Configure passing thresholds, edit questions, add clinical scenarios, and evaluate learners.</p>
+          <p class="text-sm text-slate-500">Configure passing thresholds, create multi-course exams, edit questions with rich text/media, and evaluate learners.</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-2xs">
+            <span class="text-xs font-semibold text-slate-500">Exam:</span>
+            <select id="active-assessment-selector" onchange="changeActiveAssessment(this.value)" class="text-xs font-bold text-indigo-700 bg-transparent focus:outline-none">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+          <button onclick="openAssessmentModal()" id="btn-new-assessment" class="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-xl border border-indigo-200 transition flex items-center gap-1">
+            <span>+ New Exam</span>
+          </button>
           <button onclick="openQuestionModal()" id="btn-add-question-quiz" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1">
-            <span>+ Add New Question</span>
+            <span>+ Add Question</span>
           </button>
           <button onclick="resetQuizAnswers()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition">
-            Reset Answers
+            Reset
           </button>
         </div>
       </div>
@@ -192,40 +249,79 @@
           <div class="flex items-center gap-2.5">
             <span class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm shadow-xs">⚙️</span>
             <div>
-              <h3 class="font-bold text-slate-900 text-sm">Assessment & Examination Configuration</h3>
-              <p class="text-[11px] text-slate-500">Configure passing score percentage and certification criteria (Admin & Instructor Only)</p>
+              <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <span>Assessment & Examination Configuration</span>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-100 text-indigo-800" id="setting-assessment-id-badge">ASM-NRP-01</span>
+              </h3>
+              <p class="text-[11px] text-slate-500">Configure passing score percentage, time limits, and clinical certification criteria (Admin & Instructor Only)</p>
             </div>
           </div>
-          <button onclick="saveAssessmentSettingsForm(event)" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5 self-start sm:self-auto">
-            <span>💾 Save Exam Settings</span>
-          </button>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="deleteActiveAssessment()" id="btn-delete-assessment" class="px-3 py-1.5 text-xs text-rose-600 hover:bg-rose-50 rounded-lg transition border border-rose-200 hidden">
+              🗑️ Delete Exam
+            </button>
+            <button onclick="saveAssessmentSettingsForm(event)" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5">
+              <span>💾 Save Exam Settings</span>
+            </button>
+          </div>
         </div>
 
-        <form id="form-assessment-settings" onsubmit="saveAssessmentSettingsForm(event)" class="grid sm:grid-cols-3 gap-4 text-xs">
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">Passing Score Threshold (%)</label>
-            <div class="flex items-center gap-2">
-              <input type="number" id="setting-passing-score" min="50" max="100" step="5" value="80" required class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg font-mono font-bold text-indigo-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <span class="text-xs font-bold text-slate-600">%</span>
+        <form id="form-assessment-settings" onsubmit="saveAssessmentSettingsForm(event)" class="space-y-4 text-xs">
+          <div class="grid sm:grid-cols-4 gap-4">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Passing Score (%)</label>
+              <div class="flex items-center gap-2">
+                <input type="number" id="setting-passing-score" min="50" max="100" step="5" value="80" required class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg font-mono font-bold text-indigo-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <span class="text-xs font-bold text-slate-600">%</span>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-1">Minimum for clinical competency certificate</p>
             </div>
-            <p class="text-[10px] text-slate-400 mt-1">Minimum score required to issue Certificate of Competency</p>
+
+            <div class="sm:col-span-2">
+              <label class="block font-semibold text-slate-700 mb-1">Assessment Title</label>
+              <input type="text" id="setting-exam-title" value="Neonatal Resuscitation Program (NRP) Competency Exam" required class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <p class="text-[10px] text-slate-400 mt-1">Printed on accredited clinical certificates</p>
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Linked Course</label>
+              <select id="setting-linked-course" class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none">
+                <!-- Injected by JS based on courses list -->
+              </select>
+              <p class="text-[10px] text-slate-400 mt-1">Persisted in Google Sheets Assessments</p>
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Assessment Type</label>
+              <select id="setting-exam-type" class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none">
+                <option value="certification">Accredited Certification Exam</option>
+                <option value="module_quiz">Module Knowledge Check</option>
+                <option value="case_exam">Clinical Case Study Evaluation</option>
+                <option value="pre_test">Diagnostic Pre-Test</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Time Limit (Minutes)</label>
+              <input type="number" id="setting-time-limit" min="0" max="180" value="30" class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none" placeholder="0 = Unlimited">
+            </div>
           </div>
 
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Assessment Title</label>
-            <input type="text" id="setting-exam-title" value="Neonatal Resuscitation Program (NRP) Competency Exam" required class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <p class="text-[10px] text-slate-400 mt-1">Official title printed on certificates and synced to Google Sheets</p>
-          </div>
-
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">Linked Course</label>
-            <select id="setting-linked-course" class="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs focus:outline-none">
-              <option value="CRS-NRP-01">CRS-NRP-01: Neonatal Resuscitation Program (NRP)</option>
-              <option value="CRS-THM-02">CRS-THM-02: Thermal Care & Warm Chain Protocols</option>
-              <option value="CRS-RDS-03">CRS-RDS-03: Respiratory Distress & Bubble CPAP</option>
-              <option value="CRS-SEP-04">CRS-SEP-04: Neonatal Sepsis & Antimicrobial Stewardship</option>
-            </select>
-            <p class="text-[10px] text-slate-400 mt-1">Persisted in Google Sheets Assessments table</p>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block font-semibold text-slate-700">Exam Instructions & Clinical Guidelines</label>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="insertFormat('setting-exam-instructions', 'bold')" class="fmt-btn" title="Bold"><b>B</b></button>
+                <button type="button" onclick="insertFormat('setting-exam-instructions', 'italic')" class="fmt-btn" title="Italic"><i>I</i></button>
+                <button type="button" onclick="insertFormat('setting-exam-instructions', 'bullets')" class="fmt-btn" title="Bullet list">• List</button>
+                <button type="button" onclick="insertFormat('setting-exam-instructions', 'steps')" class="fmt-btn" title="Numbered steps">1. Steps</button>
+                <button type="button" onclick="insertFormat('setting-exam-instructions', 'alert')" class="fmt-btn" title="Clinical Alert">⚠️ Alert</button>
+                <button type="button" onclick="toggleTextareaPreview('setting-exam-instructions', 'setting-exam-instructions-preview', this)" class="fmt-btn bg-indigo-50 text-indigo-700 border-indigo-200">👁️ Preview</button>
+              </div>
+            </div>
+            <textarea id="setting-exam-instructions" rows="2" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Instructions shown to clinicians before starting the exam..."></textarea>
+            <div id="setting-exam-instructions-preview" class="hidden p-3 bg-white border border-slate-200 rounded-xl text-xs prose-rich min-h-[50px]"></div>
           </div>
         </form>
       </div>
@@ -699,26 +795,30 @@
 
   <!-- ==================== MODAL: ADD / EDIT COURSE ==================== -->
   <div id="modal-course" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="font-bold text-slate-900 text-base" id="modal-course-title">Add / Edit Course</h3>
+        <div>
+          <h3 class="font-bold text-slate-900 text-base" id="modal-course-title">Add / Edit Course</h3>
+          <p class="text-[11px] text-slate-500">Design curriculum structure, learning credits, and rich clinical syllabus</p>
+        </div>
         <button onclick="closeCourseModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
       </div>
 
       <form id="form-course" onsubmit="saveCourse(event)" class="space-y-4 text-xs">
         <input type="hidden" id="course-editing-id">
 
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">Course Code / ID</label>
-          <input type="text" id="course-form-id" required placeholder="e.g. CRS-NRP-01" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Course Code</label>
+            <input type="text" id="course-form-id" required placeholder="CRS-NRP-01" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div class="col-span-2">
+            <label class="block font-semibold text-slate-700 mb-1">Course Title</label>
+            <input type="text" id="course-form-title" required placeholder="e.g. Neonatal Resuscitation Program (NRP)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
         </div>
 
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">Course Title</label>
-          <input type="text" id="course-form-title" required placeholder="e.g. Neonatal Resuscitation Program (NRP)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-3 gap-3">
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Category</label>
             <select id="course-form-category" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white">
@@ -728,6 +828,16 @@
               <option value="Respiratory Care">Respiratory Care</option>
               <option value="Pharmacology">Pharmacology</option>
               <option value="General NICU">General NICU</option>
+              <option value="Kangaroo Mother Care">Kangaroo Mother Care (KMC)</option>
+              <option value="Infection Prevention">Infection Prevention & Sepsis</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Difficulty</label>
+            <select id="course-form-difficulty" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white">
+              <option value="Foundational">Foundational</option>
+              <option value="Intermediate" selected>Intermediate</option>
+              <option value="Advanced Specialist">Advanced Specialist</option>
             </select>
           </div>
           <div>
@@ -736,28 +846,58 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-3 gap-3">
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Lead Instructor</label>
-            <input type="text" id="course-form-instructor" required value="Yaregal Semanew" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white">
+            <input type="text" id="course-form-instructor" required value="Sister Almaz" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">CPD/CME Credits</label>
+            <input type="text" id="course-form-credits" placeholder="e.g. 2.5 CPD Hours" value="2.0 CPD Units" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white">
           </div>
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Status</label>
             <select id="course-form-status" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white">
               <option value="published">Published</option>
               <option value="draft">Draft</option>
+              <option value="under_review">Under Review</option>
             </select>
           </div>
         </div>
 
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Clinical Description & Objectives</label>
-          <textarea id="course-form-desc" required rows="3" placeholder="Describe the clinical nursing outcomes, protocols covered, and targets..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+          <label class="block font-semibold text-slate-700 mb-1">Cover / Thumbnail Image URL (Optional)</label>
+          <input type="url" id="course-form-thumbnail" placeholder="https://images.unsplash.com/... or medical diagram URL" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs focus:bg-white">
         </div>
 
-        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeCourseModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
-          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm">Save Course</button>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block font-semibold text-slate-700">Clinical Description & Learning Objectives</label>
+            <div class="flex items-center gap-1">
+              <button type="button" onclick="insertFormat('course-form-desc', 'bold')" class="fmt-btn" title="Bold"><b>B</b></button>
+              <button type="button" onclick="insertFormat('course-form-desc', 'italic')" class="fmt-btn" title="Italic"><i>I</i></button>
+              <button type="button" onclick="insertFormat('course-form-desc', 'h3')" class="fmt-btn" title="Heading">H3</button>
+              <button type="button" onclick="insertFormat('course-form-desc', 'bullets')" class="fmt-btn" title="Bullet List">• List</button>
+              <button type="button" onclick="insertFormat('course-form-desc', 'steps')" class="fmt-btn" title="Steps">1. Steps</button>
+              <button type="button" onclick="insertFormat('course-form-desc', 'alert')" class="fmt-btn" title="Alert">⚠️ Alert</button>
+              <button type="button" onclick="insertFormat('course-form-desc', 'table')" class="fmt-btn" title="Table">📊 Table</button>
+              <button type="button" onclick="toggleTextareaPreview('course-form-desc', 'course-form-desc-preview', this)" class="fmt-btn bg-indigo-50 text-indigo-700 border-indigo-200">👁️ Preview</button>
+            </div>
+          </div>
+          <textarea id="course-form-desc" required rows="4" placeholder="Describe the clinical nursing outcomes, protocols covered, and targets..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-normal leading-relaxed"></textarea>
+          <div id="course-form-desc-preview" class="hidden p-3 bg-white border border-slate-200 rounded-xl text-xs prose-rich min-h-[70px]"></div>
+        </div>
+
+        <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+          <div>
+            <button type="button" id="btn-duplicate-course" onclick="duplicateCurrentCourse()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs hidden">
+              📋 Duplicate
+            </button>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="closeCourseModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+            <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm">Save Course</button>
+          </div>
         </div>
       </form>
     </div>
@@ -765,7 +905,7 @@
 
   <!-- ==================== MODAL: MANAGE COURSE LESSONS ==================== -->
   <div id="modal-lessons" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <div>
           <h3 class="font-bold text-slate-900 text-base" id="modal-lessons-header">Manage Lessons</h3>
@@ -778,50 +918,77 @@
       <div id="form-new-lesson-container">
         <form id="form-new-lesson" onsubmit="addLessonToCourse(event)" class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3 text-xs">
           <div class="font-bold text-slate-900 text-xs flex items-center justify-between">
-            <span>+ Add New Lesson Unit</span>
-            <span class="text-slate-400 font-normal">All fields saved automatically</span>
+            <span class="flex items-center gap-1.5">
+              <span class="w-5 h-5 rounded-md bg-indigo-600 text-white text-[10px] flex items-center justify-center font-bold">+</span>
+              <span>Author New Clinical Lesson Unit</span>
+            </span>
+            <span class="text-slate-400 font-normal">Supports Rich Text, Video, Simulation & Case Vignettes</span>
           </div>
-        <div class="grid grid-cols-3 gap-2">
+
+          <div class="grid grid-cols-3 gap-2.5">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Module #</label>
+              <input type="number" id="lesson-module-num" min="1" value="1" required class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg">
+            </div>
+            <div class="col-span-2">
+              <label class="block font-semibold text-slate-700 mb-1">Lesson Title</label>
+              <input type="text" id="lesson-title" required placeholder="e.g. Bag-Valve-Mask Ventilation & Corrective Steps" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg font-semibold">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2.5">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Content Format</label>
+              <select id="lesson-type" onchange="onLessonFormatChange(this.value, 'new')" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg font-medium text-slate-800">
+                <option value="clinical">📖 Clinical Protocol / Text</option>
+                <option value="video">🎥 Video Demonstration / Lecture</option>
+                <option value="simulation">🩺 Simulation Drill & Checklist</option>
+                <option value="case_study">👶 Patient Case Vignette</option>
+                <option value="pdf">📄 Guidelines Document / PDF</option>
+                <option value="audio">🎙️ Audio Clinical Podcast</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">Duration (Mins)</label>
+              <input type="number" id="lesson-duration" min="5" value="25" required class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1" id="lesson-media-label">Media / Video / PDF URL</label>
+              <input type="url" id="lesson-media-url" placeholder="https://..." class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg font-mono text-[11px]">
+            </div>
+          </div>
+
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Module #</label>
-            <input type="number" id="lesson-module-num" min="1" value="1" required class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg">
+            <div class="flex items-center justify-between mb-1">
+              <label class="block font-semibold text-slate-700">Lesson Body & Clinical Content</label>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="insertFormat('lesson-body', 'bold')" class="fmt-btn" title="Bold"><b>B</b></button>
+                <button type="button" onclick="insertFormat('lesson-body', 'italic')" class="fmt-btn" title="Italic"><i>I</i></button>
+                <button type="button" onclick="insertFormat('lesson-body', 'h3')" class="fmt-btn" title="Header">H3</button>
+                <button type="button" onclick="insertFormat('lesson-body', 'bullets')" class="fmt-btn" title="Bullets">• List</button>
+                <button type="button" onclick="insertFormat('lesson-body', 'steps')" class="fmt-btn" title="Steps">1. Steps</button>
+                <button type="button" onclick="insertFormat('lesson-body', 'alert')" class="fmt-btn" title="Alert">⚠️ Alert</button>
+                <button type="button" onclick="insertFormat('lesson-body', 'dose')" class="fmt-btn" title="Drug Dose">💊 Rx</button>
+                <button type="button" onclick="insertClinicalTemplate('lesson-body', 'nrp')" class="fmt-btn" title="Insert Template">✨ NRP Template</button>
+                <button type="button" onclick="toggleTextareaPreview('lesson-body', 'lesson-body-preview', this)" class="fmt-btn bg-indigo-50 text-indigo-700 border-indigo-200">👁️ Preview</button>
+              </div>
+            </div>
+            <textarea id="lesson-body" rows="3" placeholder="Clinical steps, equipment checklist, and nursing guidance (Markdown formatted)..." class="w-full px-2.5 py-2 bg-white border border-slate-200 rounded-lg leading-relaxed"></textarea>
+            <div id="lesson-body-preview" class="hidden p-3 bg-white border border-slate-200 rounded-lg text-xs prose-rich min-h-[60px]"></div>
           </div>
-          <div class="col-span-2">
-            <label class="block font-semibold text-slate-700 mb-1">Lesson Title</label>
-            <input type="text" id="lesson-title" required placeholder="e.g. Bag-Valve-Mask Ventilation" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg">
+
+          <div class="flex justify-end gap-2">
+            <button type="submit" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-xs">
+              + Add Lesson Unit
+            </button>
           </div>
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">Content Type</label>
-            <select id="lesson-type" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg">
-              <option value="clinical">Clinical Lecture</option>
-              <option value="protocol">Clinical Protocol</option>
-              <option value="simulation">Simulation Drill</option>
-              <option value="case_study">NICU Case Study</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">Duration (Minutes)</label>
-            <input type="number" id="lesson-duration" min="5" value="25" required class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg">
-          </div>
-        </div>
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">Lesson Content / Protocol Summary</label>
-          <textarea id="lesson-body" rows="2" placeholder="Clinical steps, equipment checklist, and nursing guidance..." class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg"></textarea>
-        </div>
-        <div class="flex justify-end">
-          <button type="submit" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-xs">
-            Add Lesson
-          </button>
-        </div>
-      </form>
+        </form>
       </div>
 
       <!-- Existing Lessons List -->
       <div class="space-y-2">
         <h4 class="font-bold text-slate-900 text-xs">Curriculum Lessons</h4>
-        <div id="lessons-list-container" class="space-y-2">
+        <div id="lessons-list-container" class="space-y-2.5">
           <!-- Populated by JS -->
         </div>
       </div>
@@ -834,54 +1001,258 @@
     </div>
   </div>
 
-  <!-- ==================== MODAL: ADD / EDIT QUESTION ==================== -->
-  <div id="modal-question" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+  <!-- ==================== MODAL: EDIT LESSON ==================== -->
+  <div id="modal-edit-lesson" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="font-bold text-slate-900 text-base" id="modal-edit-lesson-header">Edit Clinical Lesson</h3>
+          <p class="text-xs text-slate-500" id="modal-edit-lesson-subheader">Modify content format, duration, or instructions</p>
+        </div>
+        <button onclick="closeEditLessonModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <form id="form-edit-lesson" onsubmit="saveEditedLesson(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="edit-lesson-id">
+        <input type="hidden" id="edit-lesson-course-id">
+
+        <div class="grid grid-cols-3 gap-2.5">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Module #</label>
+            <input type="number" id="edit-lesson-module-num" min="1" required class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+          </div>
+          <div class="col-span-2">
+            <label class="block font-semibold text-slate-700 mb-1">Lesson Title</label>
+            <input type="text" id="edit-lesson-title" required class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg font-semibold">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2.5">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Content Format</label>
+            <select id="edit-lesson-type" onchange="onLessonFormatChange(this.value, 'edit')" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-800">
+              <option value="clinical">📖 Clinical Protocol / Text</option>
+              <option value="video">🎥 Video Demonstration / Lecture</option>
+              <option value="simulation">🩺 Simulation Drill & Checklist</option>
+              <option value="case_study">👶 Patient Case Vignette</option>
+              <option value="pdf">📄 Guidelines Document / PDF</option>
+              <option value="audio">🎙️ Audio Clinical Podcast</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Duration (Mins)</label>
+            <input type="number" id="edit-lesson-duration" min="5" required class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1" id="edit-lesson-media-label">Media / Video / PDF URL</label>
+            <input type="url" id="edit-lesson-media-url" placeholder="https://..." class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg font-mono text-[11px]">
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block font-semibold text-slate-700">Lesson Body & Clinical Content</label>
+            <div class="flex items-center gap-1">
+              <button type="button" onclick="insertFormat('edit-lesson-body', 'bold')" class="fmt-btn" title="Bold"><b>B</b></button>
+              <button type="button" onclick="insertFormat('edit-lesson-body', 'italic')" class="fmt-btn" title="Italic"><i>I</i></button>
+              <button type="button" onclick="insertFormat('edit-lesson-body', 'h3')" class="fmt-btn" title="Header">H3</button>
+              <button type="button" onclick="insertFormat('edit-lesson-body', 'bullets')" class="fmt-btn" title="Bullets">• List</button>
+              <button type="button" onclick="insertFormat('edit-lesson-body', 'steps')" class="fmt-btn" title="Steps">1. Steps</button>
+              <button type="button" onclick="insertFormat('edit-lesson-body', 'alert')" class="fmt-btn" title="Alert">⚠️ Alert</button>
+              <button type="button" onclick="insertFormat('edit-lesson-body', 'dose')" class="fmt-btn" title="Drug Dose">💊 Rx</button>
+              <button type="button" onclick="toggleTextareaPreview('edit-lesson-body', 'edit-lesson-body-preview', this)" class="fmt-btn bg-indigo-50 text-indigo-700 border-indigo-200">👁️ Preview</button>
+            </div>
+          </div>
+          <textarea id="edit-lesson-body" rows="4" class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-lg leading-relaxed"></textarea>
+          <div id="edit-lesson-body-preview" class="hidden p-3 bg-white border border-slate-200 rounded-lg text-xs prose-rich min-h-[60px]"></div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeEditLessonModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: CREATE / EDIT ASSESSMENT ==================== -->
+  <div id="modal-assessment" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="font-bold text-slate-900 text-base" id="modal-question-header">Add / Edit Test Question</h3>
+        <div>
+          <h3 class="font-bold text-slate-900 text-base" id="modal-assessment-header">Create New Clinical Assessment</h3>
+          <p class="text-[11px] text-slate-500">Configure exams, knowledge checks, and passing thresholds</p>
+        </div>
+        <button onclick="closeAssessmentModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <form id="form-new-assessment" onsubmit="saveAssessmentModal(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="modal-assessment-edit-id">
+
+        <div class="grid grid-cols-3 gap-2.5">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Assessment ID</label>
+            <input type="text" id="modal-asm-id" required placeholder="ASM-NRP-02" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg font-mono">
+          </div>
+          <div class="col-span-2">
+            <label class="block font-semibold text-slate-700 mb-1">Assessment Title</label>
+            <input type="text" id="modal-asm-title" required placeholder="e.g. Neonatal Respiratory Support Exam" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg font-semibold">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Linked Course</label>
+            <select id="modal-asm-course" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Assessment Type</label>
+            <select id="modal-asm-type" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+              <option value="certification">Accredited Certification Exam</option>
+              <option value="module_quiz">Module Knowledge Check</option>
+              <option value="case_exam">Clinical Case Study Evaluation</option>
+              <option value="pre_test">Diagnostic Pre-Test</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Passing Score (%)</label>
+            <input type="number" id="modal-asm-pass-score" min="50" max="100" step="5" value="80" required class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg font-bold text-indigo-700">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Time Limit (Mins)</label>
+            <input type="number" id="modal-asm-time-limit" min="0" max="180" value="30" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg" placeholder="0 = Unlimited">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Instructions</label>
+          <textarea id="modal-asm-instructions" rows="2" placeholder="Guidelines for test-takers..." class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeAssessmentModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm">Save Assessment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: ADD / EDIT QUESTION ==================== -->
+  <div id="modal-question" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="font-bold text-slate-900 text-base" id="modal-question-header">Add / Edit Test Question</h3>
+          <p class="text-[11px] text-slate-500">Supports Single Choice, Multiple Response, True/False, and Diagram Scenarios</p>
+        </div>
         <button onclick="closeQuestionModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <!-- Mode Selector Tabs inside Modal: Editor vs Preview -->
+      <div class="flex border-b border-slate-200 text-xs font-semibold">
+        <button type="button" onclick="switchQuestionModalTab('editor')" id="tab-btn-q-editor" class="px-3.5 py-1.5 border-b-2 border-indigo-600 text-indigo-700">✏️ Question Editor</button>
+        <button type="button" onclick="switchQuestionModalTab('preview')" id="tab-btn-q-preview" class="px-3.5 py-1.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800">👁️ Live Learner Preview</button>
+      </div>
+
+      <div id="q-tab-preview-content" class="hidden space-y-3">
+        <!-- Rendered dynamically by renderQuestionModalLivePreview() -->
       </div>
 
       <form id="form-question" onsubmit="saveQuestion(event)" class="space-y-3.5 text-xs">
         <input type="hidden" id="question-editing-idx" value="-1">
 
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">Question Scenario / Text</label>
-          <textarea id="q-form-text" required rows="2" placeholder="e.g. What is the initial action during the Golden Minute of neonatal resuscitation?" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+        <div class="grid grid-cols-3 gap-2.5">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Question Format</label>
+            <select id="q-form-type" onchange="onQuestionTypeChange(this.value)" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg font-medium text-slate-800">
+              <option value="single">Single Choice (1 Correct)</option>
+              <option value="multi">Multiple Response (Checkboxes)</option>
+              <option value="tf">True / False</option>
+              <option value="case">Clinical Case Scenario</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Difficulty</label>
+            <select id="q-form-difficulty" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+              <option value="Beginner">Beginner / Foundational</option>
+              <option value="Intermediate" selected>Intermediate</option>
+              <option value="Advanced">Advanced / Critical</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Points / Score</label>
+            <input type="number" id="q-form-points" min="1" max="10" value="1" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg font-bold">
+          </div>
         </div>
 
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block font-semibold text-slate-700">Question Scenario / Clinical Stem</label>
+            <div class="flex items-center gap-1">
+              <button type="button" onclick="insertFormat('q-form-text', 'bold')" class="fmt-btn" title="Bold"><b>B</b></button>
+              <button type="button" onclick="insertFormat('q-form-text', 'italic')" class="fmt-btn" title="Italic"><i>I</i></button>
+              <button type="button" onclick="insertFormat('q-form-text', 'dose')" class="fmt-btn" title="Drug Dose">💊 Rx</button>
+              <button type="button" onclick="insertFormat('q-form-text', 'alert')" class="fmt-btn" title="Alert">⚠️ Alert</button>
+              <button type="button" onclick="toggleTextareaPreview('q-form-text', 'q-form-text-preview', this)" class="fmt-btn bg-indigo-50 text-indigo-700 border-indigo-200">👁️ Preview</button>
+            </div>
+          </div>
+          <textarea id="q-form-text" required rows="2" placeholder="e.g. A newly born infant at 36 weeks is apneic with a heart rate of 75 bpm after initial drying. What is the immediate intervention?" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+          <div id="q-form-text-preview" class="hidden p-3 bg-white border border-slate-200 rounded-xl text-xs prose-rich min-h-[50px]"></div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Diagram / Clinical Image URL (Optional)</label>
+          <input type="url" id="q-form-media" placeholder="https://... (e.g. ECG rhythm, chest radiograph, NRP algorithm)" oninput="updateQuestionMediaPreview(this.value)" class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg font-mono text-[11px] focus:bg-white">
+          <div id="q-media-preview-container" class="hidden mt-2 p-2 bg-slate-50 rounded-lg border border-slate-200">
+            <img id="q-media-preview-img" src="" alt="Question Diagram" class="max-h-36 rounded-md object-contain mx-auto">
+          </div>
+        </div>
+
+        <!-- Dynamic Answer Options Section -->
         <div class="space-y-2">
-          <label class="block font-semibold text-slate-700">Options (Select the correct answer button)</label>
-          
-          <div class="flex items-center gap-2">
-            <input type="radio" name="q_correct_option" value="0" id="radio-opt-0" checked class="text-indigo-600 focus:ring-indigo-500">
-            <input type="text" id="q-opt-0" required placeholder="Option A" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+          <div class="flex items-center justify-between">
+            <label class="block font-semibold text-slate-700" id="q-options-label">
+              Answer Options (Check or select the correct answer)
+            </label>
+            <button type="button" onclick="addQuestionOption()" id="btn-add-option" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+              <span>+ Add Option</span>
+            </button>
           </div>
 
-          <div class="flex items-center gap-2">
-            <input type="radio" name="q_correct_option" value="1" id="radio-opt-1" class="text-indigo-600 focus:ring-indigo-500">
-            <input type="text" id="q-opt-1" required placeholder="Option B" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
-          </div>
-
-          <div class="flex items-center gap-2">
-            <input type="radio" name="q_correct_option" value="2" id="radio-opt-2" class="text-indigo-600 focus:ring-indigo-500">
-            <input type="text" id="q-opt-2" required placeholder="Option C" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
-          </div>
-
-          <div class="flex items-center gap-2">
-            <input type="radio" name="q_correct_option" value="3" id="radio-opt-3" class="text-indigo-600 focus:ring-indigo-500">
-            <input type="text" id="q-opt-3" required placeholder="Option D" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+          <div id="q-options-container" class="space-y-2">
+            <!-- Dynamically populated options with remove and check buttons -->
           </div>
         </div>
 
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Clinical Rationale / Explanation</label>
-          <textarea id="q-form-explanation" rows="2" placeholder="Explain why the correct answer is standard clinical practice according to NRP guidelines..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white"></textarea>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block font-semibold text-slate-700">Clinical Rationale & Evidence Explanation</label>
+            <div class="flex items-center gap-1">
+              <button type="button" onclick="insertFormat('q-form-explanation', 'bold')" class="fmt-btn" title="Bold"><b>B</b></button>
+              <button type="button" onclick="insertFormat('q-form-explanation', 'italic')" class="fmt-btn" title="Italic"><i>I</i></button>
+              <button type="button" onclick="insertFormat('q-form-explanation', 'alert')" class="fmt-btn" title="Alert">⚠️ Alert</button>
+              <button type="button" onclick="toggleTextareaPreview('q-form-explanation', 'q-form-explanation-preview', this)" class="fmt-btn bg-indigo-50 text-indigo-700 border-indigo-200">👁️ Preview</button>
+            </div>
+          </div>
+          <textarea id="q-form-explanation" rows="2" placeholder="Explain why the correct answer adheres to NRP standards and neonatal physiology..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white"></textarea>
+          <div id="q-form-explanation-preview" class="hidden p-3 bg-white border border-slate-200 rounded-xl text-xs prose-rich min-h-[50px]"></div>
         </div>
 
-        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-          <button type="button" onclick="closeQuestionModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
-          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm">Save Question</button>
+        <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+          <div>
+            <button type="button" id="btn-duplicate-question" onclick="duplicateCurrentQuestion()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-lg text-xs hidden">
+              📋 Duplicate
+            </button>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="closeQuestionModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+            <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm">Save Question</button>
+          </div>
         </div>
       </form>
     </div>
@@ -909,51 +1280,165 @@
         title: 'Neonatal Resuscitation Program (NRP)',
         category: 'Resuscitation',
         instructor: 'Sister Almaz',
-        desc: 'Comprehensive clinical resuscitation training for newly born infants: Golden Minute, ventilation, and airway clearance.',
+        desc: '### Clinical Resuscitation & The Golden Minute\nComprehensive resuscitation training for newly born infants within the **Golden Minute**.\n- Ventilation and airway clearance algorithms\n- MR. SOPA corrective ventilation sequence\n- Pulse oximetry & ECG target monitoring\n\n> ⚠️ **Clinical Alert:** Positive Pressure Ventilation (PPV) must be initiated within 60 seconds if heart rate < 100 bpm or infant is apneic.',
         modules: 4,
-        status: 'published'
+        status: 'published',
+        difficulty: 'Intermediate',
+        cmeCredits: '3.0 CPD Hours',
+        thumbnail: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=600&auto=format&fit=crop&q=80'
       },
       {
         id: 'CRS-THM-02',
         title: 'NICU Thermoregulation & Neutral Thermal Env',
         category: 'Thermal Care',
         instructor: 'Sister Almaz',
-        desc: 'Incubator management, radiant warmer operation, skin-to-skin Kangaroo Mother Care, and hypothermia avoidance.',
+        desc: '### Thermal Chain & Hypothermia Prevention\nServo-controlled radiant warmers, closed incubators, and Kangaroo Mother Care (KMC).\n- Target neonatal core temperature: `36.5°C - 37.5°C`\n- Warm transport protocols and humidity titration\n- Prevention of cold-induced metabolic acidosis',
         modules: 3,
-        status: 'published'
+        status: 'published',
+        difficulty: 'Foundational',
+        cmeCredits: '2.0 CPD Hours',
+        thumbnail: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?w=600&auto=format&fit=crop&q=80'
       },
       {
         id: 'CRS-BIL-03',
         title: 'Neonatal Hyperbilirubinemia & Phototherapy',
         category: 'Pathology',
         instructor: 'Dr. Dawit',
-        desc: 'Screening criteria, transcutaneous bilirubinometry, phototherapy eye shields, and exchange transfusion thresholds.',
+        desc: '### Bilirubin Screening & Intensive Phototherapy\nTranscutaneous bilirubinometry (TcB), Bhutani nomogram risk zones, LED phototherapy irradiance, and exchange transfusion thresholds.',
         modules: 3,
-        status: 'published'
+        status: 'published',
+        difficulty: 'Intermediate',
+        cmeCredits: '2.5 CPD Hours',
+        thumbnail: ''
       },
       {
         id: 'CRS-RDS-04',
         title: 'Respiratory Distress Syndrome in Preterm Infants',
         category: 'Respiratory Care',
         instructor: 'Dr. Dawit',
-        desc: 'Surfactant administration, bubble CPAP delivery, respiratory scoring (Silverman-Andersen), and weaning protocols.',
+        desc: '### Non-Invasive Respiratory Support & CPAP\nEarly CPAP application, bubble CPAP circuit calibration, nasal prong alignment, and surfactant replacement therapy.',
         modules: 4,
-        status: 'published'
+        status: 'published',
+        difficulty: 'Advanced Specialist',
+        cmeCredits: '3.5 CPD Hours',
+        thumbnail: ''
       }
     ];
 
     const DEFAULT_LESSONS = [
-      { id: 'LES-01', courseId: 'CRS-NRP-01', moduleNumber: 1, title: 'Initial Assessment & Neonatal Golden Minute', type: 'clinical', duration: 25, body: 'Dry, warm, position airway, suction secretions if obstructed, stimulate breathing within the first 60 seconds of life.' },
-      { id: 'LES-02', courseId: 'CRS-NRP-01', moduleNumber: 1, title: 'Positive Pressure Ventilation (PPV) & Mask Sizing', type: 'simulation', duration: 35, body: 'Selecting anatomical masks, establishing 40-60 breaths/min rate, and assessing heart rate response.' },
-      { id: 'LES-03', courseId: 'CRS-NRP-01', moduleNumber: 2, title: 'MR. SOPA Corrective Ventilation Steps', type: 'protocol', duration: 30, body: 'Mask adjustment, Reposition airway, Suction mouth and nose, Open mouth, Pressure increase, Alternative airway.' },
-      { id: 'LES-04', courseId: 'CRS-THM-02', moduleNumber: 1, title: 'Neutral Thermal Environment & Radiant Warmers', type: 'clinical', duration: 30, body: 'Maintaining skin temperature between 36.5°C and 37.5°C with servo-controlled probes.' },
-      { id: 'LES-05', courseId: 'CRS-BIL-03', moduleNumber: 1, title: 'Bilirubin Nomogram & Intensive Phototherapy', type: 'clinical', duration: 25, body: 'Bhutani nomogram usage, irradiance checks with radiometer, and hydration management.' },
-      { id: 'LES-06', courseId: 'CRS-RDS-04', moduleNumber: 1, title: 'Bubble CPAP Setup & Nasal Prong Fit', type: 'simulation', duration: 40, body: 'Preventing nasal septal necrosis, bubbling depth settings at 5 cm H2O, and FiO2 titration.' }
+      {
+        id: 'LES-01',
+        courseId: 'CRS-NRP-01',
+        moduleNumber: 1,
+        title: 'Initial Assessment & Neonatal Golden Minute',
+        type: 'clinical',
+        duration: 25,
+        mediaUrl: '',
+        body: '### Rapid Assessment at Birth\n1. Is the baby term gestation?\n2. Does the baby have good muscle tone?\n3. Is the baby breathing or crying?\n\n> ⚠️ **Key Protocol:** Dry, position airway, suction secretions if obstructed, and stimulate within the first 60 seconds of life.'
+      },
+      {
+        id: 'LES-02',
+        courseId: 'CRS-NRP-01',
+        moduleNumber: 1,
+        title: 'Positive Pressure Ventilation (PPV) & Mask Sizing',
+        type: 'video',
+        duration: 35,
+        mediaUrl: 'https://www.youtube.com/watch?v=kYJ5e14kE1w',
+        body: '### PPV Technique & Mask Seal\nSelect proper anatomical round/cushioned mask. Seal securely over nose and mouth without pressing on the eyes.\n- Rate: `40 - 60 breaths/min` (Breathe... Two... Three...)\n- Target initial PIP: `20 - 25 cm H2O`\n- Re-evaluate heart rate after 15 seconds.'
+      },
+      {
+        id: 'LES-03',
+        courseId: 'CRS-NRP-01',
+        moduleNumber: 2,
+        title: 'MR. SOPA Corrective Ventilation Steps',
+        type: 'simulation',
+        duration: 30,
+        mediaUrl: '',
+        checklist: [
+          { step: 'M - Mask adjustment (Ensure tight seal on face)', done: false },
+          { step: 'R - Reposition head (Slight extension, sniffing position)', done: false },
+          { step: 'S - Suction mouth then nose (Clear secretions)', done: false },
+          { step: 'O - Open mouth (Lift mandible forward)', done: false },
+          { step: 'P - Pressure increase (Increase PIP by 5 cm H2O)', done: false },
+          { step: 'A - Alternative airway (Laryngeal mask or ETT)', done: false }
+        ],
+        body: '### Simulation Drill: MR. SOPA\nPerform corrective steps when PPV does not achieve chest rise and heart rate remains < 100 bpm.\nCheck off each corrective action in sequence.'
+      },
+      {
+        id: 'LES-04',
+        courseId: 'CRS-THM-02',
+        moduleNumber: 1,
+        title: 'Neutral Thermal Environment & Radiant Warmers',
+        type: 'clinical',
+        duration: 30,
+        mediaUrl: '',
+        body: '### Temperature Monitoring & Servo Mode\nMaintain neonatal abdominal skin temperature between `36.5°C` and `37.5°C`.\n- Place servo skin probe over right upper quadrant (not over bone or liver)\n- Pre-warm radiant warmer mattress to 36.5°C prior to delivery\n- Kangaroo Mother Care (KMC) initiated as soon as stable.'
+      },
+      {
+        id: 'LES-05',
+        courseId: 'CRS-BIL-03',
+        moduleNumber: 1,
+        title: 'Bilirubin Nomogram & Intensive Phototherapy Guidelines',
+        type: 'pdf',
+        duration: 25,
+        mediaUrl: 'https://www.who.int/publications/i/item/9789240058774',
+        body: '### Clinical Guidelines Summary\n- Plot transcutaneous or total serum bilirubin on Bhutani hour-specific nomogram\n- Blue-green spectrum LED phototherapy with irradiance `> 30 μW/cm²/nm`\n- Eye patches securely placed; monitor hydration and temperature q3h.'
+      },
+      {
+        id: 'LES-06',
+        courseId: 'CRS-RDS-04',
+        moduleNumber: 1,
+        title: 'Bubble CPAP Setup & Nasal Prong Fit',
+        type: 'simulation',
+        duration: 40,
+        mediaUrl: '',
+        checklist: [
+          { step: 'Select appropriate binasal prong size (80% nares occlusion without blanching)', done: false },
+          { step: 'Calibrate water seal bottle at 5 cm H2O depth', done: false },
+          { step: 'Set gas flow rate to 6 - 8 L/min ensuring vigorous continuous bubbling', done: false },
+          { step: 'Confirm heated humidifier set to 37°C with inline moisture traps', done: false },
+          { step: 'Check nasal septum every 2 hours to prevent necrosis', done: false }
+        ],
+        body: '### Bubble CPAP Assembly & Verification\nEnsure continuous bubbling in the water chamber. Inspect nasal prongs frequently to prevent pressure ulceration on the columella.'
+      }
+    ];
+
+    const DEFAULT_ASSESSMENTS = [
+      {
+        id: 'ASM-NRP-01',
+        courseId: 'CRS-NRP-01',
+        title: 'Neonatal Resuscitation Program (NRP) Competency Exam',
+        passingScore: 80,
+        timeLimit: 30,
+        type: 'certification',
+        instructions: 'Official clinical competency exam for Neonatal Resuscitation. Answer all questions to qualify for clinical certificate.\n\n> ⚠️ **Standard:** Passing grade of 80% required.'
+      },
+      {
+        id: 'ASM-THM-02',
+        courseId: 'CRS-THM-02',
+        title: 'NICU Thermoregulation & Neutral Thermal Env Assessment',
+        passingScore: 75,
+        timeLimit: 20,
+        type: 'module_quiz',
+        instructions: 'Evaluate your knowledge of radiant warmer operation, servo probes, and hypothermia avoidance.'
+      },
+      {
+        id: 'ASM-RDS-03',
+        courseId: 'CRS-RDS-04',
+        title: 'Respiratory Distress Syndrome & Bubble CPAP Clinical Check',
+        passingScore: 80,
+        timeLimit: 25,
+        type: 'case_exam',
+        instructions: 'Clinical scenarios on Silverman-Andersen score, CPAP titration, and surfactant delivery.'
+      }
     ];
 
     const DEFAULT_QUESTIONS = [
       {
+        id: 'QST-01',
+        assessmentId: 'ASM-NRP-01',
         q: 'What is the initial action during the "Golden Minute" of neonatal resuscitation?',
+        type: 'single',
         options: [
           'Immediate chest compressions at 3:1 ratio',
           'Dry, warm, position airway, and stimulate breathing',
@@ -961,10 +1446,15 @@
           'Immediate intravenous epinephrine'
         ],
         correct: 1,
-        explanation: 'Initial steps within the Golden Minute focus on thermal protection, airway positioning, suctioning if needed, and stimulation.'
+        points: 1,
+        difficulty: 'Intermediate',
+        explanation: 'Initial steps within the Golden Minute focus on thermal protection, airway positioning, suctioning if needed, and tactile stimulation.'
       },
       {
+        id: 'QST-02',
+        assessmentId: 'ASM-NRP-01',
         q: 'When should Positive Pressure Ventilation (PPV) be initiated?',
+        type: 'single',
         options: [
           'If the newborn is apneic, gasping, or heart rate < 100 bpm after initial steps',
           'Only after umbilical venous catheterization',
@@ -972,36 +1462,46 @@
           'When core temperature reaches 36.5°C'
         ],
         correct: 0,
+        points: 1,
+        difficulty: 'Intermediate',
         explanation: 'PPV is indicated if the infant remains apneic, gasping, or has a heart rate < 100 bpm within the first 60 seconds.'
       },
       {
-        q: 'What is the target neutral thermal core temperature for a preterm neonate in NICU?',
+        id: 'QST-03',
+        assessmentId: 'ASM-NRP-01',
+        q: 'Target neutral thermal core temperature for a preterm neonate in NICU is 36.5°C – 37.5°C.',
+        type: 'tf',
         options: [
-          '35.0°C – 35.5°C',
-          '36.5°C – 37.5°C',
-          '38.0°C – 38.5°C',
-          '34.0°C – 34.5°C'
-        ],
-        correct: 1,
-        explanation: 'WHO standards mandate maintaining core neonatal temperature between 36.5°C and 37.5°C.'
-      },
-      {
-        q: 'What does the "M" and "R" stand for in the MR. SOPA ventilation corrective sequence?',
-        options: [
-          'Mask adjustment & Reposition airway',
-          'Medication delivery & Resuscitation',
-          'Monitor ECG & Radiograph chest',
-          'Massage heart & Respiratory rate'
+          'True',
+          'False'
         ],
         correct: 0,
-        explanation: 'MR. SOPA starts with Mask adjustment to ensure a tight seal and Repositioning the head into the "sniffing" position.'
+        points: 1,
+        difficulty: 'Beginner',
+        explanation: 'WHO and NRP standards mandate maintaining core neonatal temperature between 36.5°C and 37.5°C to avoid metabolic cold stress.'
+      },
+      {
+        id: 'QST-04',
+        assessmentId: 'ASM-NRP-01',
+        q: 'Which of the following are confirmed corrective actions in the **MR. SOPA** ventilation sequence? (Select all that apply)',
+        type: 'multi',
+        options: [
+          'Mask adjustment to ensure an airtight seal',
+          'Reposition head into sniffing position',
+          'Suction mouth and nose to clear airway',
+          'Medication delivery of sodium bicarbonate'
+        ],
+        correct: [0, 1, 2],
+        points: 2,
+        difficulty: 'Advanced',
+        explanation: 'MR. SOPA stands for: Mask adjustment, Reposition airway, Suction mouth/nose, Open mouth, Pressure increase, Alternative airway. Medications are not part of MR. SOPA.'
       }
     ];
 
     const SHEET_TABS = [
       'Users', 'Courses', 'Lessons', 'Enrollments',
       'Activity_Logs', 'Password_Resets', 'Lesson_Content', 'Lesson_Resources',
-      'Assignments', 'Assignment_Submissions', 'Assessments', 'Questions', 'Assessment_Attempts'
+      'Assignments', 'Assignment_Submissions', 'Assessments', 'Questions', 'Assessment_Attempts', 'Lesson_Feedback'
     ];
 
     // DEFAULT USER ACCOUNTS (Matching database)
@@ -1022,18 +1522,168 @@
     // STORAGE STATE
     let courses = JSON.parse(localStorage.getItem('lms_courses')) || DEFAULT_COURSES;
     let lessons = JSON.parse(localStorage.getItem('lms_lessons')) || DEFAULT_LESSONS;
+    let assessmentsList = JSON.parse(localStorage.getItem('lms_assessments_list')) || DEFAULT_ASSESSMENTS;
+    let activeAssessmentId = localStorage.getItem('lms_active_assessment_id') || 'ASM-NRP-01';
     let questions = JSON.parse(localStorage.getItem('lms_questions')) || DEFAULT_QUESTIONS;
     let users = JSON.parse(localStorage.getItem('lms_users')) || DEFAULT_USERS;
     let currentUser = JSON.parse(localStorage.getItem('lms_current_user')) || null;
     let enrollments = JSON.parse(localStorage.getItem('lms_enrollments')) || DEFAULT_ENROLLMENTS;
     let attempts = JSON.parse(localStorage.getItem('lms_attempts')) || DEFAULT_ATTEMPTS;
-    let assessmentSettings = JSON.parse(localStorage.getItem('lms_assessment_settings')) || {
-      id: 'ASM-NRP-01',
-      courseId: 'CRS-NRP-01',
-      title: 'Neonatal Resuscitation Program (NRP) Competency Exam',
-      passingScore: 80
-    };
+    let assessmentSettings = JSON.parse(localStorage.getItem('lms_assessment_settings')) || DEFAULT_ASSESSMENTS[0];
     let userAnswers = {};
+
+    // ==================== RICH TEXT & FORMATTING TOOLBAR ENGINE ====================
+    function insertFormat(textareaId, type) {
+      const textarea = document.getElementById(textareaId);
+      if (!textarea) return;
+      const start = textarea.selectionStart || 0;
+      const end = textarea.selectionEnd || 0;
+      const text = textarea.value;
+      const selected = text.substring(start, end);
+      let replacement = '';
+
+      switch (type) {
+        case 'bold':
+          replacement = selected ? `**${selected}**` : '**Bold Clinical Text**';
+          break;
+        case 'italic':
+          replacement = selected ? `*${selected}*` : '*Italic Clinical Text*';
+          break;
+        case 'h2':
+          replacement = `\n## ${selected || 'Clinical Heading'}\n`;
+          break;
+        case 'h3':
+          replacement = `\n### ${selected || 'Clinical Section'}\n`;
+          break;
+        case 'bullets':
+          replacement = selected ? selected.split('\n').map(l => `- ${l}`).join('\n') : '\n- Protocol Step 1\n- Protocol Step 2\n';
+          break;
+        case 'steps':
+          replacement = selected ? selected.split('\n').map((l, i) => `${i+1}. ${l}`).join('\n') : '\n1. First Action: Airway\n2. Second Action: Ventilation\n3. Third Action: Circulation\n';
+          break;
+        case 'alert':
+          replacement = `\n> ⚠️ **Clinical Alert:** ${selected || 'Initiate PPV immediately if newborn remains apneic or heart rate < 100 bpm.'}\n`;
+          break;
+        case 'dose':
+          replacement = selected ? `\`${selected}\`` : '`10 mg/kg IV`';
+          break;
+        case 'table':
+          replacement = '\n| Clinical Indicator | Normal Value | Immediate Target |\n|---|---|---|\n| Heart Rate | 120 - 160 bpm | > 100 bpm |\n| SpO2 (5 min) | 80% - 85% | Pre-ductal pulse ox |\n| Core Temp | 36.5°C - 37.5°C | Neutral thermal env |\n';
+          break;
+        default:
+          replacement = selected;
+      }
+
+      textarea.value = text.substring(0, start) + replacement + text.substring(end);
+      textarea.focus();
+      textarea.selectionStart = start + replacement.length;
+      textarea.selectionEnd = start + replacement.length;
+    }
+
+    function insertClinicalTemplate(textareaId, templateType) {
+      const textarea = document.getElementById(textareaId);
+      if (!textarea) return;
+      let tpl = '';
+      if (templateType === 'nrp') {
+        tpl = `### NRP Golden Minute Protocol
+1. **Thermal Protection:** Dry newborn under pre-warmed radiant warmer. Discard wet linen.
+2. **Airway Positioning:** Position head in "sniffing" position. Suction mouth then nose if secretions block breathing.
+3. **Assessment:** Evaluate breathing (apnea/gasping) and heart rate.
+> ⚠️ **Clinical Action:** If apneic or HR < 100 bpm, initiate Positive Pressure Ventilation (PPV) at 40-60 breaths/min immediately.`;
+      }
+      textarea.value = (textarea.value ? textarea.value + '\n\n' : '') + tpl;
+      textarea.focus();
+    }
+
+    function toggleTextareaPreview(textareaId, previewId, btnEl) {
+      const textarea = document.getElementById(textareaId);
+      const preview = document.getElementById(previewId);
+      if (!textarea || !preview) return;
+
+      const isShowingPreview = !preview.classList.contains('hidden');
+      if (isShowingPreview) {
+        preview.classList.add('hidden');
+        textarea.classList.remove('hidden');
+        if (btnEl) btnEl.innerHTML = '👁️ Preview';
+      } else {
+        preview.innerHTML = formatRichText(textarea.value);
+        textarea.classList.add('hidden');
+        preview.classList.remove('hidden');
+        if (btnEl) btnEl.innerHTML = '✏️ Edit';
+      }
+    }
+
+    function formatRichText(md) {
+      if (!md) return '<p class="text-slate-400 italic">No content provided.</p>';
+      let text = String(md)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      // Clinical alerts
+      text = text.replace(/^&gt; ⚠️\s*\*\*?(.*?)\*\*?:\s*(.*)$/gim, '<div class="my-2.5 p-3 bg-amber-50 border-l-4 border-amber-500 rounded-r-xl text-amber-950 text-xs"><strong class="font-bold flex items-center gap-1.5 text-amber-900 mb-0.5"><span>⚠️</span> $1:</strong>$2</div>');
+      text = text.replace(/^&gt; ℹ️\s*\*\*?(.*?)\*\*?:\s*(.*)$/gim, '<div class="my-2.5 p-3 bg-indigo-50 border-l-4 border-indigo-500 rounded-r-xl text-indigo-950 text-xs"><strong class="font-bold flex items-center gap-1.5 text-indigo-900 mb-0.5"><span>ℹ️</span> $1:</strong>$2</div>');
+      text = text.replace(/^&gt;\s*(.*)$/gim, '<blockquote class="my-2 pl-3 border-l-2 border-slate-300 italic text-slate-600 text-xs">$1</blockquote>');
+
+      // Headings
+      text = text.replace(/^### (.*$)/gim, '<h4 class="font-bold text-slate-900 text-xs mt-3 mb-1">$1</h4>');
+      text = text.replace(/^## (.*$)/gim, '<h3 class="font-bold text-slate-900 text-sm mt-3 mb-1.5 pb-1 border-b border-slate-100">$1</h3>');
+      text = text.replace(/^# (.*$)/gim, '<h2 class="font-bold text-slate-900 text-base mt-3 mb-2">$1</h2>');
+
+      // Tables
+      text = text.replace(/\|(.+)\|/gim, (match) => {
+        const cells = match.split('|').filter(c => c.trim().length > 0);
+        if (cells.every(c => c.trim().match(/^-+$/))) return '';
+        return `<tr>${cells.map(c => `<td class="border border-slate-200 px-2.5 py-1 text-slate-700">${c.trim()}</td>`).join('')}</tr>`;
+      });
+      text = text.replace(/(<tr>[\s\S]*?<\/tr>)+/g, '<div class="overflow-x-auto my-2"><table class="w-full border-collapse border border-slate-200 text-xs">$1</table></div>');
+
+      // Bold & Italic
+      text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-900">$1</strong>');
+      text = text.replace(/\*(.*?)\*/g, '<em class="italic text-slate-700">$1</em>');
+
+      // Inline code / dosage
+      text = text.replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 bg-indigo-50 text-indigo-700 font-mono text-[11px] font-bold rounded">$1</code>');
+
+      // Lists
+      text = text.replace(/^\s*-\s+(.*)$/gim, '<li class="list-disc ml-4 text-slate-700 my-0.5">$1</li>');
+      text = text.replace(/^\s*\d+\.\s+(.*)$/gim, '<li class="list-decimal ml-4 text-slate-700 my-0.5">$1</li>');
+
+      // Images & links
+      text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<div class="my-2"><img src="$2" alt="$1" class="rounded-xl max-h-48 border border-slate-200 shadow-xs"><span class="text-[10px] text-slate-400 block mt-1">$1</span></div>');
+      text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 underline font-semibold">$1 ↗</a>');
+
+      // Paragraph breaks
+      text = text.replace(/\n\n+/g, '<div class="h-2"></div>');
+      text = text.replace(/\n/g, '<br>');
+
+      return text;
+    }
+
+    function onLessonFormatChange(type, mode = 'new') {
+      const prefix = mode === 'new' ? 'lesson' : 'edit-lesson';
+      const mediaLabel = document.getElementById(`${prefix}-media-label`);
+      const mediaInput = document.getElementById(`${prefix}-media-url`);
+      if (!mediaLabel || !mediaInput) return;
+
+      switch(type) {
+        case 'video':
+          mediaLabel.innerText = 'YouTube / Video Demonstration URL';
+          mediaInput.placeholder = 'https://www.youtube.com/watch?v=... or MP4 link';
+          break;
+        case 'pdf':
+          mediaLabel.innerText = 'Guidelines Document / PDF URL';
+          mediaInput.placeholder = 'https://www.who.int/.../guidelines.pdf';
+          break;
+        case 'audio':
+          mediaLabel.innerText = 'Audio Lecture / Podcast URL';
+          mediaInput.placeholder = 'https://.../lecture.mp3';
+          break;
+        default:
+          mediaLabel.innerText = 'Media / Video / PDF URL';
+          mediaInput.placeholder = 'https://...';
+      }
+    }
 
     /**
      * Validates that the active user session stored in localStorage has the required role
@@ -1099,6 +1749,8 @@
     function saveState() {
       localStorage.setItem('lms_courses', JSON.stringify(courses));
       localStorage.setItem('lms_lessons', JSON.stringify(lessons));
+      localStorage.setItem('lms_assessments_list', JSON.stringify(assessmentsList));
+      localStorage.setItem('lms_active_assessment_id', activeAssessmentId);
       localStorage.setItem('lms_questions', JSON.stringify(questions));
       localStorage.setItem('lms_users', JSON.stringify(users));
       localStorage.setItem('lms_enrollments', JSON.stringify(enrollments));
@@ -1110,6 +1762,217 @@
         localStorage.removeItem('lms_current_user');
       }
       updateCounts();
+      cacheAllToIndexedDB();
+    }
+
+    // ==================== INDEXEDDB OFFLINE STORAGE & SYNC ENGINE ====================
+    const IDB_NAME = 'NeonatalLmsOfflineDB';
+    const IDB_VERSION = 1;
+    let idbInstance = null;
+
+    function openIndexedDB() {
+      return new Promise((resolve) => {
+        if (idbInstance) return resolve(idbInstance);
+        if (!window.indexedDB) {
+          console.warn('IndexedDB not supported in this environment');
+          return resolve(null);
+        }
+
+        const request = window.indexedDB.open(IDB_NAME, IDB_VERSION);
+
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains('courses')) {
+            db.createObjectStore('courses', { keyPath: 'id' });
+          }
+          if (!db.objectStoreNames.contains('lessons')) {
+            db.createObjectStore('lessons', { keyPath: 'id' });
+          }
+          if (!db.objectStoreNames.contains('questions')) {
+            db.createObjectStore('questions', { autoIncrement: true });
+          }
+          if (!db.objectStoreNames.contains('enrollments')) {
+            db.createObjectStore('enrollments', { keyPath: 'id' });
+          }
+          if (!db.objectStoreNames.contains('attempts')) {
+            db.createObjectStore('attempts', { keyPath: 'id' });
+          }
+          if (!db.objectStoreNames.contains('feedback')) {
+            db.createObjectStore('feedback', { keyPath: 'Feedback_ID' });
+          }
+          if (!db.objectStoreNames.contains('sync_queue')) {
+            const queueStore = db.createObjectStore('sync_queue', { keyPath: 'queueId', autoIncrement: true });
+            queueStore.createIndex('timestamp', 'timestamp', { unique: false });
+          }
+        };
+
+        request.onsuccess = (event) => {
+          idbInstance = event.target.result;
+          resolve(idbInstance);
+        };
+
+        request.onerror = (event) => {
+          console.error('IndexedDB open error:', event.target.error);
+          resolve(null);
+        };
+      });
+    }
+
+    async function idbSaveStore(storeName, items) {
+      const db = await openIndexedDB();
+      if (!db) return false;
+      return new Promise((resolve) => {
+        try {
+          const tx = db.transaction([storeName], 'readwrite');
+          const store = tx.objectStore(storeName);
+          store.clear();
+          (items || []).forEach(item => {
+            try { store.put(item); } catch (e) {}
+          });
+          tx.oncomplete = () => resolve(true);
+          tx.onerror = () => resolve(false);
+        } catch (e) {
+          resolve(false);
+        }
+      });
+    }
+
+    async function cacheAllToIndexedDB() {
+      try {
+        await idbSaveStore('courses', courses);
+        await idbSaveStore('lessons', lessons);
+        await idbSaveStore('questions', questions);
+        await idbSaveStore('assessments', assessmentsList);
+        await idbSaveStore('enrollments', enrollments);
+        await idbSaveStore('attempts', attempts);
+      } catch (e) {}
+    }
+
+    async function idbEnqueueSync(sheetKey, records, action = 'appendRecord') {
+      const db = await openIndexedDB();
+      if (!db) return false;
+      return new Promise((resolve) => {
+        try {
+          const tx = db.transaction(['sync_queue'], 'readwrite');
+          const store = tx.objectStore('sync_queue');
+          const entry = {
+            action,
+            sheetKey,
+            records,
+            timestamp: new Date().toISOString()
+          };
+          store.add(entry);
+          tx.oncomplete = () => {
+            updateNetworkStatusBadge();
+            resolve(true);
+          };
+          tx.onerror = () => resolve(false);
+        } catch (e) {
+          resolve(false);
+        }
+      });
+    }
+
+    async function idbGetSyncQueue() {
+      const db = await openIndexedDB();
+      if (!db) return [];
+      return new Promise((resolve) => {
+        try {
+          const tx = db.transaction(['sync_queue'], 'readonly');
+          const store = tx.objectStore('sync_queue');
+          const req = store.getAll();
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => resolve([]);
+        } catch (e) {
+          resolve([]);
+        }
+      });
+    }
+
+    async function idbRemoveSyncQueueItem(queueId) {
+      const db = await openIndexedDB();
+      if (!db) return false;
+      return new Promise((resolve) => {
+        try {
+          const tx = db.transaction(['sync_queue'], 'readwrite');
+          const store = tx.objectStore('sync_queue');
+          store.delete(queueId);
+          tx.oncomplete = () => resolve(true);
+          tx.onerror = () => resolve(false);
+        } catch (e) {
+          resolve(false);
+        }
+      });
+    }
+
+    async function updateNetworkStatusBadge() {
+      const badge = document.getElementById('network-status-badge');
+      if (!badge) return;
+      const isOnline = navigator.onLine;
+      const queue = await idbGetSyncQueue();
+      const queueCount = queue ? queue.length : 0;
+
+      if (isOnline) {
+        if (queueCount > 0) {
+          badge.className = 'flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 cursor-pointer transition';
+          badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span><span>Online (${queueCount} sync pending...)</span>`;
+          badge.onclick = () => processSyncQueue();
+        } else {
+          badge.className = 'flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition';
+          badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Online · Auto-Sync</span>`;
+          badge.onclick = null;
+        }
+      } else {
+        badge.className = 'flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30 transition';
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse"></span><span>Offline Mode (${queueCount} queued)</span>`;
+        badge.onclick = null;
+      }
+    }
+
+    let isSyncingQueue = false;
+    async function processSyncQueue() {
+      if (isSyncingQueue) return;
+      if (!navigator.onLine) {
+        updateNetworkStatusBadge();
+        return;
+      }
+      const webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (!webAppUrl) return;
+
+      const queue = await idbGetSyncQueue();
+      if (!queue || queue.length === 0) {
+        updateNetworkStatusBadge();
+        return;
+      }
+
+      isSyncingQueue = true;
+      let syncedCount = 0;
+
+      for (const item of queue) {
+        try {
+          await fetch(webAppUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: item.action,
+              sheetKey: item.sheetKey,
+              records: item.records
+            }),
+            mode: 'no-cors'
+          });
+          await idbRemoveSyncQueueItem(item.queueId);
+          syncedCount++;
+        } catch (err) {
+          console.warn('Offline item sync deferred to next connection:', err);
+          break;
+        }
+      }
+
+      isSyncingQueue = false;
+      updateNetworkStatusBadge();
+      if (syncedCount > 0) {
+        showToast(`✓ Auto-sync complete: ${syncedCount} offline activity record(s) pushed to Google Sheet!`, 'ok');
+      }
     }
 
     function updateCounts() {
@@ -1738,28 +2601,36 @@
       showToast('Enrolled successfully! View it in My Clinical Learning.');
       switchTab('learning');
 
-      // Sync enrollment to Google Sheets
-      const webAppUrl = localStorage.getItem('lms_web_app_url');
-      if (webAppUrl) {
-        fetch(webAppUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'appendRecord',
-            sheetKey: 'enrollments',
-            records: [{
-              'Enrollment_ID': newEnrollment.id,
-              'Learner_ID': currentUser.id,
-              'Learner_Name': currentUser.fullName,
-              'Course_ID': courseId,
-              'Enrollment_Date': newEnrollment.enrolledDate,
-              'Completion_Status': 'in_progress',
-              'Progress_Percentage': 0,
-              'Last_Accessed': new Date().toISOString()
-            }]
-          }),
-          mode: 'no-cors'
-        }).catch(() => {});
+      // Sync enrollment to Google Sheets (Offline-Aware)
+      const enrollmentRecord = {
+        'Enrollment_ID': newEnrollment.id,
+        'Learner_ID': currentUser.id,
+        'Learner_Name': currentUser.fullName,
+        'Course_ID': courseId,
+        'Enrollment_Date': newEnrollment.enrolledDate,
+        'Completion_Status': 'in_progress',
+        'Progress_Percentage': 0,
+        'Last_Accessed': new Date().toISOString()
+      };
+
+      if (!navigator.onLine) {
+        idbEnqueueSync('enrollments', [enrollmentRecord]);
+      } else {
+        const webAppUrl = localStorage.getItem('lms_web_app_url');
+        if (webAppUrl) {
+          fetch(webAppUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'appendRecord',
+              sheetKey: 'enrollments',
+              records: [enrollmentRecord]
+            }),
+            mode: 'no-cors'
+          }).catch(() => {
+            idbEnqueueSync('enrollments', [enrollmentRecord]);
+          });
+        }
       }
     }
 
@@ -1978,8 +2849,8 @@
         if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'instructor')) {
           actionsHtml = `
             <div class="flex items-center gap-1.5 pt-1">
-              <button onclick="openLessonsModal('${c.id}')" class="flex-1 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-lg transition text-center">
-                📚 Lessons (${courseLessons.length})
+              <button onclick="openLessonsModal('${c.id}')" class="flex-1 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-lg transition text-center flex items-center justify-center gap-1">
+                <span>📚 Lessons (${courseLessons.length})</span>
               </button>
               <button onclick="editCourse('${c.id}')" title="Edit Course" class="p-1.5 hover:bg-slate-100 text-slate-600 rounded-lg transition">
                 ✏️
@@ -2023,15 +2894,38 @@
           `;
         }
 
+        const difficultyColor = c.difficulty === 'Foundational' 
+          ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+          : c.difficulty === 'Advanced Specialist' 
+            ? 'bg-purple-50 text-purple-700 border-purple-200' 
+            : 'bg-blue-50 text-blue-700 border-blue-200';
+
+        const thumbnailHtml = c.thumbnail ? `
+          <div class="relative h-32 w-full rounded-xl overflow-hidden mb-3 border border-slate-100 bg-slate-100">
+            <img src="${c.thumbnail}" alt="${c.title}" class="w-full h-full object-cover">
+            <div class="absolute top-2 right-2 flex items-center gap-1">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold shadow-xs border ${difficultyColor} bg-white/95">
+                ${c.difficulty || 'Intermediate'}
+              </span>
+            </div>
+          </div>
+        ` : '';
+
         return `
           <div class="glass-card rounded-2xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between border border-slate-200">
             <div>
-              <div class="flex items-center justify-between text-xs mb-2.5">
+              ${thumbnailHtml}
+              <div class="flex items-center justify-between text-xs mb-2">
                 <span class="px-2 py-0.5 rounded-md font-semibold bg-indigo-50 text-indigo-700">${c.category}</span>
-                <span class="text-slate-400 font-mono font-medium">${c.id}</span>
+                <div class="flex items-center gap-1.5">
+                  ${!c.thumbnail && c.difficulty ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold border ${difficultyColor}">${c.difficulty}</span>` : ''}
+                  <span class="text-slate-400 font-mono font-medium">${c.id}</span>
+                </div>
               </div>
               <h4 class="font-bold text-slate-900 text-sm leading-snug">${c.title}</h4>
-              <p class="text-xs text-slate-500 mt-2 leading-relaxed">${c.desc}</p>
+              <div class="text-xs text-slate-600 mt-2 leading-relaxed prose-rich line-clamp-3">
+                ${formatRichText(c.desc)}
+              </div>
             </div>
 
             <div class="mt-4 pt-3 border-t border-slate-100 space-y-3">
@@ -2039,6 +2933,11 @@
                 <span class="text-slate-500">👨‍⚕️ ${c.instructor}</span>
                 <span class="font-semibold text-indigo-600">${courseLessons.length} Lessons • ${c.modules} Modules</span>
               </div>
+              ${c.cmeCredits ? `
+                <div class="flex items-center gap-1 text-[11px] text-amber-700 bg-amber-50/80 px-2 py-0.5 rounded-md font-medium border border-amber-200/50">
+                  <span>🎖️</span> <span>Accreditation: ${c.cmeCredits}</span>
+                </div>
+              ` : ''}
 
               ${actionsHtml}
             </div>
@@ -2062,6 +2961,10 @@
       const modal = document.getElementById('modal-course');
       const title = document.getElementById('modal-course-title');
       const editId = document.getElementById('course-editing-id');
+      const dupBtn = document.getElementById('btn-duplicate-course');
+      const previewEl = document.getElementById('course-form-desc-preview');
+      if (previewEl) previewEl.classList.add('hidden');
+      document.getElementById('course-form-desc').classList.remove('hidden');
 
       if (courseToEdit) {
         title.innerText = 'Edit Course';
@@ -2070,19 +2973,29 @@
         document.getElementById('course-form-id').disabled = true;
         document.getElementById('course-form-title').value = courseToEdit.title;
         document.getElementById('course-form-category').value = courseToEdit.category;
-        document.getElementById('course-form-modules').value = courseToEdit.modules;
+        document.getElementById('course-form-difficulty').value = courseToEdit.difficulty || 'Intermediate';
+        document.getElementById('course-form-modules').value = courseToEdit.modules || 4;
         document.getElementById('course-form-instructor').value = courseToEdit.instructor;
+        document.getElementById('course-form-credits').value = courseToEdit.cmeCredits || '2.0 CPD Hours';
         document.getElementById('course-form-status').value = courseToEdit.status || 'published';
-        document.getElementById('course-form-desc').value = courseToEdit.desc;
+        document.getElementById('course-form-thumbnail').value = courseToEdit.thumbnail || '';
+        document.getElementById('course-form-desc').value = courseToEdit.desc || '';
+        if (dupBtn) dupBtn.classList.remove('hidden');
       } else {
         title.innerText = 'Add New Course';
         editId.value = '';
         document.getElementById('course-form-id').value = 'CRS-' + Math.random().toString(36).substring(2, 6).toUpperCase();
         document.getElementById('course-form-id').disabled = false;
         document.getElementById('course-form-title').value = '';
+        document.getElementById('course-form-category').value = 'Resuscitation';
+        document.getElementById('course-form-difficulty').value = 'Intermediate';
         document.getElementById('course-form-modules').value = 4;
-        document.getElementById('course-form-instructor').value = 'Yaregal Semanew';
+        document.getElementById('course-form-instructor').value = currentUser ? currentUser.fullName : 'Sister Almaz';
+        document.getElementById('course-form-credits').value = '2.5 CPD Hours';
+        document.getElementById('course-form-status').value = 'published';
+        document.getElementById('course-form-thumbnail').value = '';
         document.getElementById('course-form-desc').value = '';
+        if (dupBtn) dupBtn.classList.add('hidden');
       }
 
       modal.classList.remove('hidden');
@@ -2090,6 +3003,22 @@
 
     function closeCourseModal() {
       document.getElementById('modal-course').classList.add('hidden');
+    }
+
+    function duplicateCurrentCourse() {
+      const editId = document.getElementById('course-editing-id').value;
+      const original = courses.find(c => c.id === editId);
+      if (!original) return;
+
+      const newId = 'CRS-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+      document.getElementById('course-editing-id').value = '';
+      document.getElementById('course-form-id').value = newId;
+      document.getElementById('course-form-id').disabled = false;
+      document.getElementById('course-form-title').value = original.title + ' (Copy)';
+      document.getElementById('modal-course-title').innerText = 'Add Duplicate Course';
+      const dupBtn = document.getElementById('btn-duplicate-course');
+      if (dupBtn) dupBtn.classList.add('hidden');
+      showToast(`Cloned configuration. Click 'Save Course' to create ${newId}.`, 'ok');
     }
 
     function editCourse(id) {
@@ -2101,11 +3030,28 @@
       if (!checkPermission('curriculum', `delete course ${id}`)) {
         return;
       }
-      if (confirm(`Are you sure you want to delete course ${id}?`)) {
+      if (confirm(`Are you sure you want to delete course ${id} and all its lessons?`)) {
         courses = courses.filter(c => c.id !== id);
         lessons = lessons.filter(l => l.courseId !== id);
         saveState();
         renderCourses();
+
+        // Sync deletion to Google Sheets
+        const webAppUrl = localStorage.getItem('lms_web_app_url');
+        if (webAppUrl) {
+          fetch(webAppUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'deleteRecord',
+              sheetKey: 'Courses',
+              keyField: 'Course_ID',
+              keyValue: id
+            }),
+            mode: 'no-cors'
+          }).catch(() => {});
+        }
+
         showToast(`Course ${id} deleted.`);
       }
     }
@@ -2119,26 +3065,71 @@
       const id = document.getElementById('course-form-id').value.trim();
       const title = document.getElementById('course-form-title').value.trim();
       const category = document.getElementById('course-form-category').value;
+      const difficulty = document.getElementById('course-form-difficulty').value;
       const modules = parseInt(document.getElementById('course-form-modules').value) || 3;
       const instructor = document.getElementById('course-form-instructor').value.trim();
+      const cmeCredits = document.getElementById('course-form-credits').value.trim();
       const status = document.getElementById('course-form-status').value;
+      const thumbnail = document.getElementById('course-form-thumbnail').value.trim();
       const desc = document.getElementById('course-form-desc').value.trim();
+
+      const courseObj = {
+        id: editId || id,
+        title,
+        category,
+        difficulty,
+        modules,
+        instructor,
+        cmeCredits,
+        status,
+        thumbnail,
+        desc
+      };
 
       if (editId) {
         // Edit existing
         const idx = courses.findIndex(c => c.id === editId);
         if (idx !== -1) {
-          courses[idx] = { id: editId, title, category, modules, instructor, status, desc };
+          courses[idx] = courseObj;
         }
-        showToast('Course updated successfully!');
+        showToast('Course updated successfully!', 'ok');
       } else {
         // Check duplicate
         if (courses.some(c => c.id === id)) {
           alert('A course with ID ' + id + ' already exists!');
           return;
         }
-        courses.push({ id, title, category, modules, instructor, status, desc });
-        showToast('New course created!');
+        courses.push(courseObj);
+        showToast('New course created!', 'ok');
+      }
+
+      // Sync to Google Sheets Courses tab
+      const webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (webAppUrl) {
+        fetch(webAppUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'upsertRecord',
+            sheetKey: 'Courses',
+            keyField: 'Course_ID',
+            record: {
+              'Course_ID': courseObj.id,
+              'Course_Title': courseObj.title,
+              'Category': courseObj.category,
+              'Difficulty': courseObj.difficulty,
+              'Instructor_ID': 'INST-01',
+              'Instructor_Name': courseObj.instructor,
+              'Total_Modules': courseObj.modules,
+              'CME_Credits': courseObj.cmeCredits,
+              'Status': courseObj.status,
+              'Thumbnail_URL': courseObj.thumbnail,
+              'Description': courseObj.desc,
+              'Created_Date': new Date().toISOString()
+            }
+          }),
+          mode: 'no-cors'
+        }).catch(() => {});
       }
 
       saveState();
@@ -2180,27 +3171,296 @@
       const list = lessons.filter(l => l.courseId === courseId);
 
       if (list.length === 0) {
-        container.innerHTML = '<div class="text-xs text-slate-400 p-4 text-center">No lessons added yet.</div>';
+        container.innerHTML = '<div class="text-xs text-slate-400 p-4 text-center border border-dashed border-slate-200 rounded-xl">No lessons added to this course yet. Use the authoring form above to add lessons.</div>';
         return;
       }
 
-      container.innerHTML = list.map(l => `
-        <div class="bg-white border border-slate-200 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-start justify-between gap-3 shadow-2xs">
-          <div class="space-y-1.5 flex-1">
-            <div class="flex items-center gap-2">
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700">Module ${l.moduleNumber}</span>
-              <h5 class="font-bold text-slate-900 text-xs">${l.title}</h5>
-              <span class="text-[10px] text-slate-400 font-mono">${l.duration} min • ${l.type}</span>
+      const getFormatBadge = (type) => {
+        switch(type) {
+          case 'video':
+            return '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1">🎥 Video Demo</span>';
+          case 'simulation':
+            return '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1">🩺 Simulation Drill</span>';
+          case 'case_study':
+            return '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200 flex items-center gap-1">👶 Case Study</span>';
+          case 'pdf':
+            return '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1">📄 Guidelines PDF</span>';
+          case 'audio':
+            return '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">🎙️ Podcast</span>';
+          default:
+            return '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1">📖 Clinical Protocol</span>';
+        }
+      };
+
+      container.innerHTML = list.map(l => {
+        let mediaPreviewHtml = '';
+        if (l.mediaUrl) {
+          if (l.type === 'video') {
+            const isYouTube = l.mediaUrl.includes('youtube.com') || l.mediaUrl.includes('youtu.be');
+            mediaPreviewHtml = `
+              <div class="mt-2 p-2 bg-slate-900 rounded-lg text-white flex items-center justify-between text-xs">
+                <span class="flex items-center gap-2"><span>▶️</span> <span>${isYouTube ? 'YouTube Video Lecture' : 'Video Resource'}</span></span>
+                <a href="${l.mediaUrl}" target="_blank" rel="noopener noreferrer" class="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded text-[11px] transition">
+                  Watch Video ↗
+                </a>
+              </div>
+            `;
+          } else if (l.type === 'pdf') {
+            mediaPreviewHtml = `
+              <div class="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg text-blue-900 flex items-center justify-between text-xs">
+                <span class="flex items-center gap-2"><span>📄</span> <span class="font-semibold">WHO / Clinical Protocol PDF</span></span>
+                <a href="${l.mediaUrl}" target="_blank" rel="noopener noreferrer" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded text-[11px] transition">
+                  Open Document ↗
+                </a>
+              </div>
+            `;
+          } else {
+            mediaPreviewHtml = `
+              <div class="mt-2 p-1.5 bg-slate-100 rounded text-xs flex items-center justify-between">
+                <span class="text-slate-600 truncate font-mono text-[11px]">🔗 ${l.mediaUrl}</span>
+                <a href="${l.mediaUrl}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:underline font-semibold ml-2 text-[11px]">Open ↗</a>
+              </div>
+            `;
+          }
+        }
+
+        // Interactive simulation checklist
+        let checklistHtml = '';
+        if (l.checklist && l.checklist.length > 0) {
+          checklistHtml = `
+            <div class="mt-2.5 p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-1.5">
+              <span class="text-[11px] font-bold text-amber-900 block flex items-center gap-1">
+                <span>📋</span> Clinical Procedure Checklist:
+              </span>
+              ${l.checklist.map((step, sIdx) => `
+                <label class="flex items-start gap-2 text-xs text-amber-950 cursor-pointer">
+                  <input type="checkbox" ${step.done ? 'checked' : ''} onchange="toggleLessonChecklistStep('${l.id}', ${sIdx}, this.checked)" class="mt-0.5 rounded text-amber-600 focus:ring-amber-500">
+                  <span class="${step.done ? 'line-through text-slate-400' : ''}">${step.step}</span>
+                </label>
+              `).join('')}
             </div>
-            ${l.body ? `<div class="text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100 leading-relaxed font-normal">${l.body}</div>` : ''}
+          `;
+        }
+
+        return `
+          <div class="bg-white border border-slate-200 rounded-xl p-4 flex flex-col justify-between gap-3 shadow-2xs">
+            <div class="space-y-1.5 flex-1">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700">Module ${l.moduleNumber}</span>
+                  ${getFormatBadge(l.type)}
+                  <h5 class="font-bold text-slate-900 text-xs">${l.title}</h5>
+                  <span class="text-[10px] text-slate-400 font-mono">${l.duration} min</span>
+                </div>
+                ${canManageCurriculum() ? `
+                  <div class="flex items-center gap-1">
+                    <button onclick="openEditLessonModal('${l.id}')" title="Edit Lesson Format & Content" class="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition text-xs flex items-center gap-1">
+                      <span>✏️</span> <span class="hidden sm:inline text-[10px]">Edit</span>
+                    </button>
+                    <button onclick="deleteLesson('${l.id}')" title="Delete Lesson" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition text-xs flex items-center gap-1">
+                      <span>🗑️</span> <span class="hidden sm:inline text-[10px]">Delete</span>
+                    </button>
+                  </div>
+                ` : ''}
+              </div>
+
+              ${l.body ? `
+                <div class="text-xs text-slate-700 bg-slate-50/80 p-3 rounded-xl border border-slate-200/80 leading-relaxed font-normal prose-rich">
+                  ${formatRichText(l.body)}
+                </div>
+              ` : ''}
+
+              ${checklistHtml}
+              ${mediaPreviewHtml}
+
+              <!-- LESSON FEEDBACK & RATING (1-5 STARS) -->
+              <div class="mt-3 pt-3 border-t border-slate-100 space-y-2 bg-slate-50/60 p-2.5 rounded-lg border border-slate-100">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-semibold text-slate-700 flex items-center gap-1 text-[11px]">
+                    <span>⭐</span> Rate this lesson (1-5 stars):
+                  </span>
+                  <div class="flex items-center gap-1" id="star-rating-${l.id}">
+                    <button type="button" onclick="setLessonRating('${l.id}', 1)" id="star-${l.id}-1" class="text-base text-slate-300 hover:text-amber-400 transition" title="1 star">★</button>
+                    <button type="button" onclick="setLessonRating('${l.id}', 2)" id="star-${l.id}-2" class="text-base text-slate-300 hover:text-amber-400 transition" title="2 stars">★</button>
+                    <button type="button" onclick="setLessonRating('${l.id}', 3)" id="star-${l.id}-3" class="text-base text-slate-300 hover:text-amber-400 transition" title="3 stars">★</button>
+                    <button type="button" onclick="setLessonRating('${l.id}', 4)" id="star-${l.id}-4" class="text-base text-slate-300 hover:text-amber-400 transition" title="4 stars">★</button>
+                    <button type="button" onclick="setLessonRating('${l.id}', 5)" id="star-${l.id}-5" class="text-base text-amber-400 hover:text-amber-400 transition" title="5 stars">★</button>
+                  </div>
+                </div>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <input type="text" id="feedback-comment-${l.id}" placeholder="Short comment on this clinical lesson..." class="flex-1 px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg focus:ring-1 focus:ring-indigo-500 focus:outline-none transition">
+                  <button type="button" onclick="submitLessonFeedback('${l.id}')" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-lg transition shadow-2xs whitespace-nowrap">
+                    Submit Feedback
+                  </button>
+                </div>
+                <div id="feedback-success-${l.id}" class="hidden text-[11px] text-emerald-600 font-medium"></div>
+              </div>
+            </div>
           </div>
-          ${canManageCurriculum() ? `
-            <button onclick="deleteLesson('${l.id}')" title="Delete Lesson" class="self-end sm:self-auto p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition text-xs flex items-center gap-1">
-              <span>🗑️</span> <span class="sm:hidden text-[10px]">Delete</span>
-            </button>
-          ` : ''}
-        </div>
-      `).join('');
+        `;
+      }).join('');
+    }
+
+    function toggleLessonChecklistStep(lessonId, stepIdx, done) {
+      const l = lessons.find(x => x.id === lessonId);
+      if (l && l.checklist && l.checklist[stepIdx]) {
+        l.checklist[stepIdx].done = done;
+        saveState();
+      }
+    }
+
+    function openEditLessonModal(lessonId) {
+      const l = lessons.find(x => x.id === lessonId);
+      if (!l) return;
+
+      document.getElementById('edit-lesson-id').value = l.id;
+      document.getElementById('edit-lesson-course-id').value = l.courseId;
+      document.getElementById('edit-lesson-module-num').value = l.moduleNumber || 1;
+      document.getElementById('edit-lesson-title').value = l.title || '';
+      document.getElementById('edit-lesson-type').value = l.type || 'clinical';
+      document.getElementById('edit-lesson-duration').value = l.duration || 25;
+      document.getElementById('edit-lesson-media-url').value = l.mediaUrl || '';
+      document.getElementById('edit-lesson-body').value = l.body || '';
+
+      onLessonFormatChange(l.type || 'clinical', 'edit');
+      const previewEl = document.getElementById('edit-lesson-body-preview');
+      if (previewEl) previewEl.classList.add('hidden');
+      document.getElementById('edit-lesson-body').classList.remove('hidden');
+
+      document.getElementById('modal-edit-lesson').classList.remove('hidden');
+    }
+
+    function closeEditLessonModal() {
+      document.getElementById('modal-edit-lesson').classList.add('hidden');
+    }
+
+    function saveEditedLesson(e) {
+      e.preventDefault();
+      if (!checkPermission('curriculum', 'update lesson contents')) {
+        return;
+      }
+
+      const id = document.getElementById('edit-lesson-id').value;
+      const courseId = document.getElementById('edit-lesson-course-id').value;
+      const moduleNumber = parseInt(document.getElementById('edit-lesson-module-num').value) || 1;
+      const title = document.getElementById('edit-lesson-title').value.trim();
+      const type = document.getElementById('edit-lesson-type').value;
+      const duration = parseInt(document.getElementById('edit-lesson-duration').value) || 20;
+      const mediaUrl = document.getElementById('edit-lesson-media-url').value.trim();
+      const body = document.getElementById('edit-lesson-body').value.trim();
+
+      const idx = lessons.findIndex(l => l.id === id);
+      if (idx !== -1) {
+        lessons[idx] = {
+          ...lessons[idx],
+          courseId,
+          moduleNumber,
+          title,
+          type,
+          duration,
+          mediaUrl,
+          body
+        };
+      }
+
+      // Sync updated lesson to Google Sheets
+      const webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (webAppUrl) {
+        fetch(webAppUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'upsertRecord',
+            sheetKey: 'Lessons',
+            keyField: 'Lesson_ID',
+            record: {
+              'Lesson_ID': id,
+              'Course_ID': courseId,
+              'Module_Number': moduleNumber,
+              'Lesson_Title': title,
+              'Content_Type': type,
+              'Duration_Minutes': duration,
+              'Video_URL': mediaUrl,
+              'Summary': body.substring(0, 200),
+              'Created_Date': new Date().toISOString()
+            }
+          }),
+          mode: 'no-cors'
+        }).catch(() => {});
+      }
+
+      saveState();
+      closeEditLessonModal();
+      renderLessonsList(currentLessonsCourseId);
+      showToast('Lesson unit updated successfully!', 'ok');
+    }
+
+    const lessonRatingsState = {};
+
+    function setLessonRating(lessonId, rating) {
+      lessonRatingsState[lessonId] = rating;
+      for (let i = 1; i <= 5; i++) {
+        const starBtn = document.getElementById(`star-${lessonId}-${i}`);
+        if (starBtn) {
+          if (i <= rating) {
+            starBtn.className = 'text-base text-amber-400 hover:text-amber-400 transition';
+          } else {
+            starBtn.className = 'text-base text-slate-300 hover:text-amber-400 transition';
+          }
+        }
+      }
+    }
+
+    async function submitLessonFeedback(lessonId) {
+      const rating = lessonRatingsState[lessonId] || 5;
+      const commentInput = document.getElementById(`feedback-comment-${lessonId}`);
+      const comment = commentInput ? commentInput.value.trim() : '';
+
+      const learnerId = currentUser ? currentUser.id : 'GUEST-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+      const learnerName = currentUser ? currentUser.fullName : 'Guest Clinician';
+      const now = new Date().toISOString();
+      const feedbackId = 'FBK-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+      const feedbackRecord = {
+        'Feedback_ID': feedbackId,
+        'Lesson_ID': lessonId,
+        'Learner_ID': learnerId,
+        'Learner_Name': learnerName,
+        'Rating': rating,
+        'Comment': comment || 'Clinical feedback',
+        'Timestamp': now
+      };
+
+      // 1. Save in localStorage
+      let savedFeedbacks = JSON.parse(localStorage.getItem('lms_lesson_feedback') || '[]');
+      savedFeedbacks.push(feedbackRecord);
+      localStorage.setItem('lms_lesson_feedback', JSON.stringify(savedFeedbacks));
+
+      // 2. Push to Google Sheets (Lesson_Feedback)
+      const webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (webAppUrl) {
+        try {
+          fetch(webAppUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'appendRecord',
+              sheetKey: 'Lesson_Feedback',
+              records: [feedbackRecord]
+            }),
+            mode: 'no-cors'
+          }).catch(() => {});
+        } catch(e) {}
+      }
+
+      showToast(`Thank you! Your ${rating}-star feedback was submitted to Google Sheets.`, 'ok');
+
+      const successEl = document.getElementById(`feedback-success-${lessonId}`);
+      if (successEl) {
+        successEl.innerText = `✓ Submitted to Google Sheet: ${rating}★ "${comment || 'Helpful clinical content'}"`;
+        successEl.classList.remove('hidden');
+      }
+      if (commentInput) commentInput.value = '';
     }
 
     function addLessonToCourse(e) {
@@ -2212,6 +3472,7 @@
       const title = document.getElementById('lesson-title').value.trim();
       const type = document.getElementById('lesson-type').value;
       const duration = parseInt(document.getElementById('lesson-duration').value) || 20;
+      const mediaUrl = document.getElementById('lesson-media-url').value.trim();
       const body = document.getElementById('lesson-body').value.trim();
 
       const newLesson = {
@@ -2221,28 +3482,278 @@
         title,
         type,
         duration,
+        mediaUrl,
         body
       };
 
       lessons.push(newLesson);
       saveState();
+
+      // Sync to Google Sheets Lessons tab
+      const webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (webAppUrl) {
+        fetch(webAppUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'appendRecord',
+            sheetKey: 'Lessons',
+            records: [{
+              'Lesson_ID': newLesson.id,
+              'Course_ID': newLesson.courseId,
+              'Module_Number': newLesson.moduleNumber,
+              'Lesson_Title': newLesson.title,
+              'Content_Type': newLesson.type,
+              'Duration_Minutes': newLesson.duration,
+              'Video_URL': newLesson.mediaUrl,
+              'Summary': newLesson.body.substring(0, 200),
+              'Created_Date': new Date().toISOString()
+            }]
+          }),
+          mode: 'no-cors'
+        }).catch(() => {});
+      }
+
       renderLessonsList(currentLessonsCourseId);
       document.getElementById('lesson-title').value = '';
+      document.getElementById('lesson-media-url').value = '';
       document.getElementById('lesson-body').value = '';
-      showToast('Lesson unit added.');
+      showToast('Lesson unit added successfully!', 'ok');
     }
 
     function deleteLesson(lessonId) {
       if (!checkPermission('curriculum', 'delete lessons')) {
         return;
       }
-      lessons = lessons.filter(l => l.id !== lessonId);
-      saveState();
-      renderLessonsList(currentLessonsCourseId);
-      showToast('Lesson removed.');
+      if (confirm('Delete this lesson unit?')) {
+        lessons = lessons.filter(l => l.id !== lessonId);
+        saveState();
+        renderLessonsList(currentLessonsCourseId);
+
+        // Sync deletion to Google Sheets
+        const webAppUrl = localStorage.getItem('lms_web_app_url');
+        if (webAppUrl) {
+          fetch(webAppUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'deleteRecord',
+              sheetKey: 'Lessons',
+              keyField: 'Lesson_ID',
+              keyValue: lessonId
+            }),
+            mode: 'no-cors'
+          }).catch(() => {});
+        }
+
+        showToast('Lesson removed.');
+      }
     }
 
     // ==================== ASSESSMENTS & QUESTIONS ====================
+    function renderAssessmentSelector() {
+      const selector = document.getElementById('active-assessment-selector');
+      const linkedCourseSelect = document.getElementById('setting-linked-course');
+      const modalCourseSelect = document.getElementById('modal-asm-course');
+      if (!selector) return;
+
+      // Populate assessment dropdown
+      selector.innerHTML = assessmentsList.map(a => `
+        <option value="${a.id}" ${a.id === activeAssessmentId ? 'selected' : ''}>
+          ${a.title} (${a.passingScore}%)
+        </option>
+      `).join('');
+
+      // Populate courses options in settings
+      const courseOptions = courses.map(c => `
+        <option value="${c.id}">${c.title} (${c.id})</option>
+      `).join('');
+
+      if (linkedCourseSelect) linkedCourseSelect.innerHTML = courseOptions;
+      if (modalCourseSelect) modalCourseSelect.innerHTML = courseOptions;
+
+      // Update current settings panel values
+      const currentAsm = assessmentsList.find(a => a.id === activeAssessmentId) || assessmentsList[0];
+      if (currentAsm) {
+        activeAssessmentId = currentAsm.id;
+        document.getElementById('setting-assessment-id-badge').innerText = currentAsm.id;
+        document.getElementById('setting-passing-score').value = currentAsm.passingScore || 80;
+        document.getElementById('setting-exam-title').value = currentAsm.title || '';
+        if (linkedCourseSelect && currentAsm.courseId) linkedCourseSelect.value = currentAsm.courseId;
+        const typeSelect = document.getElementById('setting-exam-type');
+        if (typeSelect && currentAsm.type) typeSelect.value = currentAsm.type;
+        const timeLimit = document.getElementById('setting-exam-time-limit');
+        if (timeLimit && currentAsm.timeLimit !== undefined) timeLimit.value = currentAsm.timeLimit;
+        const instEl = document.getElementById('setting-exam-instructions');
+        if (instEl) instEl.value = currentAsm.instructions || '';
+        
+        const delBtn = document.getElementById('btn-delete-assessment');
+        if (delBtn) {
+          delBtn.style.display = (canManageCurriculum() && assessmentsList.length > 1) ? 'inline-block' : 'none';
+        }
+      }
+
+      // Show/hide instructor panel based on permissions
+      const panel = document.getElementById('assessment-settings-panel');
+      if (panel) {
+        panel.style.display = canManageCurriculum() ? 'block' : 'none';
+      }
+    }
+
+    function changeActiveAssessment(newId) {
+      activeAssessmentId = newId;
+      localStorage.setItem('lms_active_assessment_id', newId);
+      userAnswers = {};
+      const box = document.getElementById('quiz-result-box');
+      if (box) box.classList.add('hidden');
+      renderAssessmentSelector();
+      renderQuizEditor();
+      showToast(`Switched active exam to ${newId}.`);
+    }
+
+    function openAssessmentModal(editAssessment = null) {
+      if (!checkPermission('curriculum', 'create or edit assessments')) {
+        return;
+      }
+      const modal = document.getElementById('modal-assessment');
+      const header = document.getElementById('modal-assessment-header');
+      const editIdInput = document.getElementById('modal-assessment-edit-id');
+
+      if (editAssessment) {
+        header.innerText = 'Edit Assessment Configuration';
+        editIdInput.value = editAssessment.id;
+        document.getElementById('modal-asm-id').value = editAssessment.id;
+        document.getElementById('modal-asm-id').disabled = true;
+        document.getElementById('modal-asm-title').value = editAssessment.title;
+        document.getElementById('modal-asm-course').value = editAssessment.courseId || courses[0].id;
+        document.getElementById('modal-asm-type').value = editAssessment.type || 'certification';
+        document.getElementById('modal-asm-pass-score').value = editAssessment.passingScore || 80;
+        document.getElementById('modal-asm-time-limit').value = editAssessment.timeLimit || 30;
+        document.getElementById('modal-asm-instructions').value = editAssessment.instructions || '';
+      } else {
+        header.innerText = 'Create New Clinical Assessment';
+        editIdInput.value = '';
+        document.getElementById('modal-asm-id').value = 'ASM-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+        document.getElementById('modal-asm-id').disabled = false;
+        document.getElementById('modal-asm-title').value = '';
+        document.getElementById('modal-asm-course').value = courses[0] ? courses[0].id : 'CRS-NRP-01';
+        document.getElementById('modal-asm-type').value = 'certification';
+        document.getElementById('modal-asm-pass-score').value = 80;
+        document.getElementById('modal-asm-time-limit').value = 30;
+        document.getElementById('modal-asm-instructions').value = '';
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeAssessmentModal() {
+      document.getElementById('modal-assessment').classList.add('hidden');
+    }
+
+    function saveAssessmentModal(e) {
+      e.preventDefault();
+      if (!checkPermission('curriculum', 'save assessment exam')) {
+        return;
+      }
+      const editId = document.getElementById('modal-assessment-edit-id').value;
+      const id = document.getElementById('modal-asm-id').value.trim();
+      const title = document.getElementById('modal-asm-title').value.trim();
+      const courseId = document.getElementById('modal-asm-course').value;
+      const type = document.getElementById('modal-asm-type').value;
+      const passingScore = parseInt(document.getElementById('modal-asm-pass-score').value) || 80;
+      const timeLimit = parseInt(document.getElementById('modal-asm-time-limit').value) || 30;
+      const instructions = document.getElementById('modal-asm-instructions').value.trim();
+
+      const asmObj = {
+        id: editId || id,
+        courseId,
+        title,
+        type,
+        passingScore,
+        timeLimit,
+        instructions
+      };
+
+      if (editId) {
+        const idx = assessmentsList.findIndex(a => a.id === editId);
+        if (idx !== -1) assessmentsList[idx] = asmObj;
+      } else {
+        if (assessmentsList.some(a => a.id === id)) {
+          alert('An assessment with ID ' + id + ' already exists!');
+          return;
+        }
+        assessmentsList.push(asmObj);
+        activeAssessmentId = asmObj.id;
+      }
+
+      // Sync to Google Sheets Assessments tab
+      const webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (webAppUrl) {
+        fetch(webAppUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'upsertRecord',
+            sheetKey: 'Assessments',
+            keyField: 'Assessment_ID',
+            record: {
+              'Assessment_ID': asmObj.id,
+              'Course_ID': asmObj.courseId,
+              'Title': asmObj.title,
+              'Type': asmObj.type,
+              'Passing_Score': asmObj.passingScore,
+              'Time_Limit_Minutes': asmObj.timeLimit,
+              'Instructions': asmObj.instructions,
+              'Total_Questions': questions.filter(q => q.assessmentId === asmObj.id).length
+            }
+          }),
+          mode: 'no-cors'
+        }).catch(() => {});
+      }
+
+      saveState();
+      closeAssessmentModal();
+      renderAssessmentSelector();
+      renderQuizEditor();
+      showToast('Assessment saved successfully!', 'ok');
+    }
+
+    function deleteActiveAssessment() {
+      if (!checkPermission('admin', 'delete clinical assessments')) {
+        return;
+      }
+      if (assessmentsList.length <= 1) {
+        showToast('Cannot delete the last remaining assessment.', 'err');
+        return;
+      }
+      if (confirm(`Delete assessment ${activeAssessmentId} and its associated test questions?`)) {
+        const toDelete = activeAssessmentId;
+        assessmentsList = assessmentsList.filter(a => a.id !== toDelete);
+        questions = questions.filter(q => q.assessmentId !== toDelete);
+        activeAssessmentId = assessmentsList[0].id;
+        saveState();
+
+        const webAppUrl = localStorage.getItem('lms_web_app_url');
+        if (webAppUrl) {
+          fetch(webAppUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'deleteRecord',
+              sheetKey: 'Assessments',
+              keyField: 'Assessment_ID',
+              keyValue: toDelete
+            }),
+            mode: 'no-cors'
+          }).catch(() => {});
+        }
+
+        renderAssessmentSelector();
+        renderQuizEditor();
+        showToast(`Assessment ${toDelete} deleted.`);
+      }
+    }
+
     function saveAssessmentSettingsForm(e) {
       if (e) e.preventDefault();
       if (!checkPermission('curriculum', 'update assessment settings')) {
@@ -2251,37 +3762,404 @@
       const score = parseInt(document.getElementById('setting-passing-score').value) || 80;
       const title = document.getElementById('setting-exam-title').value.trim() || 'Neonatal Clinical Assessment';
       const courseId = document.getElementById('setting-linked-course').value;
+      const type = document.getElementById('setting-exam-type') ? document.getElementById('setting-exam-type').value : 'certification';
+      const timeLimit = document.getElementById('setting-exam-time-limit') ? parseInt(document.getElementById('setting-exam-time-limit').value) || 30 : 30;
+      const instructions = document.getElementById('setting-exam-instructions') ? document.getElementById('setting-exam-instructions').value.trim() : '';
 
-      assessmentSettings.passingScore = score;
-      assessmentSettings.title = title;
-      assessmentSettings.courseId = courseId;
+      const idx = assessmentsList.findIndex(a => a.id === activeAssessmentId);
+      if (idx !== -1) {
+        assessmentsList[idx].passingScore = score;
+        assessmentsList[idx].title = title;
+        assessmentsList[idx].courseId = courseId;
+        assessmentsList[idx].type = type;
+        assessmentsList[idx].timeLimit = timeLimit;
+        assessmentsList[idx].instructions = instructions;
+      }
       saveState();
 
-      // Sync to Google Sheets Assessments tab if URL is configured
+      // Sync to Google Sheets
       const webAppUrl = localStorage.getItem('lms_web_app_url');
       if (webAppUrl) {
         fetch(webAppUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            action: 'appendRecord',
-            sheetKey: 'assessments',
-            records: [{
-              'Assessment_ID': assessmentSettings.id || 'ASM-NRP-01',
+            action: 'upsertRecord',
+            sheetKey: 'Assessments',
+            keyField: 'Assessment_ID',
+            record: {
+              'Assessment_ID': activeAssessmentId,
               'Course_ID': courseId,
               'Title': title,
+              'Type': type,
               'Passing_Score': score,
-              'Total_Questions': questions.length
-            }]
+              'Time_Limit_Minutes': timeLimit,
+              'Instructions': instructions,
+              'Total_Questions': questions.filter(q => q.assessmentId === activeAssessmentId).length
+            }
           }),
           mode: 'no-cors'
         }).catch(() => {});
       }
 
+      renderAssessmentSelector();
       renderQuizEditor();
-      renderLearningTab();
-      updateCounts();
-      showToast(`Assessment settings saved! Passing score set to ${score}%.`, 'ok');
+      showToast(`Exam settings saved! Passing score set to ${score}%.`, 'ok');
+    }
+
+    // ==================== QUESTION AUTHORING & RENDERING ====================
+    let modalQuestionOptions = ['', '', '', ''];
+    let modalQuestionCorrect = 0; // single index or array of indexes for multi
+
+    function onQuestionTypeChange(type) {
+      if (type === 'tf') {
+        modalQuestionOptions = ['True', 'False'];
+        modalQuestionCorrect = 0;
+      } else if (modalQuestionOptions.length < 2) {
+        modalQuestionOptions = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
+        modalQuestionCorrect = 0;
+      }
+      renderQuestionModalOptions(type);
+    }
+
+    function renderQuestionModalOptions(type = null) {
+      if (!type) {
+        type = document.getElementById('q-form-type').value;
+      }
+      const container = document.getElementById('q-options-container');
+      const addBtn = document.getElementById('btn-add-option');
+      if (!container) return;
+
+      if (addBtn) addBtn.style.display = (type === 'tf') ? 'none' : 'flex';
+
+      const isMulti = type === 'multi';
+
+      container.innerHTML = modalQuestionOptions.map((opt, idx) => {
+        let isChecked = false;
+        if (isMulti) {
+          isChecked = Array.isArray(modalQuestionCorrect) && modalQuestionCorrect.includes(idx);
+        } else {
+          isChecked = modalQuestionCorrect === idx;
+        }
+
+        const inputType = isMulti ? 'checkbox' : 'radio';
+
+        return `
+          <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
+            <label class="flex items-center gap-1.5 cursor-pointer flex-shrink-0" title="Mark as correct answer">
+              <input type="${inputType}" name="q_modal_correct_input" value="${idx}" ${isChecked ? 'checked' : ''} onchange="onModalCorrectChanged(${idx}, '${type}', this.checked)" class="text-indigo-600 focus:ring-indigo-500 rounded">
+              <span class="text-[10px] font-bold text-slate-500 uppercase">${String.fromCharCode(65 + idx)}</span>
+            </label>
+            <input type="text" value="${opt}" oninput="modalQuestionOptions[${idx}] = this.value" placeholder="Enter option text..." class="flex-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500" required>
+            ${type !== 'tf' && modalQuestionOptions.length > 2 ? `
+              <button type="button" onclick="removeQuestionOption(${idx})" class="p-1 hover:bg-rose-50 text-rose-600 rounded text-xs transition" title="Remove option">
+                &times;
+              </button>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function onModalCorrectChanged(idx, type, checked) {
+      if (type === 'multi') {
+        if (!Array.isArray(modalQuestionCorrect)) modalQuestionCorrect = [];
+        if (checked) {
+          if (!modalQuestionCorrect.includes(idx)) modalQuestionCorrect.push(idx);
+        } else {
+          modalQuestionCorrect = modalQuestionCorrect.filter(x => x !== idx);
+        }
+      } else {
+        modalQuestionCorrect = idx;
+      }
+    }
+
+    function addQuestionOption() {
+      if (modalQuestionOptions.length >= 6) {
+        showToast('Maximum 6 options supported per question.', 'info');
+        return;
+      }
+      modalQuestionOptions.push('');
+      const type = document.getElementById('q-form-type').value;
+      renderQuestionModalOptions(type);
+    }
+
+    function removeQuestionOption(idx) {
+      if (modalQuestionOptions.length <= 2) {
+        showToast('At least 2 options are required.', 'info');
+        return;
+      }
+      modalQuestionOptions.splice(idx, 1);
+      const type = document.getElementById('q-form-type').value;
+      if (type === 'multi' && Array.isArray(modalQuestionCorrect)) {
+        modalQuestionCorrect = modalQuestionCorrect.filter(x => x !== idx).map(x => x > idx ? x - 1 : x);
+      } else if (modalQuestionCorrect >= modalQuestionOptions.length) {
+        modalQuestionCorrect = 0;
+      }
+      renderQuestionModalOptions(type);
+    }
+
+    function updateQuestionMediaPreview(url) {
+      const container = document.getElementById('q-media-preview-container');
+      const img = document.getElementById('q-media-preview-img');
+      if (!container || !img) return;
+
+      if (url && url.trim().length > 5) {
+        img.src = url.trim();
+        container.classList.remove('hidden');
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+
+    function switchQuestionModalTab(tab) {
+      const editorTabBtn = document.getElementById('tab-btn-q-editor');
+      const previewTabBtn = document.getElementById('tab-btn-q-preview');
+      const previewContent = document.getElementById('q-tab-preview-content');
+      const formEl = document.getElementById('form-question');
+
+      if (tab === 'preview') {
+        editorTabBtn.className = 'px-3.5 py-1.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800';
+        previewTabBtn.className = 'px-3.5 py-1.5 border-b-2 border-indigo-600 text-indigo-700';
+        renderQuestionModalLivePreview();
+        previewContent.classList.remove('hidden');
+        formEl.classList.add('hidden');
+      } else {
+        previewTabBtn.className = 'px-3.5 py-1.5 border-b-2 border-transparent text-slate-500 hover:text-slate-800';
+        editorTabBtn.className = 'px-3.5 py-1.5 border-b-2 border-indigo-600 text-indigo-700';
+        previewContent.classList.add('hidden');
+        formEl.classList.remove('hidden');
+      }
+    }
+
+    function renderQuestionModalLivePreview() {
+      const container = document.getElementById('q-tab-preview-content');
+      if (!container) return;
+
+      const stem = document.getElementById('q-form-text').value;
+      const type = document.getElementById('q-form-type').value;
+      const difficulty = document.getElementById('q-form-difficulty').value;
+      const points = document.getElementById('q-form-points').value;
+      const media = document.getElementById('q-form-media').value;
+      const explanation = document.getElementById('q-form-explanation').value;
+
+      container.innerHTML = `
+        <div class="glass-card rounded-2xl p-4 border border-indigo-200 bg-white shadow-sm space-y-3">
+          <div class="flex items-center justify-between text-xs">
+            <span class="px-2 py-0.5 rounded font-bold bg-indigo-100 text-indigo-800 text-[10px] uppercase">${type} format</span>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">${difficulty}</span>
+              <span class="text-[11px] font-bold text-indigo-600">${points} pt</span>
+            </div>
+          </div>
+          <div class="text-sm font-semibold text-slate-900 leading-snug prose-rich">
+            ${formatRichText(stem)}
+          </div>
+          ${media ? `<img src="${media}" alt="Clinical Diagram" class="max-h-36 rounded-lg mx-auto border border-slate-200 object-contain">` : ''}
+          <div class="space-y-1.5 pt-1">
+            ${modalQuestionOptions.map((opt, i) => {
+              const isCorrect = (type === 'multi' && Array.isArray(modalQuestionCorrect)) ? modalQuestionCorrect.includes(i) : modalQuestionCorrect === i;
+              return `
+                <div class="p-2.5 rounded-xl border text-xs flex items-center justify-between ${isCorrect ? 'bg-emerald-50 border-emerald-300 text-emerald-950 font-medium' : 'bg-slate-50 border-slate-200'}">
+                  <span><b>${String.fromCharCode(65 + i)}.</b> ${opt || 'Option'}</span>
+                  ${isCorrect ? '<span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">✓ Correct</span>' : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
+          ${explanation ? `
+            <div class="mt-2 text-xs p-2.5 bg-slate-50 rounded-lg border border-slate-200 prose-rich">
+              <strong class="text-indigo-900 font-bold block mb-1">Clinical Rationale:</strong>
+              ${formatRichText(explanation)}
+            </div>
+          ` : ''}
+        </div>
+        <div class="text-center pt-2">
+          <button type="button" onclick="switchQuestionModalTab('editor')" class="px-4 py-1.5 bg-indigo-50 text-indigo-700 font-semibold text-xs rounded-lg hover:bg-indigo-100 transition">
+            ← Back to Question Editor
+          </button>
+        </div>
+      `;
+    }
+
+    function openQuestionModal(editIdx = -1) {
+      if (!checkPermission('curriculum', 'author or edit questions')) {
+        return;
+      }
+      openQuestionModalInternal(editIdx);
+    }
+
+    function openQuestionModalInternal(editIdx = -1) {
+      document.getElementById('question-editing-idx').value = editIdx;
+      const modal = document.getElementById('modal-question');
+      const header = document.getElementById('modal-question-header');
+      const dupBtn = document.getElementById('btn-duplicate-question');
+
+      switchQuestionModalTab('editor');
+
+      if (editIdx >= 0) {
+        header.innerText = 'Edit Test Question #' + (editIdx + 1);
+        const q = questions[editIdx];
+        document.getElementById('q-form-type').value = q.type || 'single';
+        document.getElementById('q-form-difficulty').value = q.difficulty || 'Intermediate';
+        document.getElementById('q-form-points').value = q.points || 1;
+        document.getElementById('q-form-text').value = q.q || '';
+        document.getElementById('q-form-media').value = q.mediaUrl || '';
+        document.getElementById('q-form-explanation').value = q.explanation || '';
+        updateQuestionMediaPreview(q.mediaUrl || '');
+
+        modalQuestionOptions = q.options ? [...q.options] : ['', ''];
+        modalQuestionCorrect = q.correct !== undefined ? q.correct : 0;
+        renderQuestionModalOptions(q.type || 'single');
+
+        if (dupBtn) dupBtn.classList.remove('hidden');
+      } else {
+        header.innerText = 'Add New Test Question';
+        document.getElementById('q-form-type').value = 'single';
+        document.getElementById('q-form-difficulty').value = 'Intermediate';
+        document.getElementById('q-form-points').value = 1;
+        document.getElementById('q-form-text').value = '';
+        document.getElementById('q-form-media').value = '';
+        document.getElementById('q-form-explanation').value = '';
+        updateQuestionMediaPreview('');
+
+        modalQuestionOptions = ['', '', '', ''];
+        modalQuestionCorrect = 0;
+        renderQuestionModalOptions('single');
+
+        if (dupBtn) dupBtn.classList.add('hidden');
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeQuestionModal() {
+      document.getElementById('modal-question').classList.add('hidden');
+    }
+
+    function duplicateCurrentQuestion() {
+      const editIdx = parseInt(document.getElementById('question-editing-idx').value);
+      if (editIdx >= 0 && questions[editIdx]) {
+        const orig = questions[editIdx];
+        const cloned = JSON.parse(JSON.stringify(orig));
+        cloned.id = 'QST-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+        cloned.q = cloned.q + ' (Copy)';
+        questions.push(cloned);
+        saveState();
+        closeQuestionModal();
+        renderQuizEditor();
+        showToast('Question duplicated to exam bank!', 'ok');
+      }
+    }
+
+    function editQuestion(idx) {
+      openQuestionModal(idx);
+    }
+
+    function deleteQuestion(idx) {
+      if (!checkPermission('curriculum', 'delete questions from the exam bank')) {
+        return;
+      }
+      if (confirm('Delete question #' + (idx + 1) + '?')) {
+        const deleted = questions[idx];
+        questions.splice(idx, 1);
+        saveState();
+
+        if (deleted && deleted.id) {
+          const webAppUrl = localStorage.getItem('lms_web_app_url');
+          if (webAppUrl) {
+            fetch(webAppUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action: 'deleteRecord',
+                sheetKey: 'Questions',
+                keyField: 'Question_ID',
+                keyValue: deleted.id
+              }),
+              mode: 'no-cors'
+            }).catch(() => {});
+          }
+        }
+
+        renderQuizEditor();
+        showToast('Question deleted.');
+      }
+    }
+
+    function saveQuestion(e) {
+      e.preventDefault();
+      if (!checkPermission('curriculum', 'save exam questions')) {
+        return;
+      }
+      const idx = parseInt(document.getElementById('question-editing-idx').value);
+      const type = document.getElementById('q-form-type').value;
+      const difficulty = document.getElementById('q-form-difficulty').value;
+      const points = parseInt(document.getElementById('q-form-points').value) || 1;
+      const text = document.getElementById('q-form-text').value.trim();
+      const mediaUrl = document.getElementById('q-form-media').value.trim();
+      const explanation = document.getElementById('q-form-explanation').value.trim();
+
+      const options = modalQuestionOptions.map(o => o.trim()).filter(o => o.length > 0);
+      if (options.length < 2) {
+        alert('Please provide at least 2 non-empty options.');
+        return;
+      }
+
+      const qObj = {
+        id: idx >= 0 && questions[idx].id ? questions[idx].id : 'QST-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+        assessmentId: activeAssessmentId,
+        q: text,
+        type,
+        difficulty,
+        points,
+        mediaUrl,
+        options,
+        correct: modalQuestionCorrect,
+        explanation
+      };
+
+      if (idx >= 0) {
+        questions[idx] = qObj;
+        showToast('Question #' + (idx + 1) + ' updated successfully!', 'ok');
+      } else {
+        questions.push(qObj);
+        showToast('New question added to exam bank!', 'ok');
+      }
+
+      // Sync to Google Sheets Questions table
+      const webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (webAppUrl) {
+        fetch(webAppUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'upsertRecord',
+            sheetKey: 'Questions',
+            keyField: 'Question_ID',
+            record: {
+              'Question_ID': qObj.id,
+              'Assessment_ID': qObj.assessmentId,
+              'Question_Text': qObj.q,
+              'Question_Type': qObj.type,
+              'Difficulty': qObj.difficulty,
+              'Points': qObj.points,
+              'Media_URL': qObj.mediaUrl,
+              'Option_A': options[0] || '',
+              'Option_B': options[1] || '',
+              'Option_C': options[2] || '',
+              'Option_D': options[3] || '',
+              'Correct_Option_Index': Array.isArray(qObj.correct) ? JSON.stringify(qObj.correct) : qObj.correct,
+              'Explanation': qObj.explanation
+            }
+          }),
+          mode: 'no-cors'
+        }).catch(() => {});
+      }
+
+      saveState();
+      closeQuestionModal();
+      renderQuizEditor();
     }
 
     function renderQuizEditor() {
@@ -2291,29 +4169,73 @@
       const isManager = canManageCurriculum();
       const hasEvaluated = !!userAnswers['_evaluated'];
 
-      container.innerHTML = questions.map((item, qIdx) => {
-        const isAnswered = userAnswers[qIdx] !== undefined;
+      // Filter questions matching current active assessment, or all if none assigned yet
+      const examQuestions = questions.filter(q => !q.assessmentId || q.assessmentId === activeAssessmentId);
+
+      if (examQuestions.length === 0) {
+        container.innerHTML = `
+          <div class="glass-card rounded-2xl p-8 text-center border border-dashed border-slate-300 space-y-3">
+            <span class="text-3xl">📝</span>
+            <h4 class="font-bold text-slate-800 text-sm">No Questions in this Assessment</h4>
+            <p class="text-xs text-slate-500 max-w-sm mx-auto">This exam does not have questions yet. Admins and instructors can add test questions using the button above.</p>
+            ${isManager ? `
+              <button onclick="openQuestionModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-xs transition">
+                + Author First Question
+              </button>
+            ` : ''}
+          </div>
+        `;
+        updateCounts();
+        return;
+      }
+
+      container.innerHTML = examQuestions.map((item, qIdx) => {
+        const isMulti = item.type === 'multi';
+        const globalIdx = questions.indexOf(item);
 
         return `
           <div class="glass-card rounded-2xl p-5 border border-slate-200 shadow-2xs space-y-3">
             <div class="flex items-start justify-between gap-3">
-              <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold flex items-center justify-center">${qIdx + 1}</span>
-                <p class="text-sm font-semibold text-slate-900">${item.q}</p>
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold flex items-center justify-center">${qIdx + 1}</span>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 uppercase">${item.type || 'single'}</span>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${item.difficulty === 'Advanced' ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700'}">${item.difficulty || 'Intermediate'}</span>
+                  <span class="text-[10px] text-indigo-600 font-mono font-bold">${item.points || 1} pt</span>
+                </div>
+                <div class="text-sm font-semibold text-slate-900 leading-snug prose-rich mt-1">
+                  ${formatRichText(item.q)}
+                </div>
               </div>
               ${isManager ? `
                 <div class="flex items-center gap-1.5 flex-shrink-0">
-                  <button onclick="editQuestion(${qIdx})" title="Edit Question" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold rounded-lg text-xs transition">✏️ Edit</button>
-                  <button onclick="deleteQuestion(${qIdx})" title="Delete Question" class="p-1 px-2 hover:bg-rose-50 text-rose-600 rounded-lg text-xs transition">🗑️</button>
+                  <button onclick="editQuestion(${globalIdx})" title="Edit Question" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold rounded-lg text-xs transition">✏️ Edit</button>
+                  <button onclick="deleteQuestion(${globalIdx})" title="Delete Question" class="p-1 px-2 hover:bg-rose-50 text-rose-600 rounded-lg text-xs transition">🗑️</button>
                 </div>
               ` : ''}
             </div>
 
-            <!-- Options -->
+            ${item.mediaUrl ? `
+              <div class="my-2 p-2 bg-slate-50 border border-slate-200 rounded-xl text-center">
+                <img src="${item.mediaUrl}" alt="Clinical Reference Diagram" class="max-h-40 rounded-lg object-contain mx-auto shadow-xs">
+              </div>
+            ` : ''}
+
+            <!-- Options (Single or Multi-Response) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
               ${item.options.map((opt, oIdx) => {
-                const isOptionCorrect = item.correct === oIdx;
-                const isSelected = userAnswers[qIdx] === oIdx;
+                let isOptionCorrect = false;
+                let isSelected = false;
+
+                if (isMulti) {
+                  isOptionCorrect = Array.isArray(item.correct) && item.correct.includes(oIdx);
+                  const selectedArr = userAnswers[globalIdx] || [];
+                  isSelected = Array.isArray(selectedArr) && selectedArr.includes(oIdx);
+                } else {
+                  isOptionCorrect = item.correct === oIdx;
+                  isSelected = userAnswers[globalIdx] === oIdx;
+                }
+
                 let borderClass = 'bg-white border-slate-200 hover:border-slate-300';
                 let labelExtra = '';
 
@@ -2329,9 +4251,12 @@
                   borderClass = 'bg-indigo-50/60 border-indigo-400 text-indigo-950 font-semibold';
                 }
 
+                const inputType = isMulti ? 'checkbox' : 'radio';
+                const inputName = `simulator_q_${globalIdx}`;
+
                 return `
                   <label class="flex items-center gap-2.5 p-2.5 rounded-xl border ${borderClass} cursor-pointer transition">
-                    <input type="radio" name="simulator_q_${qIdx}" value="${oIdx}" ${isSelected ? 'checked' : ''} onchange="userAnswers[${qIdx}] = ${oIdx}" class="text-indigo-600 focus:ring-indigo-500">
+                    <input type="${inputType}" name="${inputName}" value="${oIdx}" ${isSelected ? 'checked' : ''} onchange="onUserAnswerChanged(${globalIdx}, ${oIdx}, '${item.type || 'single'}', this.checked)" class="text-indigo-600 focus:ring-indigo-500 rounded">
                     <span class="text-slate-800 flex-1">${opt} ${labelExtra}</span>
                   </label>
                 `;
@@ -2339,8 +4264,9 @@
             </div>
 
             ${(isManager || hasEvaluated) && item.explanation ? `
-              <div class="text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100 leading-relaxed">
-                <strong class="text-indigo-900 font-semibold">Clinical Rationale:</strong> ${item.explanation}
+              <div class="text-[11px] text-slate-700 bg-slate-50 p-2.5 rounded-lg border border-slate-200 leading-relaxed prose-rich">
+                <strong class="text-indigo-900 font-semibold block mb-0.5">Clinical Rationale:</strong>
+                ${formatRichText(item.explanation)}
               </div>
             ` : ''}
           </div>
@@ -2350,148 +4276,55 @@
       updateCounts();
     }
 
-    function openQuestionModal(editIdx = -1) {
-      if (!checkPermission('curriculum', 'author or edit questions')) {
-        return;
-      }
-      openQuestionModalInternal(editIdx);
-    }
-
-    function openQuestionModalInternal(editIdx = -1) {
-      document.getElementById('question-editing-idx').value = editIdx;
-      const modal = document.getElementById('modal-question');
-      const header = document.getElementById('modal-question-header');
-
-      if (editIdx >= 0) {
-        header.innerText = 'Edit Test Question #' + (editIdx + 1);
-        const q = questions[editIdx];
-        document.getElementById('q-form-text').value = q.q;
-        document.getElementById('q-opt-0').value = q.options[0] || '';
-        document.getElementById('q-opt-1').value = q.options[1] || '';
-        document.getElementById('q-opt-2').value = q.options[2] || '';
-        document.getElementById('q-opt-3').value = q.options[3] || '';
-        document.getElementById(`radio-opt-${q.correct}`).checked = true;
-        document.getElementById('q-form-explanation').value = q.explanation || '';
+    function onUserAnswerChanged(qIdx, oIdx, type, checked) {
+      if (type === 'multi') {
+        if (!Array.isArray(userAnswers[qIdx])) userAnswers[qIdx] = [];
+        if (checked) {
+          if (!userAnswers[qIdx].includes(oIdx)) userAnswers[qIdx].push(oIdx);
+        } else {
+          userAnswers[qIdx] = userAnswers[qIdx].filter(x => x !== oIdx);
+        }
       } else {
-        header.innerText = 'Add New Test Question';
-        document.getElementById('q-form-text').value = '';
-        document.getElementById('q-opt-0').value = '';
-        document.getElementById('q-opt-1').value = '';
-        document.getElementById('q-opt-2').value = '';
-        document.getElementById('q-opt-3').value = '';
-        document.getElementById('radio-opt-0').checked = true;
-        document.getElementById('q-form-explanation').value = '';
+        userAnswers[qIdx] = oIdx;
       }
-
-      modal.classList.remove('hidden');
-    }
-
-    function closeQuestionModal() {
-      document.getElementById('modal-question').classList.add('hidden');
-    }
-
-    function editQuestion(idx) {
-      openQuestionModal(idx);
-    }
-
-    function deleteQuestion(idx) {
-      if (!checkPermission('curriculum', 'delete questions from the exam bank')) {
-        return;
-      }
-      if (confirm('Delete question #' + (idx + 1) + '?')) {
-        questions.splice(idx, 1);
-        saveState();
-        renderQuizEditor();
-        showToast('Question deleted.');
-      }
-    }
-
-    function saveQuestion(e) {
-      e.preventDefault();
-      if (!checkPermission('curriculum', 'save exam questions')) {
-        return;
-      }
-      const idx = parseInt(document.getElementById('question-editing-idx').value);
-      const text = document.getElementById('q-form-text').value.trim();
-      const options = [
-        document.getElementById('q-opt-0').value.trim(),
-        document.getElementById('q-opt-1').value.trim(),
-        document.getElementById('q-opt-2').value.trim(),
-        document.getElementById('q-opt-3').value.trim()
-      ];
-      const selectedRadio = document.querySelector('input[name="q_correct_option"]:checked');
-      const correct = selectedRadio ? parseInt(selectedRadio.value) : 0;
-      const explanation = document.getElementById('q-form-explanation').value.trim();
-
-      const newQ = { q: text, options, correct, explanation };
-
-      if (idx >= 0) {
-        questions[idx] = newQ;
-        showToast('Question #' + (idx + 1) + ' updated successfully!', 'ok');
-      } else {
-        questions.push(newQ);
-        showToast('New question added to exam bank!', 'ok');
-      }
-
-      // Sync to Google Sheets Questions table if URL configured
-      const webAppUrl = localStorage.getItem('lms_web_app_url');
-      if (webAppUrl) {
-        fetch(webAppUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'appendRecord',
-            sheetKey: 'questions',
-            records: [{
-              'Question_ID': 'QST-' + (idx >= 0 ? idx + 1 : questions.length),
-              'Assessment_ID': assessmentSettings.id || 'ASM-NRP-01',
-              'Question_Text': text,
-              'Option_A': options[0],
-              'Option_B': options[1],
-              'Option_C': options[2],
-              'Option_D': options[3],
-              'Correct_Option_Index': correct,
-              'Explanation': explanation
-            }]
-          }),
-          mode: 'no-cors'
-        }).catch(() => {});
-      }
-
-      saveState();
-      closeQuestionModal();
-      renderQuizEditor();
-    }
-
-    function resetQuizAnswers() {
-      userAnswers = {};
-      const box = document.getElementById('quiz-result-box');
-      if (box) box.classList.add('hidden');
-      renderQuizEditor();
-      showToast('Assessment inputs reset.');
     }
 
     function evaluateQuiz() {
-      let correctCount = 0;
+      const examQuestions = questions.filter(q => !q.assessmentId || q.assessmentId === activeAssessmentId);
+      if (examQuestions.length === 0) return;
+
+      let earnedPoints = 0;
+      let totalPoints = 0;
       let answeredCount = 0;
 
-      questions.forEach((item, idx) => {
-        if (userAnswers[idx] !== undefined) {
+      examQuestions.forEach(item => {
+        const globalIdx = questions.indexOf(item);
+        const pts = item.points || 1;
+        totalPoints += pts;
+
+        if (userAnswers[globalIdx] !== undefined) {
           answeredCount++;
-          if (userAnswers[idx] === item.correct) {
-            correctCount++;
+          if (item.type === 'multi') {
+            const correctSet = item.correct || [];
+            const userSet = userAnswers[globalIdx] || [];
+            const isFullyCorrect = correctSet.length === userSet.length && correctSet.every(v => userSet.includes(v));
+            if (isFullyCorrect) earnedPoints += pts;
+          } else {
+            if (userAnswers[globalIdx] === item.correct) earnedPoints += pts;
           }
         }
       });
 
-      if (answeredCount < questions.length) {
-        alert(`Please answer all ${questions.length} questions before evaluation.`);
+      if (answeredCount < examQuestions.length) {
+        alert(`Please complete all ${examQuestions.length} questions before evaluation.`);
         return;
       }
 
-      const scorePercent = Math.round((correctCount / questions.length) * 100);
-      const threshold = assessmentSettings.passingScore || 80;
+      const currentAsm = assessmentsList.find(a => a.id === activeAssessmentId) || assessmentsList[0];
+      const threshold = currentAsm ? currentAsm.passingScore : 80;
+      const scorePercent = Math.round((earnedPoints / (totalPoints || 1)) * 100);
       const passed = scorePercent >= threshold;
+
       userAnswers['_evaluated'] = true;
       renderQuizEditor();
 
@@ -2503,14 +4336,14 @@
         box.innerHTML = `
           <div class="text-xl">🎉</div>
           <div class="font-bold text-sm">Competency Passed (${scorePercent}%)</div>
-          <p class="text-[11px]">Met the passing threshold of ${threshold}%. Ready for Clinical NICU practice.</p>
+          <p class="text-[11px]">Score: ${earnedPoints}/${totalPoints} points. Met the passing threshold of ${threshold}%. Ready for Clinical NICU practice.</p>
         `;
       } else {
         box.className = 'rounded-xl p-4 border text-center space-y-1 bg-rose-50 border-rose-200 text-rose-800';
         box.innerHTML = `
           <div class="text-xl">⚠️</div>
-          <div class="font-bold text-sm">Score: ${scorePercent}% (Passing Required: ${threshold}%)</div>
-          <p class="text-[11px]">Review the clinical protocols and re-test.</p>
+          <div class="font-bold text-sm">Score: ${scorePercent}% (${earnedPoints}/${totalPoints} points)</div>
+          <p class="text-[11px]">Minimum passing threshold is ${threshold}%. Review the clinical rationales and retake the exam.</p>
         `;
       }
 
@@ -2528,10 +4361,10 @@
           id: 'ATT-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
           userId: currentUser.id,
           learnerName: currentUser.fullName,
-          courseId: 'CRS-NRP-01',
-          courseTitle: 'Neonatal Resuscitation Program (NRP)',
-          score: correctCount,
-          total: questions.length,
+          courseId: currentAsm ? currentAsm.courseId : 'CRS-NRP-01',
+          courseTitle: currentAsm ? currentAsm.title : 'Neonatal Resuscitation Program (NRP)',
+          score: earnedPoints,
+          total: totalPoints,
           percentage: scorePercent,
           passed: passed,
           date: new Date().toISOString().split('T')[0]
@@ -2540,37 +4373,48 @@
         saveState();
         renderLearningTab();
 
-        // Push attempt to Google Sheets
-        const webAppUrl = localStorage.getItem('lms_web_app_url');
-        if (webAppUrl) {
-          fetch(webAppUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'appendRecord',
-              sheetKey: 'attempts',
-              records: [{
-                'Attempt_ID': newAttempt.id,
-                'Assessment_ID': 'ASM-NRP-01',
-                'Learner_ID': currentUser.id,
-                'Learner_Name': currentUser.fullName,
-                'Course_ID': 'CRS-NRP-01',
-                'Attempt_Number': 1,
-                'Score': correctCount,
-                'Percentage': scorePercent,
-                'Passed': passed ? 'YES' : 'NO',
-                'Submitted_Date': new Date().toISOString(),
-                'Answers_JSON': JSON.stringify(userAnswers)
-              }]
-            }),
-            mode: 'no-cors'
-          }).catch(() => {});
+        // Push attempt to Google Sheets (Offline-Aware)
+        const attemptRecord = {
+          'Attempt_ID': newAttempt.id,
+          'Assessment_ID': activeAssessmentId,
+          'Learner_ID': currentUser.id,
+          'Learner_Name': currentUser.fullName,
+          'Course_ID': newAttempt.courseId,
+          'Attempt_Number': 1,
+          'Score': earnedPoints,
+          'Percentage': scorePercent,
+          'Passed': passed ? 'YES' : 'NO',
+          'Submitted_Date': new Date().toISOString(),
+          'Answers_JSON': JSON.stringify(userAnswers)
+        };
+
+        if (!navigator.onLine) {
+          idbEnqueueSync('attempts', [attemptRecord]);
+          showToast('Offline Mode: Quiz attempt saved to device. Will auto-sync to Google Sheet once connected!', 'info');
+        } else {
+          const webAppUrl = localStorage.getItem('lms_web_app_url');
+          if (webAppUrl) {
+            fetch(webAppUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action: 'appendRecord',
+                sheetKey: 'attempts',
+                records: [attemptRecord]
+              }),
+              mode: 'no-cors'
+            }).catch(() => {
+              idbEnqueueSync('attempts', [attemptRecord]);
+            });
+          } else {
+            idbEnqueueSync('attempts', [attemptRecord]);
+          }
         }
 
         if (passed) {
           box.innerHTML += `
             <div class="pt-3 border-t border-emerald-200 mt-2">
-              <button onclick="openCertificateModal('Neonatal Resuscitation Program (NRP)', '${scorePercent}%')" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5 mx-auto">
+              <button onclick="openCertificateModal('${currentAsm ? currentAsm.title : 'Neonatal Resuscitation Program (NRP)'}', '${scorePercent}%')" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-1.5 mx-auto">
                 <span>🏆</span> View Clinical Certificate of Competency
               </button>
             </div>
@@ -2581,11 +4425,13 @@
 
     function resetQuizAnswers() {
       userAnswers = {};
-      const radios = document.querySelectorAll('input[type="radio"]');
-      radios.forEach(r => {
-        if (r.name.startsWith('simulator_q_')) r.checked = false;
+      const inputs = document.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+      inputs.forEach(r => {
+        if (r.name && r.name.startsWith('simulator_q_')) r.checked = false;
       });
-      document.getElementById('quiz-result-box').classList.add('hidden');
+      const box = document.getElementById('quiz-result-box');
+      if (box) box.classList.add('hidden');
+      renderQuizEditor();
       showToast('Answers reset.');
     }
 
@@ -2629,22 +4475,60 @@
         }
       }
 
-      showToast('Syncing with Google Sheets...', 'ok');
+      showToast('Syncing all curriculum, lessons, exams, and questions to Google Sheets...', 'ok');
 
       try {
         const payload = {
-          action: 'syncCourses',
-          sheetKey: 'courses',
-          records: courses.map(c => ({
+          action: 'syncAllCurriculum',
+          courses: courses.map(c => ({
             'Course_ID': c.id,
             'Course_Title': c.title,
             'Category': c.category,
+            'Difficulty': c.difficulty || 'Intermediate',
             'Instructor_ID': 'INST-01',
             'Instructor_Name': c.instructor,
-            'Description': c.desc,
+            'Total_Modules': c.modules,
+            'CME_Credits': c.cmeCredits || '2.0 CPD Hours',
             'Status': c.status || 'published',
-            'Created_Date': new Date().toISOString(),
-            'Total_Modules': c.modules
+            'Thumbnail_URL': c.thumbnail || '',
+            'Description': c.desc,
+            'Created_Date': new Date().toISOString()
+          })),
+          lessons: lessons.map(l => ({
+            'Lesson_ID': l.id,
+            'Course_ID': l.courseId,
+            'Module_Number': l.moduleNumber,
+            'Lesson_Title': l.title,
+            'Content_Type': l.type || 'clinical',
+            'Duration_Minutes': l.duration,
+            'Video_URL': l.mediaUrl || '',
+            'Summary': (l.body || '').substring(0, 200),
+            'Created_Date': new Date().toISOString()
+          })),
+          assessments: assessmentsList.map(a => ({
+            'Assessment_ID': a.id,
+            'Course_ID': a.courseId,
+            'Title': a.title,
+            'Type': a.type || 'certification',
+            'Passing_Score': a.passingScore,
+            'Time_Limit_Minutes': a.timeLimit || 30,
+            'Instructions': a.instructions || '',
+            'Total_Questions': questions.filter(q => q.assessmentId === a.id).length
+          })),
+          questions: questions.map((q, idx) => ({
+            'Question_ID': q.id || ('QST-' + (idx + 1)),
+            'Assessment_ID': q.assessmentId || activeAssessmentId,
+            'Question_Text': q.q,
+            'Question_Type': q.type || 'single',
+            'Difficulty': q.difficulty || 'Intermediate',
+            'Points': q.points || 1,
+            'Media_URL': q.mediaUrl || '',
+            'Option_A': q.options[0] || '',
+            'Option_B': q.options[1] || '',
+            'Option_C': q.options[2] || '',
+            'Option_D': q.options[3] || '',
+            'Correct_Option_Index': Array.isArray(q.correct) ? JSON.stringify(q.correct) : q.correct,
+            'Explanation': q.explanation || ''
           }))
         };
 
@@ -2652,12 +4536,12 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
-          mode: 'no-cors' // Google Apps Script requires no-cors on direct client fetch
+          mode: 'no-cors'
         });
 
-        showToast('Sync completed! Courses and curriculum pushed to Google Sheets.');
+        showToast('Sync completed! Courses, lessons, exams, and questions successfully updated in Google Sheets.', 'ok');
       } catch (err) {
-        showToast('Sync completed locally. Check Google Sheet tab.');
+        showToast('Local sync complete. Check Google Sheet.');
       }
     }
 
@@ -2731,8 +4615,43 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // INITIALIZATION
-    window.addEventListener('DOMContentLoaded', () => {
+    // INITIALIZATION & OFFLINE ENGINE BOOTSTRAP
+    window.addEventListener('DOMContentLoaded', async () => {
+      // 1. Register Service Worker for offline app shell caching
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js')
+          .then(reg => console.log('LMS Service Worker active:', reg.scope))
+          .catch(err => console.warn('LMS Service Worker registration notice:', err));
+      }
+
+      // 2. Initialize IndexedDB & cache current data
+      await openIndexedDB();
+      await cacheAllToIndexedDB();
+
+      // 3. Setup online / offline network connectivity listeners
+      window.addEventListener('online', () => {
+        updateNetworkStatusBadge();
+        showToast('Internet connection restored! Syncing offline progress...', 'ok');
+        processSyncQueue();
+      });
+
+      window.addEventListener('offline', () => {
+        updateNetworkStatusBadge();
+        showToast('Network disconnected. Offline study mode active.', 'info');
+      });
+
+      updateNetworkStatusBadge();
+
+      // 4. Background Sync Interval (Every 30 seconds)
+      setInterval(() => {
+        if (navigator.onLine) processSyncQueue();
+      }, 30000);
+
+      // Trigger queue process if online
+      if (navigator.onLine) {
+        processSyncQueue();
+      }
+
       const savedUrl = localStorage.getItem('lms_web_app_url');
       if (savedUrl) {
         const urlInput = document.getElementById('sheets-config-url');
@@ -2740,6 +4659,7 @@
       }
       renderAuthUI();
       renderCourses();
+      renderAssessmentSelector();
       renderQuizEditor();
       renderSheetTabs();
       checkEmailResetLink();

@@ -328,6 +328,37 @@ class LmsViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun submitLessonFeedback(lessonId: String, rating: Int, comment: String) {
+        val user = _currentUser.value ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            val feedbackId = "FBK-" + System.currentTimeMillis().toString().takeLast(6)
+            val now = com.example.data.util.PasswordHelper.formattedNow()
+
+            val feedbackObj = org.json.JSONObject().apply {
+                put("Feedback_ID", feedbackId)
+                put("Lesson_ID", lessonId)
+                put("Learner_ID", user.userId)
+                put("Learner_Name", user.fullName)
+                put("Rating", rating)
+                put("Comment", comment.trim().ifBlank { "Helpful clinical lesson content" })
+                put("Timestamp", now)
+            }
+            pushRecordToGoogleSheet("Lesson_Feedback", feedbackObj)
+
+            val logObj = org.json.JSONObject().apply {
+                put("Log_ID", "LOG-" + System.currentTimeMillis().toString().takeLast(6))
+                put("User_ID", user.email)
+                put("Action", "LESSON_FEEDBACK ($rating stars on $lessonId)")
+                put("Timestamp", now)
+                put("IP_Address", "127.0.0.1")
+                put("Device_Info", "Android Mobile App")
+            }
+            pushRecordToGoogleSheet("Activity_Logs", logObj)
+
+            showToast("ok", "Feedback Sent", "Thank you! Your $rating-star rating was submitted to Google Sheets.")
+        }
+    }
+
     // --- RESOURCE ACTIONS ---
     fun addResource(lessonId: String, fileName: String, fileType: String, fileUrl: String) {
         val user = _currentUser.value ?: return
