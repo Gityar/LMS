@@ -2108,14 +2108,18 @@
       const pageAddCourse = document.getElementById('btn-add-course-page');
       if (pageAddCourse) pageAddCourse.style.display = canManageCurriculum() ? 'inline-flex' : 'none';
 
+      const newAsmBtn = document.getElementById('btn-new-assessment');
+      if (newAsmBtn) newAsmBtn.style.display = canManageCurriculum() ? 'inline-flex' : 'none';
+
       const addQBtn = document.getElementById('btn-add-question-quiz');
       if (addQBtn) addQBtn.style.display = canManageCurriculum() ? 'inline-flex' : 'none';
 
-      // Adapt assessment settings panel (only for Admin & Instructor)
+      // Adapt assessment settings panel (Strictly for Admin & Instructor only)
       const settingsPanel = document.getElementById('assessment-settings-panel');
       if (settingsPanel) {
         if (canManageCurriculum()) {
           settingsPanel.classList.remove('hidden');
+          settingsPanel.style.display = 'block';
           const passInput = document.getElementById('setting-passing-score');
           if (passInput) passInput.value = assessmentSettings.passingScore;
           const titleInput = document.getElementById('setting-exam-title');
@@ -2124,6 +2128,7 @@
           if (linkedCourse) linkedCourse.value = assessmentSettings.courseId || 'CRS-NRP-01';
         } else {
           settingsPanel.classList.add('hidden');
+          settingsPanel.style.display = 'none';
         }
       }
 
@@ -3593,10 +3598,23 @@
         }
       }
 
-      // Show/hide instructor panel based on permissions
+      // Show/hide instructor panel and creation buttons strictly based on permissions
+      const isManager = canManageCurriculum();
+      const btnNewAsm = document.getElementById('btn-new-assessment');
+      if (btnNewAsm) btnNewAsm.style.display = isManager ? 'inline-flex' : 'none';
+
+      const btnAddQ = document.getElementById('btn-add-question-quiz');
+      if (btnAddQ) btnAddQ.style.display = isManager ? 'inline-flex' : 'none';
+
       const panel = document.getElementById('assessment-settings-panel');
       if (panel) {
-        panel.style.display = canManageCurriculum() ? 'block' : 'none';
+        if (isManager) {
+          panel.classList.remove('hidden');
+          panel.style.display = 'block';
+        } else {
+          panel.classList.add('hidden');
+          panel.style.display = 'none';
+        }
       }
     }
 
@@ -4038,6 +4056,9 @@
     }
 
     function duplicateCurrentQuestion() {
+      if (!checkPermission('curriculum', 'duplicate test questions')) {
+        return;
+      }
       const editIdx = parseInt(document.getElementById('question-editing-idx').value);
       if (editIdx >= 0 && questions[editIdx]) {
         const orig = questions[editIdx];
@@ -4053,6 +4074,9 @@
     }
 
     function editQuestion(idx) {
+      if (!checkPermission('curriculum', 'edit test questions')) {
+        return;
+      }
       openQuestionModal(idx);
     }
 
@@ -4610,6 +4634,11 @@
 
       if (tab === 'learning') {
         renderLearningTab();
+      }
+
+      if (tab === 'quiz') {
+        renderAssessmentSelector();
+        renderQuizEditor();
       }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
