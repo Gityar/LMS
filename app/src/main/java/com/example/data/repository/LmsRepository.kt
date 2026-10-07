@@ -424,6 +424,56 @@ class LmsRepository(private val dao: LmsDao) {
     fun getQuestionsForAssessment(assessmentId: String): Flow<List<QuestionEntity>> =
         dao.getQuestionsForAssessment(assessmentId)
 
+    suspend fun updateAssessment(
+        assessmentId: String,
+        title: String,
+        passingScore: Int,
+        user: UserEntity
+    ): Boolean {
+        val asm = dao.getAssessmentById(assessmentId) ?: return false
+        val updated = asm.copy(
+            assessmentTitle = title.trim(),
+            passingScore = passingScore
+        )
+        dao.insertAssessment(updated)
+        logActivity(user.email, "UPDATE_ASSESSMENT", "Updated passing score to $passingScore% for ${asm.assessmentTitle}")
+        return true
+    }
+
+    suspend fun updateQuestion(
+        questionId: String,
+        assessmentId: String,
+        text: String,
+        optA: String,
+        optB: String,
+        optC: String,
+        optD: String,
+        correct: String,
+        points: Int,
+        user: UserEntity
+    ): Boolean {
+        val q = QuestionEntity(
+            questionId = questionId,
+            assessmentId = assessmentId,
+            questionText = text.trim(),
+            optionA = optA.trim(),
+            optionB = optB.trim(),
+            optionC = optC.trim(),
+            optionD = optD.trim(),
+            correctAnswer = correct.uppercase().trim(),
+            points = points
+        )
+        dao.insertQuestion(q)
+        logActivity(user.email, "UPDATE_QUESTION", "Updated question $questionId")
+        return true
+    }
+
+    suspend fun deleteQuestion(questionId: String, user: UserEntity): Boolean {
+        dao.deleteQuestionById(questionId)
+        logActivity(user.email, "DELETE_QUESTION", "Deleted question $questionId")
+        return true
+    }
+
     suspend fun addQuestion(
         assessmentId: String,
         text: String,

@@ -75,6 +75,7 @@ fun CourseDetailScreen(
     var assignmentToSubmit by remember { mutableStateOf<AssignmentEntity?>(null) }
     var assignmentForSubmissions by remember { mutableStateOf<AssignmentEntity?>(null) }
     var assessmentToAddQuestion by remember { mutableStateOf<AssessmentEntity?>(null) }
+    var assessmentToEditSettings by remember { mutableStateOf<AssessmentEntity?>(null) }
 
     Column(
         modifier = modifier
@@ -503,6 +504,17 @@ fun CourseDetailScreen(
                                                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(14.dp))
                                                 Spacer(modifier = Modifier.width(4.dp))
                                                 Text("Add Question", fontSize = 12.sp)
+                                            }
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            FilledTonalButton(
+                                                onClick = { assessmentToEditSettings = asm },
+                                                shape = RoundedCornerShape(8.dp),
+                                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                                                modifier = Modifier.height(34.dp)
+                                            ) {
+                                                Icon(Icons.Default.Settings, contentDescription = null, modifier = Modifier.size(14.dp))
+                                                Spacer(modifier = Modifier.width(4.dp))
+                                                Text("Settings", fontSize = 12.sp)
                                             }
                                             Spacer(modifier = Modifier.width(6.dp))
                                             OutlinedButton(
@@ -984,6 +996,63 @@ fun CourseDetailScreen(
             },
             dismissButton = {
                 TextButton(onClick = { assessmentToAddQuestion = null }) { Text("Cancel") }
+            }
+        )
+    }
+
+    // MODAL: EDIT ASSESSMENT SETTINGS
+    if (assessmentToEditSettings != null) {
+        val asm = assessmentToEditSettings!!
+        var editTitle by remember { mutableStateOf(asm.assessmentTitle) }
+        var editScore by remember { mutableStateOf(asm.passingScore.toString()) }
+
+        AlertDialog(
+            onDismissRequest = { assessmentToEditSettings = null },
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Settings, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Assessment Settings", fontWeight = FontWeight.Bold)
+                }
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    OutlinedTextField(
+                        value = editTitle,
+                        onValueChange = { editTitle = it },
+                        label = { Text("Assessment Title") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = editScore,
+                        onValueChange = { editScore = it },
+                        label = { Text("Passing Score Threshold (%)") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Text(
+                        text = "Score required to award the accredited Clinical Certificate of Completion.",
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val score = editScore.toIntOrNull() ?: 80
+                        viewModel.updateAssessmentSettings(asm.assessmentId, editTitle, score)
+                        assessmentToEditSettings = null
+                    }
+                ) {
+                    Text("Save Settings")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { assessmentToEditSettings = null }) {
+                    Text("Cancel")
+                }
             }
         )
     }

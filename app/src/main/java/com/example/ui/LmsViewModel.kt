@@ -104,7 +104,33 @@ class LmsViewModel(application: Application) : AndroidViewModel(application) {
         _toasts.update { list -> list.filterNot { it.id == id } }
     }
 
+    fun checkPermission(requiredRole: String = "admin", actionName: String = "perform this operation"): Boolean {
+        val user = _currentUser.value
+        if (user == null) {
+            showToast("err", "Access Denied", "Please log in to $actionName.")
+            return false
+        }
+        val role = user.role.trim().lowercase()
+        val allowed = when (requiredRole.lowercase()) {
+            "admin" -> role == "admin"
+            "instructor" -> role == "instructor"
+            "curriculum", "staff" -> role == "admin" || role == "instructor"
+            else -> role == requiredRole.lowercase()
+        }
+        if (!allowed) {
+            showToast("err", "Permission Denied", "Your role (${user.role}) is not authorized to $actionName.")
+            return false
+        }
+        return true
+    }
+
     fun navigateTo(screen: Screen) {
+        if (screen is Screen.GoogleSheetHub) {
+            if (!checkPermission("admin", "access Google Sheets Database Admin")) return
+        }
+        if (screen is Screen.Users || screen is Screen.ActivityLogs) {
+            if (!checkPermission("admin", "access administrative records")) return
+        }
         screenStack.add(_currentScreen.value)
         _currentScreen.value = screen
     }
@@ -209,6 +235,7 @@ class LmsViewModel(application: Application) : AndroidViewModel(application) {
 
     // --- COURSE ACTIONS ---
     fun createCourse(title: String, category: String, description: String) {
+        if (!checkPermission("curriculum", "create courses")) return
         val user = _currentUser.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
             repository.createCourse(title, category, description, user)
@@ -218,6 +245,7 @@ class LmsViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun updateCourse(courseId: String, title: String, category: String, description: String) {
+        if (!checkPermission("curriculum", "update courses")) return
         val user = _currentUser.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
             val ok = repository.updateCourse(courseId, title, category, description, user)
@@ -226,6 +254,7 @@ class LmsViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun deleteCourse(courseId: String) {
+        if (!checkPermission("curriculum", "delete courses")) return
         val user = _currentUser.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
             repository.deleteCourse(courseId, user)
@@ -259,6 +288,7 @@ class LmsViewModel(application: Application) : AndroidViewModel(application) {
         videoUrl: String,
         resourceUrl: String
     ) {
+        if (!checkPermission("curriculum", "create lesson modules")) return
         val user = _currentUser.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
             repository.createLesson(courseId, moduleNumber, title, contentType, duration, body, videoUrl, resourceUrl, user)
@@ -277,6 +307,7 @@ class LmsViewModel(application: Application) : AndroidViewModel(application) {
         videoUrl: String,
         resourceUrl: String
     ) {
+        if (!checkPermission("curriculum", "edit lessons")) return
         val user = _currentUser.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
             val ok = repository.updateLesson(lessonId, moduleNumber, title, contentType, duration, body, videoUrl, resourceUrl, user)
@@ -285,6 +316,7 @@ class LmsViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun deleteLesson(lessonId: String, courseId: String) {
+        if (!checkPermission("curriculum", "delete lessons")) return
         val user = _currentUser.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
             repository.deleteLesson(lessonId, user)
@@ -348,6 +380,7 @@ class LmsViewModel(application: Application) : AndroidViewModel(application) {
 
     // --- ASSESSMENT ACTIONS ---
     fun createAssessment(courseId: String, moduleNumber: Int, title: String, description: String, passingScore: Int, timeLimit: Int) {
+        if (!checkPermission("curriculum", "create assessments")) return
         val user = _currentUser.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
             repository.createAssessment(courseId, moduleNumber, title, description, passingScore, timeLimit, user)
@@ -355,7 +388,55 @@ class LmsViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun updateAssessmentSettings(assessmentId: String, title: String, passingScore: Int) {
+        if (!checkPermission("curriculum", "update assessment passing score")) return
+        val user = _currentUser.value ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            val ok = repository.updateAssessment(assessmentId, title, passingScore, user)
+            if (ok) {
+                showToast("ok", "Assessment Updated", "Passing threshold set to $passingScore%.")
+                val asmObj = org.json.JSONObject().apply {
+                    put("Assessment_ID", assessmentId)
+                    put("Course_ID", "")
+                    put("Title", title)
+                    put("Passing_Score", passingScore)
+                    put("Total_Questions", 4)
+                }
+                pushRecordToGoogleSheet("assessments", asmObj)
+            }
+        }
+    }
+
+    fun updateQuestion(
+        questionId: String,
+        assessmentId: String,
+        text: String,
+        optA: String,
+        optB: String,
+        optC: String,
+        optD: String,
+        correct: String,
+        points: Int
+    ) {
+        if (!checkPermission("curriculum", "update questions")) return
+        val user = _currentUser.value ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.updateQuestion(questionId, assessmentId, text, optA, optB, optC, optD, correct, points, user)
+            showToast("ok", "Question Updated", "Test question updated successfully.")
+        }
+    }
+
+    fun deleteQuestion(questionId: String) {
+        if (!checkPermission("curriculum", "delete questions")) return
+        val user = _currentUser.value ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.deleteQuestion(questionId, user)
+            showToast("ok", "Deleted", "Question deleted from exam bank.")
+        }
+    }
+
     fun addQuestion(assessmentId: String, text: String, optA: String, optB: String, optC: String, optD: String, correct: String, points: Int) {
+        if (!checkPermission("curriculum", "add questions to the assessment bank")) return
         val user = _currentUser.value ?: return
         viewModelScope.launch(Dispatchers.IO) {
             repository.addQuestion(assessmentId, text, optA, optB, optC, optD, correct, points, user)
@@ -400,6 +481,7 @@ class LmsViewModel(application: Application) : AndroidViewModel(application) {
     val sheetSyncStatus: StateFlow<SheetSyncStatus> = _sheetSyncStatus.asStateFlow()
 
     fun updateGoogleSheetId(newId: String) {
+        if (!checkPermission("admin", "update Google Spreadsheet ID")) return
         val trimmed = newId.trim()
         prefs.edit().putString("spreadsheet_id", trimmed).apply()
         _sheetSyncStatus.update { it.copy(spreadsheetId = trimmed) }
@@ -407,6 +489,7 @@ class LmsViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun updateWebAppUrl(url: String) {
+        if (!checkPermission("admin", "update Web App endpoint URL")) return
         val trimmed = url.trim()
         prefs.edit().putString("web_app_url", trimmed).apply()
         _sheetSyncStatus.update { it.copy(webAppUrl = trimmed) }
@@ -446,6 +529,7 @@ class LmsViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun syncWithGoogleSheet() {
+        if (!checkPermission("admin", "trigger Google Sheets synchronization")) return
         val user = _currentUser.value
         val webAppUrl = _sheetSyncStatus.value.webAppUrl
         viewModelScope.launch(Dispatchers.IO) {

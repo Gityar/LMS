@@ -82,11 +82,11 @@ suspend fun seedInitialData(dao: LmsDao) {
     )
     dao.insertUser(admin)
 
-    // 2. Instructor User
+    // 2. Instructor Users
     val instructor = UserEntity(
         userId = "USR-INST-02",
-        fullName = "Sarah Johnson, NNP",
-        email = "nurse.sarah@hospital.org",
+        fullName = "Sister Almaz",
+        email = "almaz@neonatal.et",
         passwordHash = PasswordHelper.hashPassword("Instructor@2026"),
         role = "instructor",
         registrationDate = now,
@@ -94,9 +94,31 @@ suspend fun seedInitialData(dao: LmsDao) {
     )
     dao.insertUser(instructor)
 
-    // 3. Learner User
+    val instructor2 = UserEntity(
+        userId = "USR-INST-03",
+        fullName = "Sarah Johnson, NNP",
+        email = "nurse.sarah@hospital.org",
+        passwordHash = PasswordHelper.hashPassword("Instructor@2026"),
+        role = "instructor",
+        registrationDate = now,
+        accountStatus = "active"
+    )
+    dao.insertUser(instructor2)
+
+    // 3. Learner Users
     val learner = UserEntity(
-        userId = "USR-LEARN-03",
+        userId = "USR-LEARN-04",
+        fullName = "Nurse Tigist Mengistu",
+        email = "nurse.tigist@hospital.et",
+        passwordHash = PasswordHelper.hashPassword("Learner@2026"),
+        role = "learner",
+        registrationDate = now,
+        accountStatus = "active"
+    )
+    dao.insertUser(learner)
+
+    val learner2 = UserEntity(
+        userId = "USR-LEARN-05",
         fullName = "Alex Smith, RN",
         email = "learner@hospital.org",
         passwordHash = PasswordHelper.hashPassword("Learner@2026"),
@@ -104,7 +126,7 @@ suspend fun seedInitialData(dao: LmsDao) {
         registrationDate = now,
         accountStatus = "active"
     )
-    dao.insertUser(learner)
+    dao.insertUser(learner2)
 
     // Seed Courses
     val c1 = CourseEntity(

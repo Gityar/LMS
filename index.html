@@ -39,9 +39,9 @@
 
   <!-- TOP STATUS BANNER -->
   <div class="bg-indigo-950 text-indigo-100 text-xs py-2 px-4 text-center font-medium flex items-center justify-between border-b border-indigo-900/60">
-    <div class="flex items-center gap-2 truncate">
+    <div class="flex items-center gap-2 truncate" id="top-database-badge">
       <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-      <span class="truncate">Database: <strong class="font-mono text-emerald-300">1TQcak2SNQ3oT9DBz_nyrOzVh8fWfNRVsWqt7Rk_1uTA</strong></span>
+      <span class="truncate">Evidence-Based NICU Clinical Education Portal</span>
     </div>
     <div class="flex items-center gap-3 flex-shrink-0" id="top-user-banner">
       <!-- Injected by JavaScript -->
@@ -1035,8 +1035,65 @@
     };
     let userAnswers = {};
 
+    /**
+     * Validates that the active user session stored in localStorage has the required role
+     * before executing sensitive operations like deleting courses, modifying lessons/exams, or accessing Admin tools.
+     * @param {string|string[]} requiredRole - 'admin', 'instructor', 'curriculum' (admin or instructor), or array of allowed roles
+     * @param {string} [actionName=''] - Description of the operation for user feedback
+     * @returns {boolean} - true if authorized, false otherwise
+     */
+    function checkPermission(requiredRole = 'admin', actionName = '') {
+      try {
+        const storedUserRaw = localStorage.getItem('lms_current_user');
+        if (!storedUserRaw) {
+          if (actionName) {
+            showToast(`Access Denied: Please log in to ${actionName}.`, 'err');
+            openLoginModal();
+          }
+          return false;
+        }
+
+        const storedUser = JSON.parse(storedUserRaw);
+        if (!storedUser || !storedUser.role) {
+          if (actionName) {
+            showToast('Access Denied: Invalid user session. Please re-authenticate.', 'err');
+            openLoginModal();
+          }
+          return false;
+        }
+
+        // Keep runtime currentUser state in sync with validated localStorage data
+        currentUser = storedUser;
+        const userRole = String(storedUser.role).trim().toLowerCase();
+
+        let authorized = false;
+        if (requiredRole === 'admin') {
+          authorized = (userRole === 'admin');
+        } else if (requiredRole === 'instructor') {
+          authorized = (userRole === 'instructor');
+        } else if (requiredRole === 'curriculum' || requiredRole === 'staff') {
+          authorized = (userRole === 'admin' || userRole === 'instructor');
+        } else if (Array.isArray(requiredRole)) {
+          authorized = requiredRole.map(r => String(r).trim().toLowerCase()).includes(userRole);
+        } else {
+          authorized = (userRole === String(requiredRole).trim().toLowerCase());
+        }
+
+        if (!authorized && actionName) {
+          showToast(`Permission Denied: Your role (${storedUser.role}) is not authorized to ${actionName}.`, 'err');
+        }
+        return authorized;
+      } catch (err) {
+        console.error('checkPermission error:', err);
+        if (actionName) {
+          showToast(`Security check failed: ${err.message}`, 'err');
+        }
+        return false;
+      }
+    }
+
     function canManageCurriculum() {
-      return currentUser && (currentUser.role === 'admin' || currentUser.role === 'instructor');
+      return checkPermission('curriculum');
     }
 
     function saveState() {
@@ -1207,10 +1264,10 @@
         }
       }
 
-      // Only expose the Google Sheets Database Admin tab to logged-in administrators
+      // Only expose the Google Sheets Database Admin tab to verified administrators in localStorage
       const sheetsNav = document.getElementById('nav-sheets');
       if (sheetsNav) {
-        if (currentUser && currentUser.role === 'admin') {
+        if (checkPermission('admin')) {
           sheetsNav.classList.remove('hidden');
         } else {
           sheetsNav.classList.add('hidden');
@@ -2041,19 +2098,23 @@
     }
 
     function deleteCourse(id) {
-      requireAdminAuth(() => {
-        if (confirm(`Are you sure you want to delete course ${id}?`)) {
-          courses = courses.filter(c => c.id !== id);
-          lessons = lessons.filter(l => l.courseId !== id);
-          saveState();
-          renderCourses();
-          showToast(`Course ${id} deleted.`);
-        }
-      });
+      if (!checkPermission('curriculum', `delete course ${id}`)) {
+        return;
+      }
+      if (confirm(`Are you sure you want to delete course ${id}?`)) {
+        courses = courses.filter(c => c.id !== id);
+        lessons = lessons.filter(l => l.courseId !== id);
+        saveState();
+        renderCourses();
+        showToast(`Course ${id} deleted.`);
+      }
     }
 
     function saveCourse(e) {
       e.preventDefault();
+      if (!checkPermission('curriculum', 'create or update courses')) {
+        return;
+      }
       const editId = document.getElementById('course-editing-id').value;
       const id = document.getElementById('course-form-id').value.trim();
       const title = document.getElementById('course-form-title').value.trim();
@@ -2144,46 +2205,47 @@
 
     function addLessonToCourse(e) {
       e.preventDefault();
-      requireAdminAuth(() => {
-        const moduleNumber = parseInt(document.getElementById('lesson-module-num').value) || 1;
-        const title = document.getElementById('lesson-title').value.trim();
-        const type = document.getElementById('lesson-type').value;
-        const duration = parseInt(document.getElementById('lesson-duration').value) || 20;
-        const body = document.getElementById('lesson-body').value.trim();
+      if (!checkPermission('curriculum', 'add lessons to this course')) {
+        return;
+      }
+      const moduleNumber = parseInt(document.getElementById('lesson-module-num').value) || 1;
+      const title = document.getElementById('lesson-title').value.trim();
+      const type = document.getElementById('lesson-type').value;
+      const duration = parseInt(document.getElementById('lesson-duration').value) || 20;
+      const body = document.getElementById('lesson-body').value.trim();
 
-        const newLesson = {
-          id: 'LES-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
-          courseId: currentLessonsCourseId,
-          moduleNumber,
-          title,
-          type,
-          duration,
-          body
-        };
+      const newLesson = {
+        id: 'LES-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+        courseId: currentLessonsCourseId,
+        moduleNumber,
+        title,
+        type,
+        duration,
+        body
+      };
 
-        lessons.push(newLesson);
-        saveState();
-        renderLessonsList(currentLessonsCourseId);
-        document.getElementById('lesson-title').value = '';
-        document.getElementById('lesson-body').value = '';
-        showToast('Lesson unit added.');
-      });
+      lessons.push(newLesson);
+      saveState();
+      renderLessonsList(currentLessonsCourseId);
+      document.getElementById('lesson-title').value = '';
+      document.getElementById('lesson-body').value = '';
+      showToast('Lesson unit added.');
     }
 
     function deleteLesson(lessonId) {
-      requireAdminAuth(() => {
-        lessons = lessons.filter(l => l.id !== lessonId);
-        saveState();
-        renderLessonsList(currentLessonsCourseId);
-        showToast('Lesson removed.');
-      });
+      if (!checkPermission('curriculum', 'delete lessons')) {
+        return;
+      }
+      lessons = lessons.filter(l => l.id !== lessonId);
+      saveState();
+      renderLessonsList(currentLessonsCourseId);
+      showToast('Lesson removed.');
     }
 
     // ==================== ASSESSMENTS & QUESTIONS ====================
     function saveAssessmentSettingsForm(e) {
       if (e) e.preventDefault();
-      if (!canManageCurriculum()) {
-        showToast('Permission Denied: Only Instructors and Admins can update assessment settings.', 'err');
+      if (!checkPermission('curriculum', 'update assessment settings')) {
         return;
       }
       const score = parseInt(document.getElementById('setting-passing-score').value) || 80;
@@ -2289,9 +2351,10 @@
     }
 
     function openQuestionModal(editIdx = -1) {
-      requireAdminAuth(() => {
-        openQuestionModalInternal(editIdx);
-      });
+      if (!checkPermission('curriculum', 'author or edit questions')) {
+        return;
+      }
+      openQuestionModalInternal(editIdx);
     }
 
     function openQuestionModalInternal(editIdx = -1) {
@@ -2332,20 +2395,20 @@
     }
 
     function deleteQuestion(idx) {
-      requireAdminAuth(() => {
-        if (confirm('Delete question #' + (idx + 1) + '?')) {
-          questions.splice(idx, 1);
-          saveState();
-          renderQuizEditor();
-          showToast('Question deleted.');
-        }
-      });
+      if (!checkPermission('curriculum', 'delete questions from the exam bank')) {
+        return;
+      }
+      if (confirm('Delete question #' + (idx + 1) + '?')) {
+        questions.splice(idx, 1);
+        saveState();
+        renderQuizEditor();
+        showToast('Question deleted.');
+      }
     }
 
     function saveQuestion(e) {
       e.preventDefault();
-      if (!canManageCurriculum()) {
-        showToast('Permission Denied: Only Instructors and Admins can save questions.', 'err');
+      if (!checkPermission('curriculum', 'save exam questions')) {
         return;
       }
       const idx = parseInt(document.getElementById('question-editing-idx').value);
@@ -2544,12 +2607,16 @@
     }
 
     function pushAllToGoogleSheets() {
-      requireAdminAuth(() => {
-        doPushAllToGoogleSheets();
-      });
+      if (!checkPermission('admin', 'sync curriculum to Google Sheets')) {
+        return;
+      }
+      doPushAllToGoogleSheets();
     }
 
     async function doPushAllToGoogleSheets() {
+      if (!checkPermission('admin', 'sync data to Google Sheets')) {
+        return;
+      }
       const url = localStorage.getItem('lms_web_app_url') || document.getElementById('sheets-config-url').value.trim();
 
       if (!url) {
@@ -2595,34 +2662,36 @@
     }
 
     function resetSeedData() {
-      requireAdminAuth(() => {
-        if (confirm('Reset courses, lessons, and questions to default Ethiopian neonatal curriculum?')) {
-          localStorage.clear();
-          courses = [...DEFAULT_COURSES];
-          lessons = [...DEFAULT_LESSONS];
-          questions = [...DEFAULT_QUESTIONS];
-          users = [...DEFAULT_USERS];
-          currentUser = null;
-          enrollments = [...DEFAULT_ENROLLMENTS];
-          attempts = [...DEFAULT_ATTEMPTS];
-          saveState();
-          renderAuthUI();
-          renderCourses();
-          renderQuizEditor();
-          showToast('Reset to default curriculum.');
-        }
-      });
+      if (!checkPermission('admin', 'reset system curriculum data')) {
+        return;
+      }
+      if (confirm('Reset courses, lessons, and questions to default Ethiopian neonatal curriculum?')) {
+        localStorage.clear();
+        courses = [...DEFAULT_COURSES];
+        lessons = [...DEFAULT_LESSONS];
+        questions = [...DEFAULT_QUESTIONS];
+        users = [...DEFAULT_USERS];
+        currentUser = null;
+        enrollments = [...DEFAULT_ENROLLMENTS];
+        attempts = [...DEFAULT_ATTEMPTS];
+        saveState();
+        renderAuthUI();
+        renderCourses();
+        renderQuizEditor();
+        showToast('Reset to default curriculum.');
+      }
     }
 
     function openSheetLink() {
+      if (!checkPermission('admin', 'view the live Google Spreadsheet')) {
+        return;
+      }
       window.open(`https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/edit`, '_blank');
     }
 
     function switchTab(tab) {
       if (tab === 'sheets') {
-        if (!currentUser || currentUser.role !== 'admin') {
-          showToast('Administrator authentication required to access database settings.', 'err');
-          openLoginModal();
+        if (!checkPermission('admin', 'access Database Admin console')) {
           return;
         }
       }
@@ -2632,7 +2701,8 @@
         const nav = document.getElementById('nav-' + t);
         if (sec) sec.classList.add('hidden');
         if (nav) {
-          nav.className = 'px-3.5 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition';
+          nav.classList.remove('text-indigo-600', 'bg-indigo-50', 'font-semibold');
+          nav.classList.add('hover:text-slate-900', 'hover:bg-slate-100');
         }
       });
 
@@ -2640,7 +2710,18 @@
       const activeNav = document.getElementById('nav-' + tab);
       if (activeSec) activeSec.classList.remove('hidden');
       if (activeNav) {
-        activeNav.className = 'px-3.5 py-1.5 rounded-lg text-indigo-600 bg-indigo-50 font-semibold transition';
+        activeNav.classList.remove('hover:text-slate-900', 'hover:bg-slate-100');
+        activeNav.classList.add('text-indigo-600', 'bg-indigo-50', 'font-semibold');
+      }
+
+      // CRITICAL: Strictly guard Database Admin navigation tab using checkPermission
+      const sheetsNav = document.getElementById('nav-sheets');
+      if (sheetsNav) {
+        if (checkPermission('admin')) {
+          sheetsNav.classList.remove('hidden');
+        } else {
+          sheetsNav.classList.add('hidden');
+        }
       }
 
       if (tab === 'learning') {
