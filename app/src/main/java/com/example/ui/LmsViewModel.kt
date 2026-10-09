@@ -22,6 +22,7 @@ sealed class Screen {
     object Users : Screen()
     object ActivityLogs : Screen()
     object GoogleSheetHub : Screen()
+    object WebPortal : Screen()
 }
 
 data class SheetSyncStatus(
@@ -632,13 +633,179 @@ class LmsViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // --- ADMIN ACTIONS ---
+    val gitHubPageUrl: String = "https://gityar.github.io/LMS/"
+
+    // --- OSCE COMPETENCY & CERTIFICATE ACTIONS ---
+    fun recordOsceCertificate(
+        lessonId: String,
+        lessonTitle: String,
+        courseId: String,
+        candidateName: String,
+        scorePercent: Int,
+        totalSteps: Int,
+        checkedSteps: Int
+    ) {
+        val user = _currentUser.value ?: UserEntity(
+            userId = "GST-" + System.currentTimeMillis().toString().takeLast(4),
+            fullName = candidateName.ifBlank { "Nurse Clinician" },
+            email = "nurse.candidate@hospital.et",
+            passwordHash = "",
+            role = "learner",
+            registrationDate = com.example.data.util.PasswordHelper.formattedNow(),
+            accountStatus = "active"
+        )
+        viewModelScope.launch(Dispatchers.IO) {
+            val attempt = repository.recordOsceAttempt(
+                lessonId = lessonId,
+                lessonTitle = lessonTitle,
+                courseId = courseId,
+                user = user,
+                scorePercent = scorePercent,
+                totalSteps = totalSteps,
+                checkedSteps = checkedSteps
+            )
+            // Push attempt to Google Sheets
+            val attemptObj = org.json.JSONObject().apply {
+                put("Attempt_ID", attempt.attemptId)
+                put("Assessment_ID", attempt.assessmentId)
+                put("Learner_ID", attempt.learnerId)
+                put("Learner_Name", candidateName.ifBlank { user.fullName })
+                put("Course_ID", courseId)
+                put("Attempt_Number", 1)
+                put("Score", attempt.score)
+                put("Percentage", scorePercent)
+                put("Passed", if (scorePercent >= 70) "YES" else "NO")
+                put("Submitted_Date", attempt.submittedDate)
+                put("Answers_JSON", attempt.answersJson)
+            }
+            pushRecordToGoogleSheet("attempts", attemptObj)
+
+            // Push audit log to Google Sheets Activity_Logs
+            val logObj = org.json.JSONObject().apply {
+                put("Log_ID", "LOG-" + System.currentTimeMillis().toString().takeLast(6))
+                put("User_ID", user.email)
+                put("Action", "OSCE_CERTIFICATE_CLAIM")
+                put("Timestamp", attempt.submittedDate)
+                put("IP_Address", "Android Mobile App")
+                put("Device_Info", "Earned accredited OSCE Certificate for '$lessonTitle' ($scorePercent% >= 70%)")
+            }
+            pushRecordToGoogleSheet("Activity_Logs", logObj)
+
+            refreshDashboard()
+        }
+    }
+
+    // --- WEB PORTAL ACTIVITY SYNC BRIDGE ---
+    fun recordWebUserActivity(action: String, details: String) {
+        val email = _currentUser.value?.email ?: "web.user@gityar.github.io"
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.logActivity(email, action, details)
+            val logObj = org.json.JSONObject().apply {
+                put("Log_ID", "LOG-" + System.currentTimeMillis().toString().takeLast(6))
+                put("User_ID", email)
+                put("Action", action)
+                put("Timestamp", com.example.data.util.PasswordHelper.formattedNow())
+                put("IP_Address", "GitHub Pages Web Portal")
+                put("Device_Info", details)
+            }
+            pushRecordToGoogleSheet("Activity_Logs", logObj)
+        }
+    }
+
+    // --- PULL SYNC FROM GOOGLE SHEETS DATABASE ---
+    fun pullSyncFromGoogleSheets() {
+        val webAppUrl = _sheetSyncStatus.value.webAppUrl
+        if (webAppUrl.isBlank()) {
+            showToast("info", "Web App URL Needed", "Set deployed Web App URL in Sheets tab to pull cloud records.")
+            return
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            _sheetSyncStatus.update { it.copy(isSyncing = true) }
+            try {
+                // Fetch users from doGet?action=users
+                val usersUrl = java.net.URL("$webAppUrl?action=users")
+                val conn = usersUrl.openConnection() as java.net.HttpURLConnection
+                conn.requestMethod = "GET"
+                conn.connectTimeout = 8000
+                conn.readTimeout = 8000
+                if (conn.responseCode == 200) {
+                    val responseStr = conn.inputStream.bufferedReader().use { it.readText() }
+                    val json = org.json.JSONObject(responseStr)
+                    if (json.optString("status") == "success") {
+                        val arr = json.optJSONArray("data")
+                        if (arr != null) {
+                            for (i in 0 until arr.length()) {
+                                val item = arr.getJSONObject(i)
+                                val uid = item.optString("User_ID").ifBlank { item.optString("user_id") }
+                                val email = item.optString("Email").ifBlank { item.optString("email") }
+                                if (uid.isNotBlank() && email.isNotBlank()) {
+                                    val existing = repository.getAllUsers().first().find { it.userId == uid || it.email.equals(email, ignoreCase = true) }
+                                    if (existing == null) {
+                                        val newUser = UserEntity(
+                                            userId = uid,
+                                            fullName = item.optString("Full_Name").ifBlank { "User" },
+                                            email = email,
+                                            passwordHash = item.optString("Password_Hash").ifBlank { com.example.data.util.PasswordHelper.hashPassword("Secure@2026") },
+                                            role = item.optString("Role").lowercase().ifBlank { "learner" },
+                                            registrationDate = item.optString("Registration_Date").ifBlank { com.example.data.util.PasswordHelper.formattedNow() },
+                                            accountStatus = item.optString("Account_Status").lowercase().ifBlank { "active" }
+                                        )
+                                        db.lmsDao().insertUser(newUser)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                conn.disconnect()
+            } catch (_: Exception) {}
+
+            _sheetSyncStatus.update {
+                it.copy(
+                    isSyncing = false,
+                    lastSyncTime = com.example.data.util.PasswordHelper.formattedNow()
+                )
+            }
+            refreshDashboard()
+            showToast("ok", "Database Synced", "Pulled latest records from shared Google Sheets database.")
+        }
+    }
+
+    // --- ADMIN ACTIONS (Full privileges to approve, edit, and delete all user roles) ---
     fun toggleUserStatus(userToUpdate: UserEntity) {
         val admin = _currentUser.value ?: return
         val newStatus = if (userToUpdate.accountStatus.lowercase() == "active") "disabled" else "active"
         viewModelScope.launch(Dispatchers.IO) {
             repository.updateUserStatus(userToUpdate.userId, newStatus, userToUpdate.role, admin.email)
             showToast("ok", "Updated", "User account status is now $newStatus.")
+            val userObj = org.json.JSONObject().apply {
+                put("User_ID", userToUpdate.userId)
+                put("Full_Name", userToUpdate.fullName)
+                put("Email", userToUpdate.email)
+                put("Password_Hash", userToUpdate.passwordHash)
+                put("Role", userToUpdate.role)
+                put("Registration_Date", userToUpdate.registrationDate)
+                put("Account_Status", newStatus)
+                put("Last_Login", userToUpdate.lastLogin)
+            }
+            val payload = org.json.JSONObject().apply {
+                put("action", "upsertRecord")
+                put("sheetKey", "users")
+                put("keyColumn", "User_ID")
+                put("keyField", "User_ID")
+                put("record", userObj)
+            }
+            postJsonToEndpoint(_sheetSyncStatus.value.webAppUrl, payload.toString())
+
+            val logObj = org.json.JSONObject().apply {
+                put("Log_ID", "LOG-" + System.currentTimeMillis().toString().takeLast(6))
+                put("User_ID", admin.email)
+                put("Action", "ADMIN_STATUS_CHANGE")
+                put("Timestamp", com.example.data.util.PasswordHelper.formattedNow())
+                put("IP_Address", "Android Mobile App")
+                put("Device_Info", "Changed status of ${userToUpdate.fullName} to $newStatus")
+            }
+            pushRecordToGoogleSheet("Activity_Logs", logObj)
             refreshDashboard()
         }
     }
@@ -648,7 +815,150 @@ class LmsViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.updateUserStatus(userToUpdate.userId, userToUpdate.accountStatus, newRole, admin.email)
             showToast("ok", "Updated", "User role changed to $newRole.")
+            val userObj = org.json.JSONObject().apply {
+                put("User_ID", userToUpdate.userId)
+                put("Full_Name", userToUpdate.fullName)
+                put("Email", userToUpdate.email)
+                put("Password_Hash", userToUpdate.passwordHash)
+                put("Role", newRole)
+                put("Registration_Date", userToUpdate.registrationDate)
+                put("Account_Status", userToUpdate.accountStatus)
+                put("Last_Login", userToUpdate.lastLogin)
+            }
+            val payload = org.json.JSONObject().apply {
+                put("action", "upsertRecord")
+                put("sheetKey", "users")
+                put("keyColumn", "User_ID")
+                put("keyField", "User_ID")
+                put("record", userObj)
+            }
+            postJsonToEndpoint(_sheetSyncStatus.value.webAppUrl, payload.toString())
+
+            val logObj = org.json.JSONObject().apply {
+                put("Log_ID", "LOG-" + System.currentTimeMillis().toString().takeLast(6))
+                put("User_ID", admin.email)
+                put("Action", "ADMIN_ROLE_CHANGE")
+                put("Timestamp", com.example.data.util.PasswordHelper.formattedNow())
+                put("IP_Address", "Android Mobile App")
+                put("Device_Info", "Assigned role $newRole to ${userToUpdate.fullName}")
+            }
+            pushRecordToGoogleSheet("Activity_Logs", logObj)
             refreshDashboard()
+        }
+    }
+
+    fun approveUser(userToApprove: UserEntity, approvedRole: String = userToApprove.role) {
+        if (!checkPermission("admin", "approve user registrations")) return
+        val admin = _currentUser.value ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            val ok = repository.approveUser(userToApprove.userId, approvedRole, admin.email)
+            if (ok) {
+                showToast("ok", "User Approved", "${userToApprove.fullName} has been approved as $approvedRole.")
+                val userObj = org.json.JSONObject().apply {
+                    put("User_ID", userToApprove.userId)
+                    put("Full_Name", userToApprove.fullName)
+                    put("Email", userToApprove.email)
+                    put("Password_Hash", userToApprove.passwordHash)
+                    put("Role", approvedRole)
+                    put("Registration_Date", userToApprove.registrationDate)
+                    put("Account_Status", "active")
+                    put("Last_Login", userToApprove.lastLogin)
+                }
+                val payload = org.json.JSONObject().apply {
+                    put("action", "upsertRecord")
+                    put("sheetKey", "users")
+                    put("keyColumn", "User_ID")
+                    put("keyField", "User_ID")
+                    put("record", userObj)
+                }
+                postJsonToEndpoint(_sheetSyncStatus.value.webAppUrl, payload.toString())
+
+                val logObj = org.json.JSONObject().apply {
+                    put("Log_ID", "LOG-" + System.currentTimeMillis().toString().takeLast(6))
+                    put("User_ID", admin.email)
+                    put("Action", "ADMIN_APPROVE_USER")
+                    put("Timestamp", com.example.data.util.PasswordHelper.formattedNow())
+                    put("IP_Address", "Android Mobile App")
+                    put("Device_Info", "Approved user ${userToApprove.fullName} (${userToApprove.userId}) with role $approvedRole")
+                }
+                pushRecordToGoogleSheet("Activity_Logs", logObj)
+                refreshDashboard()
+            }
+        }
+    }
+
+    fun updateUserDetails(userId: String, fullName: String, email: String, role: String, status: String) {
+        if (!checkPermission("admin", "edit user profile & role")) return
+        val admin = _currentUser.value ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            val ok = repository.updateUserDetails(userId, fullName, email, role, status, admin.email)
+            if (ok) {
+                showToast("ok", "User Profile Updated", "Account details for $fullName saved.")
+                val userObj = org.json.JSONObject().apply {
+                    put("User_ID", userId)
+                    put("Full_Name", fullName)
+                    put("Email", email)
+                    put("Password_Hash", "")
+                    put("Role", role)
+                    put("Account_Status", status)
+                }
+                val payload = org.json.JSONObject().apply {
+                    put("action", "upsertRecord")
+                    put("sheetKey", "users")
+                    put("keyColumn", "User_ID")
+                    put("keyField", "User_ID")
+                    put("record", userObj)
+                }
+                postJsonToEndpoint(_sheetSyncStatus.value.webAppUrl, payload.toString())
+
+                val logObj = org.json.JSONObject().apply {
+                    put("Log_ID", "LOG-" + System.currentTimeMillis().toString().takeLast(6))
+                    put("User_ID", admin.email)
+                    put("Action", "ADMIN_EDIT_USER")
+                    put("Timestamp", com.example.data.util.PasswordHelper.formattedNow())
+                    put("IP_Address", "Android Mobile App")
+                    put("Device_Info", "Edited user $fullName ($userId): role=$role, status=$status")
+                }
+                pushRecordToGoogleSheet("Activity_Logs", logObj)
+                refreshDashboard()
+            }
+        }
+    }
+
+    fun deleteUser(userToDelete: UserEntity) {
+        if (!checkPermission("admin", "delete user accounts")) return
+        val admin = _currentUser.value ?: return
+        if (userToDelete.userId == admin.userId || userToDelete.email.equals(admin.email, ignoreCase = true)) {
+            showToast("err", "Cannot Delete Self", "You cannot delete your own administrative account.")
+            return
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            val ok = repository.deleteUser(userToDelete.userId, admin.email)
+            if (ok) {
+                showToast("ok", "User Deleted", "Account for ${userToDelete.fullName} permanently deleted.")
+                val webAppUrl = _sheetSyncStatus.value.webAppUrl
+                if (webAppUrl.isNotBlank()) {
+                    val payload = org.json.JSONObject().apply {
+                        put("action", "deleteRecord")
+                        put("sheetKey", "users")
+                        put("keyColumn", "User_ID")
+                        put("keyField", "User_ID")
+                        put("keyValue", userToDelete.userId)
+                    }
+                    postJsonToEndpoint(webAppUrl, payload.toString())
+                }
+
+                val logObj = org.json.JSONObject().apply {
+                    put("Log_ID", "LOG-" + System.currentTimeMillis().toString().takeLast(6))
+                    put("User_ID", admin.email)
+                    put("Action", "ADMIN_DELETE_USER")
+                    put("Timestamp", com.example.data.util.PasswordHelper.formattedNow())
+                    put("IP_Address", "Android Mobile App")
+                    put("Device_Info", "Deleted user ${userToDelete.fullName} (${userToDelete.userId}) [Role: ${userToDelete.role}]")
+                }
+                pushRecordToGoogleSheet("Activity_Logs", logObj)
+                refreshDashboard()
+            }
         }
     }
 }

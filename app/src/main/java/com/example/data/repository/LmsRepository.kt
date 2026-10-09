@@ -130,10 +130,38 @@ class LmsRepository(private val dao: LmsDao) {
         return true
     }
 
+    suspend fun updateUserDetails(userId: String, fullName: String, email: String, role: String, accountStatus: String, adminEmail: String): Boolean {
+        val user = dao.getUserById(userId) ?: return false
+        val updated = user.copy(
+            fullName = fullName.trim(),
+            email = email.trim(),
+            role = role.trim().lowercase(),
+            accountStatus = accountStatus.trim().lowercase()
+        )
+        dao.updateUser(updated)
+        logActivity(adminEmail, "EDIT_USER", "Updated details for $fullName ($userId): role=$role, status=$accountStatus")
+        return true
+    }
+
+    suspend fun approveUser(userId: String, approvedRole: String, adminEmail: String): Boolean {
+        val user = dao.getUserById(userId) ?: return false
+        val updated = user.copy(accountStatus = "active", role = approvedRole.ifBlank { user.role })
+        dao.updateUser(updated)
+        logActivity(adminEmail, "APPROVE_USER", "Approved user ${user.fullName} ($userId) with role=${updated.role}")
+        return true
+    }
+
+    suspend fun deleteUser(userId: String, adminEmail: String): Boolean {
+        val user = dao.getUserById(userId) ?: return false
+        dao.deleteUserById(userId)
+        logActivity(adminEmail, "DELETE_USER", "Permanently deleted user account ${user.fullName} (${user.email})")
+        return true
+    }
+
     // --- ACTIVITY LOGS ---
     fun getAllLogs(): Flow<List<ActivityLogEntity>> = dao.getAllLogs()
 
-    suspend fun logActivity(email: String, action: String, message: String) {
+    suspend fun logActivity(email: String, action: String, message: String): ActivityLogEntity {
         val log = ActivityLogEntity(
             activityId = PasswordHelper.genId("ACT"),
             userEmail = email.ifBlank { "anonymous" },
@@ -143,6 +171,7 @@ class LmsRepository(private val dao: LmsDao) {
             statusMessage = message
         )
         dao.insertLog(log)
+        return log
     }
 
     // --- COURSES ---
@@ -549,6 +578,37 @@ class LmsRepository(private val dao: LmsDao) {
             "Keep trying! You scored $percentage%, passing score is ${asm.passingScore}%."
         }
         return QuizResult(true, msg, earnedPoints, totalPoints, percentage, passed)
+    }
+
+    suspend fun recordOsceAttempt(
+        lessonId: String,
+        lessonTitle: String,
+        courseId: String,
+        user: UserEntity,
+        scorePercent: Int,
+        totalSteps: Int,
+        checkedSteps: Int
+    ): AttemptEntity {
+        val attempt = AttemptEntity(
+            attemptId = PasswordHelper.genId("OSCE"),
+            assessmentId = "OSCE-$lessonId",
+            learnerId = user.userId,
+            learnerName = user.fullName,
+            courseId = courseId,
+            attemptNumber = 1,
+            score = "$checkedSteps / $totalSteps",
+            percentage = scorePercent,
+            passed = scorePercent >= 70,
+            submittedDate = PasswordHelper.formattedNow(),
+            answersJson = """{"lessonTitle":"$lessonTitle","stepsCompleted":$checkedSteps,"totalSteps":$totalSteps,"threshold":70}"""
+        )
+        dao.insertAttempt(attempt)
+        logActivity(
+            user.email,
+            "OSCE_CERTIFICATE_CLAIM",
+            "Claimed accredited OSCE Certificate for '$lessonTitle' with $scorePercent% competency score (Threshold: >= 70%)"
+        )
+        return attempt
     }
 
     suspend fun getDashboardStats(user: UserEntity): DashboardStats {

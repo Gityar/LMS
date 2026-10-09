@@ -27,7 +27,29 @@ fun UsersScreen(
     modifier: Modifier = Modifier
 ) {
     val allUsers by viewModel.allUsers.collectAsStateWithLifecycle()
-    var userForRoleEdit by remember { mutableStateOf<UserEntity?>(null) }
+    val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
+
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedRoleFilter by remember { mutableStateOf("All") }
+
+    // Dialog states
+    var userToEdit by remember { mutableStateOf<UserEntity?>(null) }
+    var userToDelete by remember { mutableStateOf<UserEntity?>(null) }
+
+    val filteredUsers = remember(allUsers, searchQuery, selectedRoleFilter) {
+        allUsers.filter { u ->
+            val matchesSearch = u.fullName.contains(searchQuery, ignoreCase = true) ||
+                    u.email.contains(searchQuery, ignoreCase = true) ||
+                    u.role.contains(searchQuery, ignoreCase = true)
+
+            val matchesFilter = when (selectedRoleFilter) {
+                "All" -> true
+                "Pending" -> u.accountStatus.lowercase() != "active"
+                else -> u.role.equals(selectedRoleFilter, ignoreCase = true)
+            }
+            matchesSearch && matchesFilter
+        }
+    }
 
     LazyColumn(
         modifier = modifier
@@ -37,23 +59,77 @@ fun UsersScreen(
     ) {
         item {
             SectionHeader(
-                title = "User Directory & Access Control",
+                title = "User Directory & Role Administration",
                 icon = Icons.Default.ManageAccounts
             )
             Text(
-                text = "Total registered accounts: ${allUsers.size}",
-                fontSize = 13.sp,
+                text = "Admin privileges: Approve registrations, edit roles & profiles, or remove accounts.",
+                fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Search bar
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                label = { Text("Search users by name, email or role") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("input_search_users"),
+                shape = RoundedCornerShape(12.dp)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Filter Chips
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                listOf("All", "Admin", "Instructor", "Learner", "Pending").forEach { role ->
+                    FilterChip(
+                        selected = selectedRoleFilter == role,
+                        onClick = { selectedRoleFilter = role },
+                        label = { Text(role, fontSize = 11.sp) }
+                    )
+                }
+            }
         }
 
-        items(allUsers, key = { it.userId }) { user ->
+        if (filteredUsers.isEmpty()) {
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                ) {
+                    Box(modifier = Modifier.padding(24.dp).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "No users found matching current filters.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+            }
+        }
+
+        items(filteredUsers, key = { it.userId }) { user ->
+            val isSelf = currentUser?.userId == user.userId
+            val isPending = user.accountStatus.lowercase() != "active"
+
             Card(
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (isPending) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surface
+                ),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-                modifier = Modifier.fillMaxWidth().testTag("user_item_${user.userId}")
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("user_item_${user.userId}")
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
                     Row(
@@ -62,12 +138,22 @@ fun UsersScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = user.fullName,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Text(
+                                    text = user.fullName,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                if (isSelf) {
+                                    Text(
+                                        text = "(You)",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                            }
                             Text(
                                 text = user.email,
                                 fontSize = 12.sp,
@@ -78,7 +164,11 @@ fun UsersScreen(
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             LmsBadge(
                                 text = user.role.uppercase(),
-                                colorType = if (user.role.lowercase() == "admin") "primary" else "neutral"
+                                colorType = when (user.role.lowercase()) {
+                                    "admin" -> "primary"
+                                    "instructor" -> "success"
+                                    else -> "neutral"
+                                }
                             )
                             LmsBadge(
                                 text = user.accountStatus.uppercase(),
@@ -95,31 +185,51 @@ fun UsersScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Registered: ${user.registrationDate}",
+                            text = "Joined: ${user.registrationDate.take(10)}",
                             fontSize = 11.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
 
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            OutlinedButton(
-                                onClick = { viewModel.toggleUserStatus(user) },
-                                shape = RoundedCornerShape(6.dp),
-                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                                modifier = Modifier.height(30.dp).testTag("btn_toggle_user_${user.userId}")
-                            ) {
-                                Text(
-                                    text = if (user.accountStatus.lowercase() == "active") "Disable" else "Activate",
-                                    fontSize = 11.sp
-                                )
+                            // Approve Button (If pending or disabled)
+                            if (isPending) {
+                                FilledTonalButton(
+                                    onClick = { viewModel.approveUser(user) },
+                                    shape = RoundedCornerShape(8.dp),
+                                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                    modifier = Modifier.height(30.dp).testTag("btn_approve_${user.userId}")
+                                ) {
+                                    Icon(Icons.Default.Check, contentDescription = "Approve", modifier = Modifier.size(14.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Approve", fontSize = 11.sp)
+                                }
                             }
 
-                            Button(
-                                onClick = { userForRoleEdit = user },
-                                shape = RoundedCornerShape(6.dp),
-                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                                modifier = Modifier.height(30.dp).testTag("btn_change_role_${user.userId}")
+                            // Edit Button
+                            OutlinedButton(
+                                onClick = { userToEdit = user },
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                                modifier = Modifier.height(30.dp).testTag("btn_edit_user_${user.userId}")
                             ) {
-                                Text("Change Role", fontSize = 11.sp)
+                                Icon(Icons.Default.Edit, contentDescription = "Edit", modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Edit", fontSize = 11.sp)
+                            }
+
+                            // Delete Button (Protected against self-deletion)
+                            if (!isSelf) {
+                                IconButton(
+                                    onClick = { userToDelete = user },
+                                    modifier = Modifier.size(30.dp).testTag("btn_delete_user_${user.userId}")
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Delete User",
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
                             }
                         }
                     }
@@ -130,30 +240,65 @@ fun UsersScreen(
         item { Spacer(modifier = Modifier.height(24.dp)) }
     }
 
-    if (userForRoleEdit != null) {
-        val u = userForRoleEdit!!
-        var selectedRole by remember { mutableStateOf(u.role) }
+    // --- EDIT USER & ROLES DIALOG ---
+    if (userToEdit != null) {
+        val u = userToEdit!!
+        var editName by remember { mutableStateOf(u.fullName) }
+        var editEmail by remember { mutableStateOf(u.email) }
+        var editRole by remember { mutableStateOf(u.role) }
+        var editStatus by remember { mutableStateOf(u.accountStatus) }
 
         AlertDialog(
-            onDismissRequest = { userForRoleEdit = null },
-            title = { Text("Update Role for ${u.fullName}", fontSize = 16.sp, fontWeight = FontWeight.Bold) },
+            onDismissRequest = { userToEdit = null },
+            title = {
+                Text(
+                    text = "Edit User Profile & Role",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    listOf("learner", "instructor", "admin").forEach { role ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp)
-                        ) {
-                            RadioButton(
-                                selected = selectedRole == role,
-                                onClick = { selectedRole = role }
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    OutlinedTextField(
+                        value = editName,
+                        onValueChange = { editName = it },
+                        label = { Text("Full Name") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = editEmail,
+                        onValueChange = { editEmail = it },
+                        label = { Text("Email Address") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Text("Assign Role:", fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        listOf("learner", "instructor", "admin").forEach { role ->
+                            FilterChip(
+                                selected = editRole.equals(role, ignoreCase = true),
+                                onClick = { editRole = role },
+                                label = { Text(role.replaceFirstChar { it.uppercase() }, fontSize = 11.sp) }
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = role.replaceFirstChar { it.uppercase() },
-                                fontWeight = if (selectedRole == role) FontWeight.Bold else FontWeight.Normal
+                        }
+                    }
+
+                    Text("Account Status:", fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        listOf("active", "disabled").forEach { status ->
+                            FilterChip(
+                                selected = editStatus.equals(status, ignoreCase = true),
+                                onClick = { editStatus = status },
+                                label = { Text(status.replaceFirstChar { it.uppercase() }, fontSize = 11.sp) }
                             )
                         }
                     }
@@ -162,15 +307,55 @@ fun UsersScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        viewModel.updateUserRole(u, selectedRole)
-                        userForRoleEdit = null
+                        viewModel.updateUserDetails(
+                            userId = u.userId,
+                            fullName = editName,
+                            email = editEmail,
+                            role = editRole,
+                            status = editStatus
+                        )
+                        userToEdit = null
                     }
                 ) {
-                    Text("Apply Role")
+                    Text("Save Changes")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { userForRoleEdit = null }) { Text("Cancel") }
+                TextButton(onClick = { userToEdit = null }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    // --- DELETE CONFIRMATION DIALOG ---
+    if (userToDelete != null) {
+        val u = userToDelete!!
+        AlertDialog(
+            onDismissRequest = { userToDelete = null },
+            icon = { Icon(Icons.Default.Warning, contentDescription = "Warning", tint = MaterialTheme.colorScheme.error) },
+            title = { Text("Delete User Account?", fontWeight = FontWeight.Bold) },
+            text = {
+                Text(
+                    text = "Are you sure you want to permanently delete '${u.fullName}' (${u.email})? This user will be removed from local storage and deleted from the Google Sheet users tab.",
+                    fontSize = 13.sp
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.deleteUser(u)
+                        userToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Delete Account")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { userToDelete = null }) {
+                    Text("Cancel")
+                }
             }
         )
     }

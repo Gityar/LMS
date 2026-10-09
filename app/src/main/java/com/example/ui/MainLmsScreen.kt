@@ -105,6 +105,17 @@ fun MainLmsScreen(
                                     fontSize = 15.sp
                                 )
                             }
+                            // Web Portal button (GitHub Pages Live Sync)
+                            IconButton(
+                                onClick = { viewModel.navigateTo(Screen.WebPortal) },
+                                modifier = Modifier.testTag("btn_top_web_portal")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Language,
+                                    contentDescription = "GitHub Pages Web Portal",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
                             // Google Sheet integration button (Admin only)
                             if (isAdmin) {
                                 IconButton(
@@ -245,6 +256,12 @@ fun MainLmsScreen(
                     is Screen.GoogleSheetHub -> {
                         com.example.ui.sheets.GoogleSheetHubScreen(
                             viewModel = viewModel,
+                            onBack = { viewModel.navigateBack() }
+                        )
+                    }
+                    is Screen.WebPortal -> {
+                        com.example.ui.web.WebPortalScreen(
+                            url = viewModel.gitHubPageUrl,
                             onBack = { viewModel.navigateBack() }
                         )
                     }

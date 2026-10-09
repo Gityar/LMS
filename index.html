@@ -116,6 +116,9 @@
         <button onclick="switchTab('learning')" id="nav-learning" class="px-3.5 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1">
           <span>🩺</span> My Clinical Learning
         </button>
+        <button onclick="switchTab('users')" id="nav-users" class="hidden px-3.5 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5 text-indigo-700 bg-indigo-50/50">
+          <span>👥</span> User Management
+        </button>
         <button onclick="switchTab('sheets')" id="nav-sheets" class="hidden px-3.5 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5 text-indigo-700 bg-indigo-50/50">
           <span class="w-2 h-2 rounded-full bg-emerald-500"></span> ⚙️ Database Admin
         </button>
@@ -353,6 +356,82 @@
               Evaluate Assessment
             </button>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB: USER MANAGEMENT & ROLE ADMINISTRATION ==================== -->
+    <section id="tab-users" class="space-y-6 hidden">
+      <div class="glass-card rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+          <div>
+            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800">
+              ● Admin Privilege: Access Control & Approvals
+            </div>
+            <h2 class="text-xl font-bold text-slate-900 mt-1">User Directory & Role Administration</h2>
+            <p class="text-xs text-slate-500">Approve user registrations, modify roles (Admin, Instructor, Learner), edit clinician profiles, or delete accounts.</p>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="openNewUserModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1.5">
+              <span>+ Add / Invite Clinician</span>
+            </button>
+            <button onclick="syncUsersToGoogleSheet()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl transition flex items-center gap-1.5">
+              <span>☁️ Sync Users to Sheet</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- STATS COUNTERS -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+            <span class="text-slate-400 block text-[10px] font-semibold uppercase">Total Users</span>
+            <span class="text-2xl font-bold text-slate-900" id="stat-total-users">0</span>
+          </div>
+          <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+            <span class="text-emerald-700 block text-[10px] font-semibold uppercase">Active Clinicians</span>
+            <span class="text-2xl font-bold text-emerald-800" id="stat-active-users">0</span>
+          </div>
+          <div class="p-4 bg-amber-50 rounded-xl border border-amber-200">
+            <span class="text-amber-700 block text-[10px] font-semibold uppercase">Pending Approvals</span>
+            <span class="text-2xl font-bold text-amber-800" id="stat-pending-users">0</span>
+          </div>
+          <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-200">
+            <span class="text-indigo-700 block text-[10px] font-semibold uppercase">Faculty (Admins/Instructors)</span>
+            <span class="text-2xl font-bold text-indigo-800" id="stat-staff-users">0</span>
+          </div>
+        </div>
+
+        <!-- SEARCH & FILTER CONTROLS -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+          <div class="flex-1 relative">
+            <input type="text" id="user-search-input" oninput="renderUsers()" placeholder="Search users by name, email, facility or role..." class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+          </div>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <button onclick="setUserRoleFilter('all')" class="user-filter-btn px-2.5 py-1.5 rounded-lg font-semibold bg-indigo-600 text-white" id="filter-user-all">All</button>
+            <button onclick="setUserRoleFilter('pending')" class="user-filter-btn px-2.5 py-1.5 rounded-lg font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100" id="filter-user-pending">Pending</button>
+            <button onclick="setUserRoleFilter('instructor')" class="user-filter-btn px-2.5 py-1.5 rounded-lg font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100" id="filter-user-instructor">Instructors</button>
+            <button onclick="setUserRoleFilter('learner')" class="user-filter-btn px-2.5 py-1.5 rounded-lg font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100" id="filter-user-learner">Learners</button>
+            <button onclick="setUserRoleFilter('admin')" class="user-filter-btn px-2.5 py-1.5 rounded-lg font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100" id="filter-user-admin">Admins</button>
+          </div>
+        </div>
+
+        <!-- USERS TABLE CONTAINER -->
+        <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
+                <th class="p-3">Clinician / User</th>
+                <th class="p-3">Email Address</th>
+                <th class="p-3">Hospital / Facility</th>
+                <th class="p-3">Assigned Role</th>
+                <th class="p-3">Account Status</th>
+                <th class="p-3 text-right">Admin Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-table-body" class="divide-y divide-slate-100">
+              <!-- Rendered by renderUsers() -->
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
@@ -709,28 +788,32 @@
       </div>
 
       <div class="space-y-1">
-        <div class="text-[10px] font-extrabold uppercase tracking-widest text-amber-700">Official Clinical Competency</div>
-        <h3 class="text-2xl font-extrabold text-slate-900 tracking-tight">Certificate of Completion</h3>
+        <div class="text-[10px] font-extrabold uppercase tracking-widest text-amber-700" id="cert-badge-type">Official Clinical Competency</div>
+        <h3 class="text-2xl font-extrabold text-slate-900 tracking-tight" id="cert-title-header">Certificate of Completion</h3>
         <p class="text-xs text-slate-500">Ethiopian Neonatal Care Clinical Program</p>
       </div>
 
       <div class="py-2 border-y border-slate-100 space-y-1">
         <div class="text-xs text-slate-400 font-medium">This is to certify that</div>
         <div class="text-xl font-extrabold text-indigo-900" id="cert-learner-name">Nurse Tigist Mengistu</div>
-        <div class="text-xs text-slate-600 max-w-md mx-auto pt-1 leading-relaxed">
-          Has successfully mastered the clinical protocol and passed the examination for
+        <div class="text-xs text-slate-600 max-w-md mx-auto pt-1 leading-relaxed" id="cert-desc-text">
+          Has successfully mastered the clinical protocol and demonstrated competency for
         </div>
         <div class="text-sm font-bold text-slate-800" id="cert-course-name">Neonatal Resuscitation Program (NRP)</div>
       </div>
 
-      <div class="grid grid-cols-2 gap-4 text-left text-xs bg-slate-50 p-4 rounded-2xl border border-slate-200">
+      <div class="grid grid-cols-3 gap-2 text-left text-xs bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
         <div>
-          <span class="text-slate-400 block text-[10px]">Score Achieved:</span>
-          <span class="font-extrabold text-emerald-700 text-base" id="cert-score">100% (Passed)</span>
+          <span class="text-slate-400 block text-[10px]">Competency Score:</span>
+          <span class="font-extrabold text-emerald-700 text-sm" id="cert-score">100% (Passed)</span>
         </div>
         <div>
-          <span class="text-slate-400 block text-[10px]">Verified By:</span>
-          <span class="font-bold text-slate-800">Sr. Almaz & Dr. Dawit</span>
+          <span class="text-slate-400 block text-[10px]">Benchmark Met:</span>
+          <span class="font-bold text-slate-800 text-[11px]" id="cert-threshold-badge">≥ 70% OSCE Standard</span>
+        </div>
+        <div>
+          <span class="text-slate-400 block text-[10px]">Clinical Evaluator:</span>
+          <span class="font-bold text-indigo-900 text-[11px]">Sr. Almaz & Dr. Dawit</span>
         </div>
       </div>
 
@@ -958,6 +1041,35 @@
             </div>
           </div>
 
+          <!-- Dedicated OSCE Clinical Station Rubric Section (Shown when Format is Simulation) -->
+          <div id="lesson-osce-section" class="p-3.5 bg-amber-50/80 border border-amber-200 rounded-xl space-y-2.5 hidden">
+            <div class="flex items-center justify-between">
+              <label class="font-bold text-amber-900 flex items-center gap-1.5 text-xs">
+                <span class="text-base">🩺</span> <span>OSCE Station Tickbox Rubric & Checklist</span>
+              </label>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] text-amber-800 font-semibold">Competency Threshold:</span>
+                <div class="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-amber-300">
+                  <input type="number" id="lesson-osce-threshold" min="50" max="100" value="70" class="w-9 text-center font-bold text-slate-900 text-xs focus:outline-none">
+                  <span class="text-[11px] font-bold text-amber-800">%</span>
+                </div>
+              </div>
+            </div>
+            <p class="text-[10px] text-slate-600 leading-normal">
+              Enter procedural checklist criteria below (one step per line). When a candidate checks <strong>≥ 70%</strong> (or configured threshold), the system automatically issues an accredited OSCE Competency Certificate.
+            </p>
+            <textarea id="lesson-osce-steps" rows="3" placeholder="1. Mask adjustment (Ensure tight seal on face)&#10;2. Reposition head in sniffing position&#10;3. Suction mouth then nose&#10;4. Open mouth and lift jaw&#10;5. Pressure increase (Increase PIP by 5 cm H2O)&#10;6. Alternative airway insertion" class="w-full px-2.5 py-2 bg-white border border-amber-200 rounded-lg text-xs leading-relaxed font-mono focus:border-amber-400 focus:outline-none"></textarea>
+            <div class="flex items-center justify-between gap-1 flex-wrap pt-0.5">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] font-bold text-amber-800">Quick Templates:</span>
+                <button type="button" onclick="loadOsceTemplate('lesson-osce-steps', 'mr_sopa')" class="px-2 py-0.5 bg-white hover:bg-amber-100 text-amber-800 border border-amber-200 rounded text-[10px] font-medium transition">MR. SOPA (NRP)</button>
+                <button type="button" onclick="loadOsceTemplate('lesson-osce-steps', 'cpap')" class="px-2 py-0.5 bg-white hover:bg-amber-100 text-amber-800 border border-amber-200 rounded text-[10px] font-medium transition">Bubble CPAP</button>
+                <button type="button" onclick="loadOsceTemplate('lesson-osce-steps', 'thermal')" class="px-2 py-0.5 bg-white hover:bg-amber-100 text-amber-800 border border-amber-200 rounded text-[10px] font-medium transition">Thermal Care</button>
+              </div>
+              <span class="text-[10px] text-amber-700 italic">Auto-awards 🏆 Certificate on ≥ 70%</span>
+            </div>
+          </div>
+
           <div>
             <div class="flex items-center justify-between mb-1">
               <label class="block font-semibold text-slate-700">Lesson Body & Clinical Content</label>
@@ -1046,6 +1158,35 @@
           <div>
             <label class="block font-semibold text-slate-700 mb-1" id="edit-lesson-media-label">Media / Video / PDF URL</label>
             <input type="url" id="edit-lesson-media-url" placeholder="https://..." class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg font-mono text-[11px]">
+          </div>
+        </div>
+
+        <!-- Dedicated OSCE Clinical Station Rubric Section (Shown when Format is Simulation) -->
+        <div id="edit-lesson-osce-section" class="p-3.5 bg-amber-50/80 border border-amber-200 rounded-xl space-y-2.5 hidden">
+          <div class="flex items-center justify-between">
+            <label class="font-bold text-amber-900 flex items-center gap-1.5 text-xs">
+              <span class="text-base">🩺</span> <span>OSCE Station Tickbox Rubric & Checklist</span>
+            </label>
+            <div class="flex items-center gap-1.5">
+              <span class="text-[10px] text-amber-800 font-semibold">Competency Threshold:</span>
+              <div class="flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-amber-300">
+                <input type="number" id="edit-lesson-osce-threshold" min="50" max="100" value="70" class="w-9 text-center font-bold text-slate-900 text-xs focus:outline-none">
+                <span class="text-[11px] font-bold text-amber-800">%</span>
+              </div>
+            </div>
+          </div>
+          <p class="text-[10px] text-slate-600 leading-normal">
+            Enter procedural steps or clinical checklist criteria below (one step per line). When a candidate checks <strong>≥ 70%</strong> (or configured threshold), the system automatically issues an accredited OSCE Competency Certificate.
+          </p>
+          <textarea id="edit-lesson-osce-steps" rows="4" placeholder="1. Mask adjustment (Ensure tight seal on face)&#10;2. Reposition head in sniffing position&#10;3. Suction mouth then nose&#10;4. Open mouth and lift jaw&#10;5. Pressure increase&#10;6. Alternative airway insertion" class="w-full px-2.5 py-2 bg-white border border-amber-200 rounded-lg text-xs leading-relaxed font-mono focus:border-amber-400 focus:outline-none"></textarea>
+          <div class="flex items-center justify-between gap-1 flex-wrap pt-0.5">
+            <div class="flex items-center gap-1.5">
+              <span class="text-[10px] font-bold text-amber-800">Quick Templates:</span>
+              <button type="button" onclick="loadOsceTemplate('edit-lesson-osce-steps', 'mr_sopa')" class="px-2 py-0.5 bg-white hover:bg-amber-100 text-amber-800 border border-amber-200 rounded text-[10px] font-medium transition">MR. SOPA (NRP)</button>
+              <button type="button" onclick="loadOsceTemplate('edit-lesson-osce-steps', 'cpap')" class="px-2 py-0.5 bg-white hover:bg-amber-100 text-amber-800 border border-amber-200 rounded text-[10px] font-medium transition">Bubble CPAP</button>
+              <button type="button" onclick="loadOsceTemplate('edit-lesson-osce-steps', 'thermal')" class="px-2 py-0.5 bg-white hover:bg-amber-100 text-amber-800 border border-amber-200 rounded text-[10px] font-medium transition">Thermal Care</button>
+            </div>
+            <span class="text-[10px] text-amber-700 italic">Auto-awards 🏆 Certificate on ≥ 70%</span>
           </div>
         </div>
 
@@ -1253,6 +1394,112 @@
             <button type="button" onclick="closeQuestionModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
             <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm">Save Question</button>
           </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: EDIT USER & ASSIGN ROLE ==================== -->
+  <div id="modal-edit-user" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="font-bold text-slate-900 text-base" id="modal-edit-user-title">Edit User Profile & Role</h3>
+          <p class="text-xs text-slate-500">Update clinician credentials, hospital, role, or access status</p>
+        </div>
+        <button onclick="closeEditUserModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <form id="form-edit-user" onsubmit="saveEditUser(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="edit-user-id">
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Full Name</label>
+          <input type="text" id="edit-user-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Email Address</label>
+          <input type="email" id="edit-user-email" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Hospital / Clinical Facility</label>
+          <input type="text" id="edit-user-hospital" placeholder="e.g. Tikur Anbessa Hospital NICU" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Assigned Role</label>
+            <select id="edit-user-role" class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold text-indigo-700 focus:bg-white">
+              <option value="learner">Learner (Clinician / Nurse)</option>
+              <option value="instructor">Instructor (Faculty)</option>
+              <option value="admin">Admin (Full System Control)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Account Status</label>
+            <select id="edit-user-status" class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold text-slate-800 focus:bg-white">
+              <option value="active">Active (Full Access)</option>
+              <option value="pending_approval">Pending Approval</option>
+              <option value="disabled">Disabled / Suspended</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeEditUserModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: ADD / INVITE USER ==================== -->
+  <div id="modal-new-user" class="fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="font-bold text-slate-900 text-base">Add New Clinician / User</h3>
+          <p class="text-xs text-slate-500">Create an account with role assignment and immediate approval</p>
+        </div>
+        <button onclick="closeNewUserModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <form id="form-new-user" onsubmit="saveNewUser(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Full Name</label>
+          <input type="text" id="new-user-name" required placeholder="e.g. Dr. Dawit Abebe" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Email Address</label>
+          <input type="email" id="new-user-email" required placeholder="dawit@hospital.et" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Hospital / Clinical Facility</label>
+          <input type="text" id="new-user-hospital" placeholder="e.g. St. Paul's Hospital Millennium Medical College" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Assigned Role</label>
+            <select id="new-user-role" class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-lg font-bold text-indigo-700 focus:bg-white">
+              <option value="learner" selected>Learner (Clinician)</option>
+              <option value="instructor">Instructor (Faculty)</option>
+              <option value="admin">Admin (System Admin)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Initial Password</label>
+            <input type="text" id="new-user-password" value="Nurse@2026" required class="w-full px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-lg font-mono focus:bg-white">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeNewUserModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm">+ Create Account</button>
         </div>
       </form>
     </div>
@@ -1506,9 +1753,10 @@
 
     // DEFAULT USER ACCOUNTS (Matching database)
     const DEFAULT_USERS = [
-      { id: 'USR-ADMIN-01', fullName: 'Yaregal Semanew', email: 'yaregalsemanew@gmail.com', password: 'Admin@2026', role: 'admin', hospital: 'Ethiopian Neonatal Center', avatar: 'YS' },
-      { id: 'USR-INST-01', fullName: 'Sister Almaz', email: 'almaz@neonatal.et', password: 'Instructor@2026', role: 'instructor', hospital: 'Gondar Teaching Hospital', avatar: 'SA' },
-      { id: 'USR-NURSE-01', fullName: 'Nurse Tigist Mengistu', email: 'nurse.tigist@hospital.et', password: 'Learner@2026', role: 'learner', hospital: 'Tikur Anbessa Hospital', avatar: 'TM' }
+      { id: 'USR-ADMIN-01', fullName: 'Yaregal Semanew', email: 'yaregalsemanew@gmail.com', password: 'Admin@2026', role: 'admin', hospital: 'Ethiopian Neonatal Center', avatar: 'YS', accountStatus: 'active', registrationDate: '2026-09-01' },
+      { id: 'USR-INST-01', fullName: 'Sister Almaz', email: 'almaz@neonatal.et', password: 'Instructor@2026', role: 'instructor', hospital: 'Gondar Teaching Hospital', avatar: 'SA', accountStatus: 'active', registrationDate: '2026-09-15' },
+      { id: 'USR-NURSE-01', fullName: 'Nurse Tigist Mengistu', email: 'nurse.tigist@hospital.et', password: 'Learner@2026', role: 'learner', hospital: 'Tikur Anbessa Hospital', avatar: 'TM', accountStatus: 'active', registrationDate: '2026-10-01' },
+      { id: 'USR-NURSE-02', fullName: 'Nurse Bethelhem Kebede', email: 'bethelhem@hospital.et', password: 'Learner@2026', role: 'learner', hospital: 'Hawassa Referral Hospital', avatar: 'BK', accountStatus: 'pending_approval', registrationDate: '2026-10-08' }
     ];
 
     const DEFAULT_ENROLLMENTS = [
@@ -1664,6 +1912,16 @@
       const prefix = mode === 'new' ? 'lesson' : 'edit-lesson';
       const mediaLabel = document.getElementById(`${prefix}-media-label`);
       const mediaInput = document.getElementById(`${prefix}-media-url`);
+      const osceSection = document.getElementById(`${prefix}-osce-section`);
+
+      if (osceSection) {
+        if (type === 'simulation') {
+          osceSection.classList.remove('hidden');
+        } else {
+          osceSection.classList.add('hidden');
+        }
+      }
+
       if (!mediaLabel || !mediaInput) return;
 
       switch(type) {
@@ -1682,6 +1940,37 @@
         default:
           mediaLabel.innerText = 'Media / Video / PDF URL';
           mediaInput.placeholder = 'https://...';
+      }
+    }
+
+    function loadOsceTemplate(targetId, type) {
+      const el = document.getElementById(targetId);
+      if (!el) return;
+      if (type === 'mr_sopa') {
+        el.value = [
+          'M - Mask adjustment (Ensure tight seal on infant face)',
+          'R - Reposition head (Slight extension into sniffing position)',
+          'S - Suction mouth then nose with bulb suction',
+          'O - Open mouth and lift infant jaw slightly forward',
+          'P - Pressure increase (Increase PIP by 5 cm H2O incrementally)',
+          'A - Alternative airway (Insert laryngeal mask or endotracheal tube)'
+        ].join('\n');
+      } else if (type === 'cpap') {
+        el.value = [
+          'Select appropriate binasal prong size (80% nares occlusion without blanching)',
+          'Calibrate water seal bottle at 5 cm H2O depth',
+          'Set gas flow rate to 6 - 8 L/min ensuring continuous bubbling in chamber',
+          'Confirm heated humidifier set to 37°C with inline moisture traps',
+          'Check infant nasal septum every 2 hours to prevent pressure necrosis'
+        ].join('\n');
+      } else if (type === 'thermal') {
+        el.value = [
+          'Pre-warm radiant warmer mattress to 36.5°C prior to delivery',
+          'Dry infant immediately with warm towel and discard wet linen',
+          'Attach skin temperature servo probe to right upper quadrant',
+          'Apply warm polyethylene wrap or hat for infants < 32 weeks',
+          'Verify axillary temperature maintained between 36.5°C and 37.5°C'
+        ].join('\n');
       }
     }
 
@@ -2009,6 +2298,47 @@
       }, 3000);
     }
 
+    // ==================== UNIFIED USER ACTIVITY AUDIT LOG ====================
+    // Synchronizes all user actions with Google Sheets (Activity_Logs) and Android Native DB
+    function logUserActivity(action, details = '') {
+      const email = currentUser ? currentUser.email : (localStorage.getItem('lms_guest_name') || 'guest@lms.local');
+      const now = new Date().toISOString();
+      const logRecord = {
+        'Log_ID': 'LOG-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
+        'User_ID': email,
+        'Action': action,
+        'Timestamp': now,
+        'IP_Address': 'Web-Portal (GitHub Pages)',
+        'Device_Info': (details || 'Web Client Activity').substring(0, 100)
+      };
+
+      // Native Android App bridge integration
+      if (window.AndroidAppInterface && typeof window.AndroidAppInterface.onWebUserActivity === 'function') {
+        try {
+          window.AndroidAppInterface.onWebUserActivity(action, details || email);
+        } catch (e) {
+          console.warn('Native bridge error:', e);
+        }
+      }
+
+      // Sync to Google Sheet (Activity_Logs tab)
+      const webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (webAppUrl && navigator.onLine) {
+        fetch(webAppUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'appendRecord',
+            sheetKey: 'Activity_Logs',
+            records: [logRecord]
+          }),
+          mode: 'no-cors'
+        }).catch(() => {});
+      } else if (typeof idbEnqueueSync === 'function') {
+        idbEnqueueSync('Activity_Logs', [logRecord]);
+      }
+    }
+
     // ==================== USER AUTHENTICATION & SESSIONS ====================
     function renderAuthUI() {
       const topBanner = document.getElementById('top-user-banner');
@@ -2132,17 +2462,18 @@
         }
       }
 
-      // Only expose the Google Sheets Database Admin tab to verified administrators in localStorage
+      // Expose Database Admin and User Management tabs to verified administrators
+      const isAdmin = checkPermission('admin');
       const sheetsNav = document.getElementById('nav-sheets');
-      if (sheetsNav) {
-        if (checkPermission('admin')) {
-          sheetsNav.classList.remove('hidden');
-        } else {
-          sheetsNav.classList.add('hidden');
-          const sheetsTab = document.getElementById('tab-sheets');
-          if (sheetsTab && !sheetsTab.classList.contains('hidden')) {
-            switchTab('dashboard');
-          }
+      if (sheetsNav) sheetsNav.classList.toggle('hidden', !isAdmin);
+      const usersNav = document.getElementById('nav-users');
+      if (usersNav) usersNav.classList.toggle('hidden', !isAdmin);
+
+      if (!isAdmin) {
+        const sheetsTab = document.getElementById('tab-sheets');
+        const usersTab = document.getElementById('tab-users');
+        if ((sheetsTab && !sheetsTab.classList.contains('hidden')) || (usersTab && !usersTab.classList.contains('hidden'))) {
+          switchTab('dashboard');
         }
       }
 
@@ -2155,6 +2486,9 @@
             footerLeft.innerHTML = 'Neonatal Nursing Clinical LMS &copy; 2026. <span class="text-indigo-600 font-semibold">● Admin Database Active</span>';
           }
           footerLinks.innerHTML = `
+            <a href="#" onclick="switchTab('users'); return false;" class="hover:text-indigo-600 transition flex items-center gap-1 font-semibold text-indigo-700">
+              <span>👥</span> User Management
+            </a>
             <a href="https://docs.google.com/spreadsheets/d/1TQcak2SNQ3oT9DBz_nyrOzVh8fWfNRVsWqt7Rk_1uTA/edit" target="_blank" class="hover:text-indigo-600 transition flex items-center gap-1 font-semibold text-emerald-700">
               <span>📊</span> Open Google Sheet ↗
             </a>
@@ -2234,6 +2568,7 @@
           sessionStorage.setItem('lms_admin_auth', 'true');
         }
         saveState();
+        logUserActivity('USER_LOGIN', `Logged in as ${found.role.toUpperCase()}`);
         closeLoginModal();
         renderAuthUI();
         renderCourses();
@@ -2271,6 +2606,7 @@
       users.push(newUser);
       currentUser = newUser;
       saveState();
+      logUserActivity('USER_REGISTER', `New user registered as ${role.toUpperCase()} from ${hospital || 'General NICU'}`);
 
       // Push newly registered user to Google Sheets Users table if URL configured
       const webAppUrl = localStorage.getItem('lms_web_app_url');
@@ -2303,6 +2639,8 @@
     }
 
     function logoutUser() {
+      const email = currentUser ? currentUser.email : '';
+      logUserActivity('USER_LOGOUT', `Logged out (${email})`);
       currentUser = null;
       isAdminAuthenticated = false;
       sessionStorage.removeItem('lms_admin_auth');
@@ -2604,6 +2942,7 @@
       renderCourses();
       renderLearningTab();
       showToast('Enrolled successfully! View it in My Clinical Learning.');
+      logUserActivity('COURSE_ENROLL', `Enrolled in course ${courseId}`);
       switchTab('learning');
 
       // Sync enrollment to Google Sheets (Offline-Aware)
@@ -2712,20 +3051,23 @@
           <div class="bg-white border border-slate-200 rounded-xl p-3.5 flex items-center justify-between shadow-2xs">
             <div>
               <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[9px] font-bold ${att.type === 'osce' ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-indigo-100 text-indigo-800 border border-indigo-200'} uppercase">
+                  ${att.type === 'osce' ? '🩺 OSCE Skill' : '📝 Exam'}
+                </span>
                 <h5 class="font-bold text-slate-900 text-xs">${att.courseTitle || 'Neonatal Resuscitation Program (NRP)'}</h5>
                 <span class="px-2 py-0.5 rounded text-[10px] font-bold ${att.passed ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
-                  ${att.passed ? 'PASSED' : 'NEEDS REVIEW'}
+                  ${att.passed ? 'PASSED (≥ 70%)' : 'NEEDS REVIEW'}
                 </span>
               </div>
               <p class="text-[11px] text-slate-500 mt-0.5">Score: ${att.score}/${att.total} (${att.percentage}%) • Date: ${att.date}</p>
             </div>
             ${att.passed ? `
-              <button onclick="openCertificateModal('${att.courseTitle}', '${att.percentage}%')" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-semibold text-xs rounded-lg shadow-2xs transition flex items-center gap-1">
+              <button onclick="openCertificateModal('${att.courseTitle}', '${att.percentage}%', '${att.type === 'osce' ? 'OSCE CLINICAL STATION COMPETENCY' : 'Official Clinical Competency'}', '${att.type === 'osce' ? 'OSCE Certificate of Clinical Skill' : 'Certificate of Completion'}', '${att.type === 'osce' ? 'Has successfully demonstrated clinical protocol mastery and achieved the >= 70% benchmark in procedural OSCE performance for:' : ''}')" class="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-semibold text-xs rounded-lg shadow-2xs transition flex items-center gap-1">
                 <span>🏆</span> Certificate
               </button>
             ` : `
               <button onclick="switchTab('quiz')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition">
-                Retake Exam
+                Retake
               </button>
             `}
           </div>
@@ -2733,11 +3075,19 @@
       }
     }
 
-    function openCertificateModal(courseTitle = 'Neonatal Resuscitation Program (NRP)', score = '100%') {
-      const learnerName = currentUser ? currentUser.fullName : 'Nurse Clinician';
+    function openCertificateModal(courseTitle = 'Neonatal Resuscitation Program (NRP)', score = '100%', badgeType = 'Official Clinical Competency', certTitle = 'Certificate of Completion', descText = '', candidateName = '', thresholdText = '') {
+      const learnerName = candidateName || (currentUser ? currentUser.fullName : (localStorage.getItem('lms_guest_name') || 'Nurse Clinician'));
       document.getElementById('cert-learner-name').innerText = learnerName;
       document.getElementById('cert-course-name').innerText = courseTitle;
       document.getElementById('cert-score').innerText = score + ' (Competency Passed)';
+      const badgeEl = document.getElementById('cert-badge-type');
+      if (badgeEl) badgeEl.innerText = badgeType;
+      const titleEl = document.getElementById('cert-title-header');
+      if (titleEl) titleEl.innerText = certTitle;
+      const descEl = document.getElementById('cert-desc-text');
+      if (descEl) descEl.innerText = descText || 'Has successfully mastered the clinical protocol and demonstrated competency for';
+      const threshBadge = document.getElementById('cert-threshold-badge');
+      if (threshBadge) threshBadge.innerText = thresholdText || '≥ 70% OSCE Standard';
       document.getElementById('modal-certificate').classList.remove('hidden');
     }
 
@@ -2839,6 +3189,397 @@
         if (err) err.classList.remove('hidden');
         if (input) input.select();
       }
+    }
+
+    // ==================== USER MANAGEMENT & ROLE ADMINISTRATION ====================
+    let currentUserRoleFilter = 'all';
+
+    function setUserRoleFilter(filter) {
+      currentUserRoleFilter = filter;
+      document.querySelectorAll('.user-filter-btn').forEach(btn => {
+        btn.className = 'user-filter-btn px-2.5 py-1.5 rounded-lg font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-100';
+      });
+      const activeBtn = document.getElementById(`filter-user-${filter}`);
+      if (activeBtn) {
+        activeBtn.className = 'user-filter-btn px-2.5 py-1.5 rounded-lg font-semibold bg-indigo-600 text-white';
+      }
+      renderUsers();
+    }
+
+    function renderUsers() {
+      const tbody = document.getElementById('users-table-body');
+      if (!tbody) return;
+
+      const searchTerm = (document.getElementById('user-search-input')?.value || '').toLowerCase().trim();
+
+      // Update counters
+      const totalCount = users.length;
+      const activeCount = users.filter(u => (u.accountStatus || 'active') === 'active').length;
+      const pendingCount = users.filter(u => u.accountStatus === 'pending_approval' || u.accountStatus === 'pending').length;
+      const staffCount = users.filter(u => u.role === 'admin' || u.role === 'instructor').length;
+
+      const totalEl = document.getElementById('stat-total-users');
+      const activeEl = document.getElementById('stat-active-users');
+      const pendingEl = document.getElementById('stat-pending-users');
+      const staffEl = document.getElementById('stat-staff-users');
+
+      if (totalEl) totalEl.innerText = totalCount;
+      if (activeEl) activeEl.innerText = activeCount;
+      if (pendingEl) pendingEl.innerText = pendingCount;
+      if (staffEl) staffEl.innerText = staffCount;
+
+      const filtered = users.filter(u => {
+        const matchesSearch = !searchTerm ||
+          (u.fullName || '').toLowerCase().includes(searchTerm) ||
+          (u.email || '').toLowerCase().includes(searchTerm) ||
+          (u.hospital || '').toLowerCase().includes(searchTerm) ||
+          (u.role || '').toLowerCase().includes(searchTerm);
+
+        const status = (u.accountStatus || 'active').toLowerCase();
+        const matchesFilter = currentUserRoleFilter === 'all' ||
+          (currentUserRoleFilter === 'pending' && (status === 'pending_approval' || status === 'pending')) ||
+          u.role === currentUserRoleFilter;
+
+        return matchesSearch && matchesFilter;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="p-8 text-center text-slate-400">
+              No clinician or user accounts found matching your criteria.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(u => {
+        const isSelf = currentUser && currentUser.id === u.id;
+        const status = u.accountStatus || 'active';
+        const isPending = status === 'pending_approval' || status === 'pending';
+
+        const roleBadge = u.role === 'admin' ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">Admin</span>' :
+                          u.role === 'instructor' ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">Instructor</span>' :
+                          '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">Learner</span>';
+
+        const statusBadge = isPending ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">⏳ Pending</span>' :
+                            status === 'disabled' ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">⊘ Disabled</span>' :
+                            '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">✓ Active</span>';
+
+        return `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="p-3">
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-full bg-indigo-600 text-white font-bold text-[10px] flex items-center justify-center flex-shrink-0 shadow-2xs">
+                  ${u.avatar || (u.fullName || 'User').substring(0, 2).toUpperCase()}
+                </div>
+                <div>
+                  <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                    <span>${u.fullName}</span>
+                    ${isSelf ? '<span class="text-[9px] px-1 py-0.2 rounded bg-indigo-50 text-indigo-600 font-semibold">(You)</span>' : ''}
+                  </div>
+                  <div class="text-[10px] text-slate-400 font-mono">ID: ${u.id}</div>
+                </div>
+              </div>
+            </td>
+            <td class="p-3 text-slate-700 font-mono text-[11px]">${u.email}</td>
+            <td class="p-3 text-slate-600">${u.hospital || 'Ethiopian Health Center'}</td>
+            <td class="p-3">${roleBadge}</td>
+            <td class="p-3">${statusBadge}</td>
+            <td class="p-3 text-right">
+              <div class="flex items-center justify-end gap-1.5">
+                ${isPending ? `
+                  <button type="button" onclick="approveUser('${u.id}')" title="Approve registration" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] rounded-lg shadow-2xs transition flex items-center gap-1">
+                    <span>✓</span> <span>Approve</span>
+                  </button>
+                ` : ''}
+                <button type="button" onclick="openEditUserModal('${u.id}')" title="Edit Profile & Role" class="p-1.5 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition text-xs">
+                  <span>✏️</span>
+                </button>
+                ${!isSelf ? `
+                  <button type="button" onclick="deleteUser('${u.id}')" title="Permanently delete user" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition text-xs">
+                    <span>🗑️</span>
+                  </button>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function approveUser(userId) {
+      if (!checkPermission('admin', 'approve user registrations')) return;
+      const u = users.find(x => x.id === userId);
+      if (!u) return;
+
+      u.accountStatus = 'active';
+      saveState();
+      logUserActivity('ADMIN_APPROVE_USER', `Approved user '${u.fullName}' (${u.id}) as ${u.role.toUpperCase()}`);
+
+      // Sync to Google Sheets
+      const webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (webAppUrl) {
+        fetch(webAppUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'upsertRecord',
+            sheetKey: 'users',
+            keyColumn: 'User_ID',
+            keyField: 'User_ID',
+            record: {
+              'User_ID': u.id,
+              'Full_Name': u.fullName,
+              'Email': u.email,
+              'Password_Hash': u.password || 'Secure@2026',
+              'Role': u.role,
+              'Hospital': u.hospital || '',
+              'Account_Status': 'active',
+              'Registration_Date': u.registrationDate || new Date().toISOString()
+            }
+          }),
+          mode: 'no-cors'
+        }).catch(() => {});
+      }
+
+      renderUsers();
+      showToast(`User '${u.fullName}' approved successfully! Access granted as ${u.role}.`, 'ok');
+    }
+
+    function openEditUserModal(userId) {
+      if (!checkPermission('admin', 'edit user profiles and roles')) return;
+      const u = users.find(x => x.id === userId);
+      if (!u) return;
+
+      document.getElementById('edit-user-id').value = u.id;
+      document.getElementById('edit-user-name').value = u.fullName || '';
+      document.getElementById('edit-user-email').value = u.email || '';
+      document.getElementById('edit-user-hospital').value = u.hospital || '';
+      document.getElementById('edit-user-role').value = u.role || 'learner';
+      document.getElementById('edit-user-status').value = u.accountStatus || 'active';
+
+      document.getElementById('modal-edit-user-title').innerText = `Edit: ${u.fullName}`;
+      document.getElementById('modal-edit-user').classList.remove('hidden');
+    }
+
+    function closeEditUserModal() {
+      document.getElementById('modal-edit-user').classList.add('hidden');
+    }
+
+    function saveEditUser(e) {
+      e.preventDefault();
+      if (!checkPermission('admin', 'update user profile and roles')) return;
+
+      const userId = document.getElementById('edit-user-id').value;
+      const name = document.getElementById('edit-user-name').value.trim();
+      const email = document.getElementById('edit-user-email').value.trim();
+      const hospital = document.getElementById('edit-user-hospital').value.trim();
+      const role = document.getElementById('edit-user-role').value;
+      const status = document.getElementById('edit-user-status').value;
+
+      const u = users.find(x => x.id === userId);
+      if (u) {
+        u.fullName = name;
+        u.email = email;
+        u.hospital = hospital;
+        u.role = role;
+        u.accountStatus = status;
+
+        if (currentUser && currentUser.id === userId) {
+          currentUser.fullName = name;
+          currentUser.email = email;
+          currentUser.hospital = hospital;
+          currentUser.role = role;
+          currentUser.accountStatus = status;
+        }
+
+        saveState();
+        logUserActivity('ADMIN_EDIT_USER', `Updated profile & role for '${name}' (${userId}) to Role: ${role.toUpperCase()}, Status: ${status}`);
+
+        // Push update to Google Sheets users tab
+        const webAppUrl = localStorage.getItem('lms_web_app_url');
+        if (webAppUrl) {
+          fetch(webAppUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'upsertRecord',
+              sheetKey: 'users',
+              keyColumn: 'User_ID',
+              keyField: 'User_ID',
+              record: {
+                'User_ID': u.id,
+                'Full_Name': u.fullName,
+                'Email': u.email,
+                'Password_Hash': u.password || 'Secure@2026',
+                'Role': u.role,
+                'Hospital': u.hospital || '',
+                'Account_Status': u.accountStatus,
+                'Registration_Date': u.registrationDate || new Date().toISOString()
+              }
+            }),
+            mode: 'no-cors'
+          }).catch(() => {});
+        }
+
+        renderAuthUI();
+        renderUsers();
+        closeEditUserModal();
+        showToast(`User profile and role for '${name}' updated successfully!`, 'ok');
+      }
+    }
+
+    function deleteUser(userId) {
+      if (!checkPermission('admin', 'delete user accounts')) return;
+      if (currentUser && currentUser.id === userId) {
+        showToast('Operation Aborted: You cannot delete your currently authenticated admin account.', 'err');
+        return;
+      }
+
+      const u = users.find(x => x.id === userId);
+      if (!u) return;
+
+      if (!confirm(`Are you sure you want to permanently delete '${u.fullName}' (${u.email})? This action cannot be undone.`)) {
+        return;
+      }
+
+      users = users.filter(x => x.id !== userId);
+      saveState();
+      logUserActivity('ADMIN_DELETE_USER', `Permanently deleted user account for '${u.fullName}' (${userId}) [Role: ${u.role}]`);
+
+      // Delete on Google Sheets
+      const webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (webAppUrl) {
+        fetch(webAppUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'deleteRecord',
+            sheetKey: 'users',
+            keyColumn: 'User_ID',
+            keyField: 'User_ID',
+            keyValue: userId
+          }),
+          mode: 'no-cors'
+        }).catch(() => {});
+      }
+
+      renderUsers();
+      showToast(`User account for '${u.fullName}' has been permanently deleted.`, 'ok');
+    }
+
+    function openNewUserModal() {
+      if (!checkPermission('admin', 'add new users')) return;
+      document.getElementById('form-new-user').reset();
+      document.getElementById('modal-new-user').classList.remove('hidden');
+    }
+
+    function closeNewUserModal() {
+      document.getElementById('modal-new-user').classList.add('hidden');
+    }
+
+    function saveNewUser(e) {
+      e.preventDefault();
+      if (!checkPermission('admin', 'add new users')) return;
+
+      const name = document.getElementById('new-user-name').value.trim();
+      const email = document.getElementById('new-user-email').value.trim();
+      const hospital = document.getElementById('new-user-hospital').value.trim();
+      const role = document.getElementById('new-user-role').value;
+      const pwd = document.getElementById('new-user-password').value.trim();
+
+      if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
+        showToast('An account with this email address already exists.', 'err');
+        return;
+      }
+
+      const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'RN';
+      const newUser = {
+        id: 'USR-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+        fullName: name,
+        email,
+        hospital: hospital || 'Ethiopian Neonatal Center',
+        role,
+        password: pwd || 'Nurse@2026',
+        avatar: initials,
+        accountStatus: 'active',
+        registrationDate: new Date().toISOString()
+      };
+
+      users.push(newUser);
+      saveState();
+      logUserActivity('ADMIN_CREATE_USER', `Created new user '${name}' with role ${role.toUpperCase()}`);
+
+      // Push to Google Sheets
+      const webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (webAppUrl) {
+        fetch(webAppUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'appendRecord',
+            sheetKey: 'users',
+            records: [{
+              'User_ID': newUser.id,
+              'Full_Name': newUser.fullName,
+              'Email': newUser.email,
+              'Password_Hash': newUser.password,
+              'Role': newUser.role,
+              'Hospital': newUser.hospital,
+              'Account_Status': newUser.accountStatus,
+              'Registration_Date': newUser.registrationDate,
+              'Last_Login': ''
+            }]
+          }),
+          mode: 'no-cors'
+        }).catch(() => {});
+      }
+
+      renderUsers();
+      closeNewUserModal();
+      showToast(`User '${name}' added with role ${role.toUpperCase()}.`, 'ok');
+    }
+
+    function syncUsersToGoogleSheet() {
+      if (!checkPermission('admin', 'sync users to Google Sheet')) return;
+      const webAppUrl = localStorage.getItem('lms_web_app_url');
+      if (!webAppUrl) {
+        showToast('Please configure your Apps Script Web App URL first in Database Admin tab.', 'err');
+        switchTab('sheets');
+        return;
+      }
+
+      showToast('Syncing all users to Google Sheets...', 'ok');
+      const records = users.map(u => ({
+        'User_ID': u.id,
+        'Full_Name': u.fullName,
+        'Email': u.email,
+        'Password_Hash': u.password || 'Secure@2026',
+        'Role': u.role,
+        'Hospital': u.hospital || '',
+        'Account_Status': u.accountStatus || 'active',
+        'Registration_Date': u.registrationDate || new Date().toISOString(),
+        'Last_Login': ''
+      }));
+
+      fetch(webAppUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'syncUsers',
+          sheetKey: 'users',
+          records: records
+        }),
+        mode: 'no-cors'
+      })
+      .then(() => {
+        showToast(`Successfully synced ${records.length} user records to Google Sheet!`, 'ok');
+      })
+      .catch(() => {
+        showToast('Error syncing users to Google Sheet.', 'err');
+      });
     }
 
     // ==================== COURSE MANAGEMENT ====================
@@ -3229,20 +3970,89 @@
           }
         }
 
-        // Interactive simulation checklist
+        // Interactive OSCE Clinical Station Rubric & Certification
         let checklistHtml = '';
         if (l.checklist && l.checklist.length > 0) {
+          const totalSteps = l.checklist.length;
+          const checkedSteps = l.checklist.filter(s => s.done).length;
+          const percent = totalSteps > 0 ? Math.round((checkedSteps / totalSteps) * 100) : 0;
+          const threshold = l.osceThreshold || 70;
+          const hasPassedOsce = percent >= threshold;
+
           checklistHtml = `
-            <div class="mt-2.5 p-3 bg-amber-50/70 border border-amber-200 rounded-xl space-y-1.5">
-              <span class="text-[11px] font-bold text-amber-900 block flex items-center gap-1">
-                <span>📋</span> Clinical Procedure Checklist:
-              </span>
-              ${l.checklist.map((step, sIdx) => `
-                <label class="flex items-start gap-2 text-xs text-amber-950 cursor-pointer">
-                  <input type="checkbox" ${step.done ? 'checked' : ''} onchange="toggleLessonChecklistStep('${l.id}', ${sIdx}, this.checked)" class="mt-0.5 rounded text-amber-600 focus:ring-amber-500">
-                  <span class="${step.done ? 'line-through text-slate-400' : ''}">${step.step}</span>
-                </label>
-              `).join('')}
+            <div class="mt-3 p-4 bg-gradient-to-br from-amber-50/60 via-slate-50 to-emerald-50/30 border border-amber-200/90 rounded-2xl space-y-3 shadow-2xs">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200/60 pb-2.5">
+                <div class="flex items-center gap-2">
+                  <span class="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center text-xs font-bold shadow-xs">🩺</span>
+                  <div>
+                    <h6 class="font-bold text-slate-900 text-xs flex items-center gap-2">
+                      <span>OSCE Clinical Station Rubric</span>
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${hasPassedOsce ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'}">
+                        ${hasPassedOsce ? '✓ Competency Passed (≥ 70%)' : 'In Clinical Evaluation'}
+                      </span>
+                    </h6>
+                    <p class="text-[10px] text-slate-500">Benchmark: Minimum <strong>${threshold}%</strong> checklist completion required for accredited competency certificate.</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-extrabold ${hasPassedOsce ? 'text-emerald-700' : 'text-slate-700'}">
+                    ${checkedSteps} / ${totalSteps} Steps (${percent}%)
+                  </span>
+                  <button type="button" onclick="resetLessonChecklist('${l.id}')" title="Reset this OSCE station checklist" class="text-[10px] text-slate-500 hover:text-slate-800 font-semibold px-2 py-1 rounded-md bg-white border border-slate-200 transition shadow-2xs flex items-center gap-1">
+                    <span>↺</span> <span>Reset</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Real-time Progress Bar with 70% Benchmark Indicator -->
+              <div class="space-y-1">
+                <div class="relative w-full bg-slate-200/90 h-3 rounded-full overflow-hidden border border-slate-200">
+                  <div class="h-full rounded-full transition-all duration-300 ${hasPassedOsce ? 'bg-emerald-500' : 'bg-amber-500'}" style="width: ${percent}%"></div>
+                  <!-- 70% benchmark marker line -->
+                  <div class="absolute top-0 bottom-0 border-r-2 border-dashed border-slate-700" style="left: ${threshold}%;" title="70% Passing Threshold"></div>
+                </div>
+                <div class="flex justify-between text-[10px] text-slate-400 font-medium px-0.5">
+                  <span>0%</span>
+                  <span class="font-bold text-slate-700">70% Passing Benchmark</span>
+                  <span>100%</span>
+                </div>
+              </div>
+
+              <!-- OSCE Procedural Tickbox Checklist -->
+              <div class="space-y-1.5 pt-1">
+                ${l.checklist.map((step, sIdx) => `
+                  <label class="flex items-start gap-2.5 p-2.5 rounded-xl border text-xs cursor-pointer transition ${step.done ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 font-medium' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'}">
+                    <input type="checkbox" ${step.done ? 'checked' : ''} onchange="toggleLessonChecklistStep('${l.id}', ${sIdx}, this.checked)" class="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4">
+                    <span class="flex-1 leading-snug ${step.done ? 'line-through text-slate-400 font-normal' : ''}">
+                      <strong class="text-slate-900 mr-1">${sIdx + 1}.</strong> ${step.step}
+                    </span>
+                    ${step.done ? '<span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded flex-shrink-0">✓ Verified</span>' : ''}
+                  </label>
+                `).join('')}
+              </div>
+
+              <!-- Dynamic OSCE Certification Callout when >= 70% -->
+              ${hasPassedOsce ? `
+                <div class="mt-3 p-3.5 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-300 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+                  <div class="flex items-center gap-2.5">
+                    <span class="text-3xl">🏆</span>
+                    <div>
+                      <div class="font-extrabold text-xs text-emerald-900">OSCE Clinical Competency Standard Achieved! (${percent}%)</div>
+                      <p class="text-[11px] text-emerald-700">Candidate passed the ≥ 70% procedural benchmark. Verified clinical certificate is available.</p>
+                    </div>
+                  </div>
+                  <button type="button" onclick="claimOsceCertificate('${l.id}')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5 whitespace-nowrap">
+                    <span>📜</span> <span>Claim OSCE Certificate</span>
+                  </button>
+                </div>
+              ` : `
+                <div class="text-[11px] text-slate-600 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white/90 p-2.5 rounded-xl border border-slate-200">
+                  <span class="flex items-center gap-1.5">
+                    <span>ℹ️</span> <span>Complete <strong>${Math.max(0, Math.ceil((threshold / 100) * totalSteps) - checkedSteps)}</strong> more procedural step(s) to reach 70% and earn your accredited OSCE certificate.</span>
+                  </span>
+                  <span class="font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 text-center font-mono">${percent}% / ${threshold}%</span>
+                </div>
+              `}
             </div>
           `;
         }
@@ -3311,7 +4121,117 @@
       if (l && l.checklist && l.checklist[stepIdx]) {
         l.checklist[stepIdx].done = done;
         saveState();
+        renderLessonsList(currentLessonsCourseId);
+
+        // Check if 70% benchmark is met
+        const total = l.checklist.length;
+        const checked = l.checklist.filter(s => s.done).length;
+        const pct = Math.round((checked / total) * 100);
+        const threshold = l.osceThreshold || 70;
+        if (pct >= threshold && done) {
+          showToast(`🎉 OSCE Competency Benchmark Met (${pct}%)! Click 'Claim OSCE Certificate' to view.`, 'ok');
+        }
       }
+    }
+
+    function resetLessonChecklist(lessonId) {
+      const l = lessons.find(x => x.id === lessonId);
+      if (l && l.checklist) {
+        l.checklist.forEach(s => s.done = false);
+        saveState();
+        renderLessonsList(currentLessonsCourseId);
+        showToast('OSCE Station Rubric reset for evaluation.');
+      }
+    }
+
+    function claimOsceCertificate(lessonId) {
+      const l = lessons.find(x => x.id === lessonId);
+      if (!l || !l.checklist || l.checklist.length === 0) return;
+
+      const total = l.checklist.length;
+      const doneCount = l.checklist.filter(s => s.done).length;
+      const percent = Math.round((doneCount / total) * 100);
+      const threshold = l.osceThreshold || 70;
+
+      if (percent < threshold) {
+        showToast(`OSCE threshold not met. Score is ${percent}% (Minimum ${threshold}% required).`, 'err');
+        return;
+      }
+
+      const certTitle = `OSCE Competency: ${l.title}`;
+
+      const learnerId = currentUser ? currentUser.id : 'GST-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+      let learnerName = currentUser ? currentUser.fullName : (localStorage.getItem('lms_guest_name') || '');
+      if (!learnerName) {
+        learnerName = prompt('Enter your clinician/candidate full name for this accredited OSCE certificate:', 'Nurse Tigist Mengistu') || 'Clinician Candidate';
+        localStorage.setItem('lms_guest_name', learnerName);
+      }
+
+      // Record in attempts if not already present
+      const existing = attempts.find(a => a.courseId === l.id && a.type === 'osce');
+      if (!existing) {
+        const newAttempt = {
+          id: 'OSCE-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+          userId: learnerId,
+          learnerName: learnerName,
+          courseId: l.id,
+          courseTitle: certTitle,
+          score: doneCount,
+          total: total,
+          percentage: percent,
+          passed: true,
+          type: 'osce',
+          date: new Date().toISOString().split('T')[0]
+        };
+        attempts.unshift(newAttempt);
+        saveState();
+        renderLearningTab();
+
+        // Sync to Google Sheets (Offline-aware)
+        const osceRecord = {
+          'Attempt_ID': newAttempt.id,
+          'Assessment_ID': 'OSCE-' + l.id,
+          'Learner_ID': learnerId,
+          'Learner_Name': learnerName,
+          'Course_ID': l.courseId,
+          'Attempt_Number': 1,
+          'Score': doneCount,
+          'Percentage': percent,
+          'Passed': 'YES',
+          'Submitted_Date': new Date().toISOString(),
+          'Answers_JSON': JSON.stringify({ checklist: l.checklist, threshold: threshold })
+        };
+
+        if (navigator.onLine) {
+          const webAppUrl = localStorage.getItem('lms_web_app_url');
+          if (webAppUrl) {
+            fetch(webAppUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                action: 'appendRecord',
+                sheetKey: 'attempts',
+                records: [osceRecord]
+              }),
+              mode: 'no-cors'
+            }).catch(() => {});
+          }
+        } else {
+          idbEnqueueSync('attempts', [osceRecord]);
+        }
+      }
+
+      openCertificateModal(
+        certTitle,
+        `${percent}%`,
+        'OSCE CLINICAL STATION COMPETENCY',
+        'OSCE Certificate of Clinical Skill',
+        'Has successfully demonstrated clinical protocol mastery and achieved the >= 70% benchmark in procedural OSCE performance for:',
+        learnerName,
+        `≥ ${threshold}% OSCE Standard`
+      );
+      logUserActivity('OSCE_CERTIFICATE_CLAIM', `Claimed accredited OSCE Certificate for '${l.title}' with ${percent}% competency (Threshold: ${threshold}%)`);
+      showToast(`Congratulations! OSCE Certificate claimed with ${percent}% competency score.`, 'ok');
     }
 
     function openEditLessonModal(lessonId) {
@@ -3328,6 +4248,22 @@
       document.getElementById('edit-lesson-body').value = l.body || '';
 
       onLessonFormatChange(l.type || 'clinical', 'edit');
+      if (l.type === 'simulation' || (l.checklist && l.checklist.length > 0)) {
+        const osceSec = document.getElementById('edit-lesson-osce-section');
+        if (osceSec) osceSec.classList.remove('hidden');
+        const stepsEl = document.getElementById('edit-lesson-osce-steps');
+        if (stepsEl) stepsEl.value = (l.checklist || []).map(s => s.step).join('\n');
+        const threshEl = document.getElementById('edit-lesson-osce-threshold');
+        if (threshEl) threshEl.value = l.osceThreshold || 70;
+      } else {
+        const osceSec = document.getElementById('edit-lesson-osce-section');
+        if (osceSec) osceSec.classList.add('hidden');
+        const stepsEl = document.getElementById('edit-lesson-osce-steps');
+        if (stepsEl) stepsEl.value = '';
+        const threshEl = document.getElementById('edit-lesson-osce-threshold');
+        if (threshEl) threshEl.value = 70;
+      }
+
       const previewEl = document.getElementById('edit-lesson-body-preview');
       if (previewEl) previewEl.classList.add('hidden');
       document.getElementById('edit-lesson-body').classList.remove('hidden');
@@ -3355,6 +4291,20 @@
       const body = document.getElementById('edit-lesson-body').value.trim();
 
       const idx = lessons.findIndex(l => l.id === id);
+      const osceStepsRaw = (document.getElementById('edit-lesson-osce-steps')?.value || '').trim();
+      const osceThreshold = parseInt(document.getElementById('edit-lesson-osce-threshold')?.value) || 70;
+      let parsedChecklist = [];
+      if (osceStepsRaw) {
+        const existingList = (idx !== -1 && lessons[idx].checklist) ? lessons[idx].checklist : [];
+        parsedChecklist = osceStepsRaw.split('\n')
+          .map(s => s.trim())
+          .filter(Boolean)
+          .map(s => {
+            const matched = existingList.find(e => e.step.trim().toLowerCase() === s.toLowerCase());
+            return { step: s, done: matched ? matched.done : false };
+          });
+      }
+
       if (idx !== -1) {
         lessons[idx] = {
           ...lessons[idx],
@@ -3364,7 +4314,9 @@
           type,
           duration,
           mediaUrl,
-          body
+          body,
+          checklist: parsedChecklist,
+          osceThreshold
         };
       }
 
@@ -3479,6 +4431,15 @@
       const duration = parseInt(document.getElementById('lesson-duration').value) || 20;
       const mediaUrl = document.getElementById('lesson-media-url').value.trim();
       const body = document.getElementById('lesson-body').value.trim();
+      const osceStepsRaw = (document.getElementById('lesson-osce-steps')?.value || '').trim();
+      const osceThreshold = parseInt(document.getElementById('lesson-osce-threshold')?.value) || 70;
+      let parsedChecklist = [];
+      if (osceStepsRaw) {
+        parsedChecklist = osceStepsRaw.split('\n')
+          .map(s => s.trim())
+          .filter(Boolean)
+          .map(s => ({ step: s, done: false }));
+      }
 
       const newLesson = {
         id: 'LES-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
@@ -3488,8 +4449,13 @@
         type,
         duration,
         mediaUrl,
-        body
+        body,
+        checklist: parsedChecklist,
+        osceThreshold
       };
+
+      if (document.getElementById('lesson-osce-steps')) document.getElementById('lesson-osce-steps').value = '';
+      if (document.getElementById('lesson-osce-threshold')) document.getElementById('lesson-osce-threshold').value = '70';
 
       lessons.push(newLesson);
       saveState();
@@ -4435,6 +5401,8 @@
           }
         }
 
+        logUserActivity('ASSESSMENT_SUBMIT', `Assessment ${activeAssessmentId}: Score ${scorePercent}% (${passed ? 'PASSED' : 'NEEDS RETAKE'})`);
+
         if (passed) {
           box.innerHTML += `
             <div class="pt-3 border-t border-emerald-200 mt-2">
@@ -4553,6 +5521,16 @@
             'Option_D': q.options[3] || '',
             'Correct_Option_Index': Array.isArray(q.correct) ? JSON.stringify(q.correct) : q.correct,
             'Explanation': q.explanation || ''
+          })),
+          users: users.map(u => ({
+            'User_ID': u.id,
+            'Full_Name': u.fullName,
+            'Email': u.email,
+            'Password_Hash': u.password || 'Secure@2026',
+            'Role': u.role,
+            'Hospital': u.hospital || '',
+            'Account_Status': u.accountStatus || 'active',
+            'Registration_Date': u.registrationDate || new Date().toISOString()
           }))
         };
 
@@ -4598,13 +5576,13 @@
     }
 
     function switchTab(tab) {
-      if (tab === 'sheets') {
-        if (!checkPermission('admin', 'access Database Admin console')) {
+      if (tab === 'sheets' || tab === 'users') {
+        if (!checkPermission('admin', `access ${tab === 'users' ? 'User Administration' : 'Database Admin'} console`)) {
           return;
         }
       }
 
-      ['dashboard', 'courses', 'quiz', 'learning', 'sheets'].forEach(t => {
+      ['dashboard', 'courses', 'quiz', 'learning', 'users', 'sheets'].forEach(t => {
         const sec = document.getElementById('tab-' + t);
         const nav = document.getElementById('nav-' + t);
         if (sec) sec.classList.add('hidden');
@@ -4622,15 +5600,12 @@
         activeNav.classList.add('text-indigo-600', 'bg-indigo-50', 'font-semibold');
       }
 
-      // CRITICAL: Strictly guard Database Admin navigation tab using checkPermission
+      // Guard Admin navigation tabs
+      const isAdmin = checkPermission('admin');
       const sheetsNav = document.getElementById('nav-sheets');
-      if (sheetsNav) {
-        if (checkPermission('admin')) {
-          sheetsNav.classList.remove('hidden');
-        } else {
-          sheetsNav.classList.add('hidden');
-        }
-      }
+      if (sheetsNav) sheetsNav.classList.toggle('hidden', !isAdmin);
+      const usersNav = document.getElementById('nav-users');
+      if (usersNav) usersNav.classList.toggle('hidden', !isAdmin);
 
       if (tab === 'learning') {
         renderLearningTab();
@@ -4639,6 +5614,10 @@
       if (tab === 'quiz') {
         renderAssessmentSelector();
         renderQuizEditor();
+      }
+
+      if (tab === 'users') {
+        renderUsers();
       }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4686,6 +5665,39 @@
         const urlInput = document.getElementById('sheets-config-url');
         if (urlInput) urlInput.value = savedUrl;
       }
+      // 5. Android Native App Bridge Detection & User Session Sync
+      if (window.AndroidAppInterface) {
+        try {
+          const rawUser = window.AndroidAppInterface.getNativeUserJson ? window.AndroidAppInterface.getNativeUserJson() : null;
+          if (rawUser) {
+            const nativeUser = JSON.parse(rawUser);
+            if (nativeUser && nativeUser.email) {
+              let existingUser = users.find(u => u.email.toLowerCase() === nativeUser.email.toLowerCase());
+              if (!existingUser) {
+                existingUser = {
+                  id: nativeUser.userId || 'USR-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+                  fullName: nativeUser.fullName || 'Nurse Clinician',
+                  email: nativeUser.email,
+                  role: nativeUser.role || 'learner',
+                  accountStatus: nativeUser.accountStatus || 'active',
+                  hospital: 'Ethiopian Neonatal Center',
+                  password: 'Synced@2026'
+                };
+                users.push(existingUser);
+              }
+              currentUser = existingUser;
+              if (currentUser.role === 'admin') {
+                isAdminAuthenticated = true;
+                sessionStorage.setItem('lms_admin_auth', 'true');
+              }
+              saveState();
+            }
+          }
+        } catch (bridgeErr) {
+          console.warn('Native session sync error:', bridgeErr);
+        }
+      }
+
       renderAuthUI();
       renderCourses();
       renderAssessmentSelector();

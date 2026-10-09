@@ -280,9 +280,9 @@ function doPost(e) {
     // ------------------------------------------------------------------------
     if (action === "upsertRecord") {
       var sheet = getTargetSheet(ss, req.sheetKey || "Courses");
-      var keyColName = req.keyColumn || "Course_ID";
+      var keyColName = req.keyColumn || req.keyField || "Course_ID";
       var record = req.record || {};
-      var keyValue = record[keyColName];
+      var keyValue = record[keyColName] || record[keyColName.toLowerCase()] || record[keyColName.replace(/_/g, '')];
       
       upsertSingleRecord(sheet, keyColName, keyValue, record);
       return jsonResponse({ status: "success", message: "Record upserted successfully" });
@@ -293,12 +293,18 @@ function doPost(e) {
     // ------------------------------------------------------------------------
     if (action === "deleteRecord") {
       var sheet = getTargetSheet(ss, req.sheetKey || "Courses");
-      var keyColName = req.keyColumn || "Course_ID";
+      var keyColName = req.keyColumn || req.keyField || "Course_ID";
       var keyValue = String(req.keyValue || "");
       
       var data = sheet.getDataRange().getValues();
       var headers = data[0];
-      var colIdx = headers.indexOf(keyColName);
+      var colIdx = -1;
+      for (var ci = 0; ci < headers.length; ci++) {
+        if (String(headers[ci]).toLowerCase() === String(keyColName).toLowerCase()) {
+          colIdx = ci;
+          break;
+        }
+      }
       
       if (colIdx !== -1) {
         for (var r = data.length - 1; r >= 1; r--) {
@@ -323,7 +329,15 @@ function doPost(e) {
         var rec = records[i];
         var row = [];
         for (var h = 0; h < headers.length; h++) {
-          row.push(rec[headers[h]] !== undefined ? rec[headers[h]] : "");
+          var hName = headers[h];
+          var val = rec[hName];
+          if (val === undefined) val = rec[hName.toLowerCase()];
+          if (val === undefined) val = rec[hName.replace(/_/g, '')];
+          if (val === undefined && hName === "User_ID") val = rec.userId || rec.email || rec.userEmail;
+          if (val === undefined && hName === "Log_ID") val = rec.activityId || rec.logId;
+          if (val === undefined && hName === "Action") val = rec.actionType || rec.action;
+          if (val === undefined && hName === "Device_Info") val = rec.statusMessage || rec.deviceInfo || "Android/Web";
+          row.push(val !== undefined ? val : "");
         }
         targetSheet.appendRow(row);
       }
@@ -331,11 +345,23 @@ function doPost(e) {
     }
     
     // ------------------------------------------------------------------------
-    // 6. SYNC COURSES (Full replace or update)
+    // 6. SYNC COURSES & SYNC USERS
     // ------------------------------------------------------------------------
     if (action === "syncCourses") {
       var courseSheet = getTargetSheet(ss, "Courses");
       syncTableRows(courseSheet, "Courses", req.records || []);
+      return jsonResponse({ status: "success", synced: (req.records || []).length });
+    }
+
+    if (action === "syncUsers") {
+      var userSheet = getTargetSheet(ss, "Users");
+      syncTableRows(userSheet, "Users", req.records || []);
+      return jsonResponse({ status: "success", synced: (req.records || []).length });
+    }
+
+    if (action === "syncActivityLogs") {
+      var logSheet = getTargetSheet(ss, "Activity_Logs");
+      syncTableRows(logSheet, "Activity_Logs", req.records || []);
       return jsonResponse({ status: "success", synced: (req.records || []).length });
     }
     
