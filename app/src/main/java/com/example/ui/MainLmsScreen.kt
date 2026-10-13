@@ -261,6 +261,7 @@ fun MainLmsScreen(
                     }
                     is Screen.WebPortal -> {
                         com.example.ui.web.WebPortalScreen(
+                            viewModel = viewModel,
                             url = viewModel.gitHubPageUrl,
                             onBack = { viewModel.navigateBack() }
                         )
