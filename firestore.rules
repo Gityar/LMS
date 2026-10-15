@@ -1,0 +1,200 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(docId) {
+      return docId is string && docId.size() > 0 && docId.size() <= 128 && docId.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // -------------------------------------------------------------
+    // USERS COLLECTION
+    // -------------------------------------------------------------
+    function isValidUser(data) {
+      return (!('userId' in data) || data.userId == null || (data.userId is string && data.userId.size() <= 128)) &&
+             data.fullName is string && data.fullName.size() >= 2 && data.fullName.size() <= 100 &&
+             data.email is string && data.email.size() <= 150 &&
+             data.role in ['learner', 'instructor', 'admin'] &&
+             data.accountStatus in ['active', 'pending', 'disabled'] &&
+             (!('hospital' in data) || data.hospital == null || (data.hospital is string && data.hospital.size() <= 150)) &&
+             (!('createdAt' in data) || data.createdAt == null || (data.createdAt is timestamp && data.createdAt <= request.time)) &&
+             (!('updatedAt' in data) || data.updatedAt == null || (data.updatedAt is timestamp && data.updatedAt <= request.time));
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId);
+      allow list: if isSignedIn();
+      allow create: if isOwner(userId) && isValidId(userId) &&
+                       incoming().keys().hasAll(['fullName', 'email', 'role', 'accountStatus']) &&
+                       isValidUser(incoming());
+      allow update: if (isOwner(userId) || (isSignedIn() && request.auth.token.email == 'yaregalsemanew@gmail.com')) &&
+                       isValidId(userId) &&
+                       isValidUser(incoming());
+      allow delete: if isSignedIn() && (request.auth.token.email == 'yaregalsemanew@gmail.com' || isOwner(userId)) && isValidId(userId);
+    }
+
+    // -------------------------------------------------------------
+    // COURSES COLLECTION
+    // -------------------------------------------------------------
+    function isValidCourse(data) {
+      return (!('courseId' in data) || data.courseId == null || (data.courseId is string && data.courseId.size() <= 50)) &&
+             data.courseTitle is string && data.courseTitle.size() >= 3 && data.courseTitle.size() <= 150 &&
+             data.category is string && data.category.size() <= 100 &&
+             data.isActive is bool &&
+             (!('createdAt' in data) || data.createdAt == null || (data.createdAt is timestamp && data.createdAt <= request.time)) &&
+             (!('description' in data) || data.description == null || (data.description is string && data.description.size() <= 2000)) &&
+             (!('durationHours' in data) || data.durationHours == null || (data.durationHours is number && data.durationHours >= 0)) &&
+             (!('level' in data) || data.level == null || (data.level is string && data.level.size() <= 50)) &&
+             (!('targetAudience' in data) || data.targetAudience == null || (data.targetAudience is string && data.targetAudience.size() <= 100)) &&
+             (!('instructorEmail' in data) || data.instructorEmail == null || (data.instructorEmail is string && data.instructorEmail.size() <= 150));
+    }
+
+    match /courses/{courseId} {
+      allow get, list: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidId(courseId) &&
+                               incoming().keys().hasAll(['courseTitle', 'category', 'isActive']) &&
+                               isValidCourse(incoming());
+      allow delete: if isSignedIn() && isValidId(courseId);
+    }
+
+    // -------------------------------------------------------------
+    // LESSONS COLLECTION
+    // -------------------------------------------------------------
+    function isValidLesson(data) {
+      return (!('lessonId' in data) || data.lessonId == null || (data.lessonId is string && data.lessonId.size() <= 50)) &&
+             data.courseId is string && data.courseId.size() <= 50 &&
+             data.moduleNumber is int && data.moduleNumber >= 1 &&
+             data.lessonTitle is string && data.lessonTitle.size() >= 2 && data.lessonTitle.size() <= 150 &&
+             data.contentType is string && data.contentType.size() <= 50 &&
+             (!('createdAt' in data) || data.createdAt == null || (data.createdAt is timestamp && data.createdAt <= request.time)) &&
+             (!('durationMins' in data) || data.durationMins == null || (data.durationMins is number && data.durationMins >= 0)) &&
+             (!('contentBody' in data) || data.contentBody == null || (data.contentBody is string && data.contentBody.size() <= 20000)) &&
+             (!('videoUrl' in data) || data.videoUrl == null || (data.videoUrl is string && data.videoUrl.size() <= 500)) &&
+             (!('resourceUrl' in data) || data.resourceUrl == null || (data.resourceUrl is string && data.resourceUrl.size() <= 500));
+    }
+
+    match /lessons/{lessonId} {
+      allow get, list: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidId(lessonId) &&
+                               incoming().keys().hasAll(['courseId', 'moduleNumber', 'lessonTitle', 'contentType']) &&
+                               isValidLesson(incoming());
+      allow delete: if isSignedIn() && isValidId(lessonId);
+    }
+
+    // -------------------------------------------------------------
+    // ENROLLMENTS COLLECTION
+    // -------------------------------------------------------------
+    function isValidEnrollment(data) {
+      return (!('enrollmentId' in data) || data.enrollmentId == null || (data.enrollmentId is string && data.enrollmentId.size() <= 128)) &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.courseId is string && data.courseId.size() <= 50 &&
+             data.status in ['enrolled', 'in_progress', 'completed'] &&
+             data.progressPercent is number && data.progressPercent >= 0 && data.progressPercent <= 100 &&
+             (!('createdAt' in data) || data.createdAt == null || (data.createdAt is timestamp && data.createdAt <= request.time)) &&
+             (!('lastAccessed' in data) || data.lastAccessed == null || (data.lastAccessed is timestamp && data.lastAccessed <= request.time));
+    }
+
+    match /enrollments/{enrollmentId} {
+      allow get: if isSignedIn() && isValidId(enrollmentId) && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(enrollmentId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().keys().hasAll(['userId', 'courseId', 'status', 'progressPercent']) &&
+                       isValidEnrollment(incoming());
+      allow update: if isSignedIn() && isValidId(enrollmentId) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == request.auth.uid &&
+                       isValidEnrollment(incoming());
+      allow delete: if isSignedIn() && isValidId(enrollmentId) && resource.data.userId == request.auth.uid;
+    }
+
+    // -------------------------------------------------------------
+    // ATTEMPTS & OSCE CERTIFICATES COLLECTION
+    // -------------------------------------------------------------
+    function isValidAttempt(data) {
+      return (!('attemptId' in data) || data.attemptId == null || (data.attemptId is string && data.attemptId.size() <= 128)) &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.learnerName is string && data.learnerName.size() >= 2 && data.learnerName.size() <= 100 &&
+             data.courseId is string && data.courseId.size() <= 50 &&
+             data.score is number && data.score >= 0 &&
+             data.percentage is number && data.percentage >= 0 && data.percentage <= 100 &&
+             data.passed is bool &&
+             data.type in ['quiz', 'osce', 'exam'] &&
+             (!('createdAt' in data) || data.createdAt == null || (data.createdAt is timestamp && data.createdAt <= request.time)) &&
+             (!('total' in data) || data.total == null || (data.total is number && data.total >= 0)) &&
+             (!('assessmentId' in data) || data.assessmentId == null || (data.assessmentId is string && data.assessmentId.size() <= 50));
+    }
+
+    match /attempts/{attemptId} {
+      allow get: if isSignedIn() && isValidId(attemptId) && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(attemptId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().keys().hasAll(['userId', 'learnerName', 'courseId', 'score', 'percentage', 'passed', 'type']) &&
+                       isValidAttempt(incoming());
+      allow update: if isSignedIn() && isValidId(attemptId) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == request.auth.uid &&
+                       isValidAttempt(incoming());
+      allow delete: if isSignedIn() && isValidId(attemptId) && resource.data.userId == request.auth.uid;
+    }
+
+    // -------------------------------------------------------------
+    // FEEDBACK COLLECTION
+    // -------------------------------------------------------------
+    function isValidFeedback(data) {
+      return (!('feedbackId' in data) || data.feedbackId == null || (data.feedbackId is string && data.feedbackId.size() <= 128)) &&
+             data.userId is string && data.userId == request.auth.uid &&
+             data.lessonId is string && data.lessonId.size() <= 50 &&
+             data.rating is int && data.rating >= 1 && data.rating <= 5 &&
+             (!('createdAt' in data) || data.createdAt == null || (data.createdAt is timestamp && data.createdAt <= request.time)) &&
+             (!('comment' in data) || data.comment == null || (data.comment is string && data.comment.size() <= 1000));
+    }
+
+    match /feedback/{feedbackId} {
+      allow get: if isSignedIn() && isValidId(feedbackId);
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(feedbackId) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().keys().hasAll(['userId', 'lessonId', 'rating']) &&
+                       isValidFeedback(incoming());
+      allow update, delete: if isSignedIn() && isValidId(feedbackId) && resource.data.userId == request.auth.uid;
+    }
+
+    // -------------------------------------------------------------
+    // ACTIVITY LOGS COLLECTION
+    // -------------------------------------------------------------
+    function isValidActivityLog(data) {
+      return (!('logId' in data) || data.logId == null || (data.logId is string && data.logId.size() <= 128)) &&
+             data.userId is string && (data.userId == request.auth.uid || data.userId == request.auth.token.email) &&
+             data.action is string && data.action.size() <= 100 &&
+             (!('createdAt' in data) || data.createdAt == null || (data.createdAt is timestamp && data.createdAt <= request.time)) &&
+             (!('deviceInfo' in data) || data.deviceInfo == null || (data.deviceInfo is string && data.deviceInfo.size() <= 200));
+    }
+
+    match /activityLogs/{logId} {
+      allow get: if isSignedIn() && isValidId(logId);
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(logId) &&
+                       incoming().keys().hasAll(['userId', 'action']) &&
+                       isValidActivityLog(incoming());
+      allow update, delete: if false; // Audit logs are immutable
+    }
+  }
+}

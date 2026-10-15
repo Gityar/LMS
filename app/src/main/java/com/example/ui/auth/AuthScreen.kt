@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.LmsViewModel
+import kotlinx.coroutines.launch
 
 enum class AuthTab {
     LOGIN, REGISTER, FORGOT, RESET
@@ -39,6 +40,10 @@ fun AuthScreen(
     modifier: Modifier = Modifier
 ) {
     var activeTab by remember { mutableStateOf(AuthTab.LOGIN) }
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var isGoogleSigningIn by remember { mutableStateOf(false) }
 
     // Login state
     var loginEmail by remember { mutableStateOf("") }
@@ -287,7 +292,7 @@ fun AuthScreen(
                                 isLoggingIn = false
                             }
                         },
-                        enabled = !isLoggingIn,
+                        enabled = !isLoggingIn && !isGoogleSigningIn,
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -305,7 +310,84 @@ fun AuthScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFE2E8F0))
+                        Text(
+                            text = "  OR  ",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF94A3B8)
+                        )
+                        HorizontalDivider(modifier = Modifier.weight(1f), color = Color(0xFFE2E8F0))
+                    }
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    OutlinedButton(
+                        onClick = {
+                            coroutineScope.launch {
+                                try {
+                                    isGoogleSigningIn = true
+                                    val credentialManager = androidx.credentials.CredentialManager.create(context)
+                                    val serverClientId = context.getString(com.example.R.string.default_web_client_id)
+                                    val googleIdOption = com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption.Builder(serverClientId)
+                                        .build()
+                                    val request = androidx.credentials.GetCredentialRequest.Builder()
+                                        .addCredentialOption(googleIdOption)
+                                        .build()
+                                    val result = credentialManager.getCredential(context = context, request = request)
+                                    val googleIdTokenCredential = com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.createFrom(result.credential.data)
+                                    viewModel.signInWithGoogle(
+                                        idToken = googleIdTokenCredential.idToken,
+                                        displayName = googleIdTokenCredential.displayName,
+                                        email = googleIdTokenCredential.id
+                                    ) {
+                                        isGoogleSigningIn = false
+                                    }
+                                } catch (e: androidx.credentials.exceptions.GetCredentialCancellationException) {
+                                    isGoogleSigningIn = false
+                                } catch (e: Exception) {
+                                    isGoogleSigningIn = false
+                                    viewModel.showToast("err", "Google Sign-In Error", e.localizedMessage ?: "Failed to sign in with Google.")
+                                }
+                            }
+                        },
+                        enabled = !isLoggingIn && !isGoogleSigningIn,
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .testTag("btn_google_signin")
+                    ) {
+                        if (isGoogleSigningIn) {
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Connecting Google Account...")
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = "Google Logo",
+                                tint = Color(0xFF4285F4),
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Sign in with Google",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     TextButton(
                         onClick = { activeTab = AuthTab.FORGOT },

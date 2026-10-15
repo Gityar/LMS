@@ -12,6 +12,7 @@ import com.example.data.repository.QuizResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 sealed class Screen {
     object Dashboard : Screen()
@@ -47,6 +48,12 @@ class LmsViewModel(application: Application) : AndroidViewModel(application) {
     private val prefs = application.getSharedPreferences("lms_google_sheets_prefs", android.content.Context.MODE_PRIVATE)
     private val db = AppDatabase.getDatabase(application)
     val repository = LmsRepository(db.lmsDao())
+    val firebaseRepository by lazy {
+        val databaseId = getApplication<Application>().getString(com.example.R.string.firestore_database_id)
+        com.example.data.repository.FirebaseLmsRepository(
+            com.google.firebase.firestore.FirebaseFirestore.getInstance(databaseId)
+        )
+    }
 
     // --- Current User State ---
     private val _currentUser = MutableStateFlow<UserEntity?>(null)
@@ -166,6 +173,75 @@ class LmsViewModel(application: Application) : AndroidViewModel(application) {
                 onResult(true)
             } else {
                 showToast("err", "Login Failed", result.message)
+                onResult(false)
+            }
+        }
+    }
+
+    fun signInWithGoogle(idToken: String, displayName: String?, email: String?, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
+                val credential = com.google.firebase.auth.GoogleAuthProvider.getCredential(idToken, null)
+                val authResult = auth.signInWithCredential(credential).await()
+                val firebaseUser = authResult.user
+                if (firebaseUser != null) {
+                    val userEmail = email ?: firebaseUser.email ?: "clinician@hospital.org"
+                    val userName = displayName ?: firebaseUser.displayName ?: "Clinician"
+                    val isAdmin = userEmail.equals("yaregalsemanew@gmail.com", ignoreCase = true)
+                    val assignedRole = if (isAdmin) "admin" else "learner"
+
+                    var localUser = db.lmsDao().getUserByEmail(userEmail)
+                    if (localUser == null) {
+                        localUser = UserEntity(
+                            userId = firebaseUser.uid,
+                            fullName = userName,
+                            email = userEmail,
+                            passwordHash = "GOOGLE_AUTH",
+                            role = assignedRole,
+                            registrationDate = com.example.data.util.PasswordHelper.formattedNow(),
+                            accountStatus = "active"
+                        )
+                        db.lmsDao().insertUser(localUser)
+                    }
+
+                    // Mirror into Firestore users collection
+                    try {
+                        val fbUser = FirebaseUser(
+                            userId = firebaseUser.uid,
+                            fullName = userName,
+                            email = userEmail,
+                            role = localUser.role,
+                            accountStatus = localUser.accountStatus,
+                            hospital = "Ethiopian Neonatal Center"
+                        )
+                        firebaseRepository.saveUser(fbUser)
+                    } catch (e: Exception) {
+                        android.util.Log.w("LmsViewModel", "Firestore user sync non-blocking error", e)
+                    }
+
+                    _currentUser.value = localUser
+                    screenStack.clear()
+                    _currentScreen.value = Screen.Dashboard
+                    refreshDashboard()
+                    showToast("ok", "Signed in with Google", "Welcome, ${localUser.fullName} (${localUser.role.uppercase()})")
+
+                    val logObj = org.json.JSONObject().apply {
+                        put("Log_ID", "LOG-" + System.currentTimeMillis().toString().takeLast(6))
+                        put("User_ID", userEmail)
+                        put("Action", "GOOGLE_SIGN_IN")
+                        put("Timestamp", com.example.data.util.PasswordHelper.formattedNow())
+                        put("IP_Address", "Android Mobile App")
+                        put("Device_Info", "Google Sign-In via Credential Manager (UID: ${firebaseUser.uid})")
+                    }
+                    pushRecordToGoogleSheet("Activity_Logs", logObj)
+                    onResult(true)
+                } else {
+                    showToast("err", "Sign In Failed", "Unable to obtain user from Google.")
+                    onResult(false)
+                }
+            } catch (e: Exception) {
+                showToast("err", "Google Auth Error", e.localizedMessage ?: "Failed to authenticate with Google.")
                 onResult(false)
             }
         }

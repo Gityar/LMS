@@ -1,0 +1,147 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User account and profile information for neonatal nursing LMS",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Unique Firebase Auth UID" },
+        "fullName": { "type": "string", "description": "Clinician full name" },
+        "email": { "type": "string", "format": "email", "description": "Email address" },
+        "role": { "type": "string", "enum": ["learner", "instructor", "admin"], "description": "Role in LMS" },
+        "accountStatus": { "type": "string", "enum": ["active", "pending", "disabled"], "description": "Account status" },
+        "hospital": { "type": "string", "description": "Affiliated hospital or medical center" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp of registration" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp of last update" }
+      },
+      "required": ["userId", "fullName", "email", "role", "accountStatus", "createdAt"]
+    },
+    "Course": {
+      "title": "Course",
+      "description": "Neonatal clinical curriculum course",
+      "type": "object",
+      "properties": {
+        "courseId": { "type": "string", "description": "Unique Course ID (e.g. CRS-NRP-01)" },
+        "courseTitle": { "type": "string", "description": "Title of the course" },
+        "category": { "type": "string", "description": "Clinical category (e.g. Resuscitation, Respiratory)" },
+        "description": { "type": "string", "description": "Detailed curriculum overview" },
+        "durationHours": { "type": "number", "description": "Estimated learning duration in hours" },
+        "level": { "type": "string", "description": "Difficulty level (e.g. Intermediate, Advanced)" },
+        "targetAudience": { "type": "string", "description": "Target healthcare personnel" },
+        "instructorEmail": { "type": "string", "description": "Course instructor email" },
+        "isActive": { "type": "boolean", "description": "Whether course is currently published" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["courseId", "courseTitle", "category", "isActive", "createdAt"]
+    },
+    "Lesson": {
+      "title": "Lesson",
+      "description": "Individual educational module or simulation station",
+      "type": "object",
+      "properties": {
+        "lessonId": { "type": "string", "description": "Unique Lesson ID" },
+        "courseId": { "type": "string", "description": "Parent Course ID" },
+        "moduleNumber": { "type": "number", "description": "Module sequence number" },
+        "lessonTitle": { "type": "string", "description": "Title of lesson" },
+        "contentType": { "type": "string", "description": "Type of content: Video, Interactive, Text, OSCE" },
+        "durationMins": { "type": "number", "description": "Duration in minutes" },
+        "contentBody": { "type": "string", "description": "Procedural protocol notes and body text" },
+        "videoUrl": { "type": "string", "description": "Lecture video URL" },
+        "resourceUrl": { "type": "string", "description": "Evidence-based reference link" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["lessonId", "courseId", "moduleNumber", "lessonTitle", "contentType", "createdAt"]
+    },
+    "Enrollment": {
+      "title": "Enrollment",
+      "description": "Learner enrollment record in a course",
+      "type": "object",
+      "properties": {
+        "enrollmentId": { "type": "string", "description": "Unique Enrollment ID" },
+        "userId": { "type": "string", "description": "UID of the enrolled user" },
+        "courseId": { "type": "string", "description": "ID of enrolled course" },
+        "status": { "type": "string", "enum": ["enrolled", "in_progress", "completed"], "description": "Progress status" },
+        "progressPercent": { "type": "number", "description": "Completion percentage (0-100)" },
+        "lastAccessed": { "type": "string", "format": "date-time", "description": "Timestamp of last lesson access" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Enrollment timestamp" }
+      },
+      "required": ["enrollmentId", "userId", "courseId", "status", "progressPercent", "createdAt"]
+    },
+    "Attempt": {
+      "title": "Attempt",
+      "description": "Quiz assessment attempt or OSCE clinical competency certificate claim",
+      "type": "object",
+      "properties": {
+        "attemptId": { "type": "string", "description": "Unique attempt identifier" },
+        "userId": { "type": "string", "description": "UID of the candidate" },
+        "learnerName": { "type": "string", "description": "Full name of candidate on certificate" },
+        "courseId": { "type": "string", "description": "Associated course ID" },
+        "assessmentId": { "type": "string", "description": "Assessment or lesson ID" },
+        "score": { "type": "number", "description": "Raw points scored" },
+        "total": { "type": "number", "description": "Total available points" },
+        "percentage": { "type": "number", "description": "Achieved percentage (0-100)" },
+        "passed": { "type": "boolean", "description": "Whether ≥ passing threshold (70% or 80%)" },
+        "type": { "type": "string", "enum": ["quiz", "osce", "exam"], "description": "Type of assessment" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Submission timestamp" }
+      },
+      "required": ["attemptId", "userId", "learnerName", "courseId", "score", "percentage", "passed", "type", "createdAt"]
+    },
+    "Feedback": {
+      "title": "Feedback",
+      "description": "Clinician lesson evaluation rating and review",
+      "type": "object",
+      "properties": {
+        "feedbackId": { "type": "string", "description": "Unique feedback ID" },
+        "userId": { "type": "string", "description": "User UID who submitted feedback" },
+        "lessonId": { "type": "string", "description": "Associated Lesson ID" },
+        "rating": { "type": "number", "description": "Star rating 1 to 5" },
+        "comment": { "type": "string", "description": "Review comment" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of submission" }
+      },
+      "required": ["feedbackId", "userId", "lessonId", "rating", "createdAt"]
+    },
+    "ActivityLog": {
+      "title": "ActivityLog",
+      "description": "User audit trail for security and clinical activity tracking",
+      "type": "object",
+      "properties": {
+        "logId": { "type": "string", "description": "Unique activity log ID" },
+        "userId": { "type": "string", "description": "User UID or email associated with action" },
+        "action": { "type": "string", "description": "Action type string" },
+        "deviceInfo": { "type": "string", "description": "Device and environment summary" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Event timestamp" }
+      },
+      "required": ["logId", "userId", "action", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Registered clinician user accounts and profiles"
+    },
+    "/courses/{courseId}": {
+      "schema": { "$ref": "#/entities/Course" },
+      "description": "Neonatal nursing clinical courses and curriculums"
+    },
+    "/lessons/{lessonId}": {
+      "schema": { "$ref": "#/entities/Lesson" },
+      "description": "Course modules, procedural notes, videos and OSCE rubric stations"
+    },
+    "/enrollments/{enrollmentId}": {
+      "schema": { "$ref": "#/entities/Enrollment" },
+      "description": "Learner course enrollments and progress"
+    },
+    "/attempts/{attemptId}": {
+      "schema": { "$ref": "#/entities/Attempt" },
+      "description": "Quiz attempts, assessment results and claimed OSCE competency certificates"
+    },
+    "/feedback/{feedbackId}": {
+      "schema": { "$ref": "#/entities/Feedback" },
+      "description": "Clinician ratings and comments for lessons"
+    },
+    "/activityLogs/{logId}": {
+      "schema": { "$ref": "#/entities/ActivityLog" },
+      "description": "Audit events and user action records"
+    }
+  }
+}
