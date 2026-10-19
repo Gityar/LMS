@@ -133,9 +133,12 @@ fun WebPortalScreen(
                         )
                     }
 
-                    // Reload
+                    // Reload (Bypassing cache)
                     IconButton(
-                        onClick = { webViewInstance?.reload() },
+                        onClick = {
+                            webViewInstance?.clearCache(true)
+                            webViewInstance?.reload()
+                        },
                         modifier = Modifier.testTag("btn_portal_reload")
                     ) {
                         Icon(

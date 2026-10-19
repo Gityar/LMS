@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Neonatal Nursing LMS | Web Admin & Learning Portal</title>
+  <title>Wollo University PCHNM-3073 | Neonatal Nursing LMS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -83,7 +83,7 @@
   <div class="bg-indigo-950 text-indigo-100 text-xs py-2 px-4 text-center font-medium flex items-center justify-between border-b border-indigo-900/60">
     <div class="flex items-center gap-2 truncate" id="top-database-badge">
       <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-      <span class="truncate">Evidence-Based NICU Clinical Education Portal</span>
+      <span class="truncate">Wollo University PCHNM-3073 · Evidence-Based Neonatal Nursing LMS</span>
     </div>
     <div class="flex items-center gap-2.5 flex-shrink-0">
       <div id="network-status-badge" class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 transition">
@@ -121,6 +121,9 @@
         </button>
         <button onclick="switchTab('sheets')" id="nav-sheets" class="hidden px-3.5 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5 text-indigo-700 bg-indigo-50/50">
           <span class="w-2 h-2 rounded-full bg-emerald-500"></span> ⚙️ Database Admin
+        </button>
+        <button onclick="resetToOfficialCurriculum()" title="Reload Official Wollo University PCHNM-3073 Curriculum" class="px-2.5 py-1.5 rounded-lg text-emerald-700 hover:bg-emerald-50 text-xs font-semibold transition flex items-center gap-1 border border-emerald-200">
+          <span>🔄</span> Sync Curriculum
         </button>
       </nav>
 
@@ -209,6 +212,9 @@
         </div>
         <div class="flex items-center gap-3">
           <input type="text" id="course-search-input" oninput="filterCourses()" placeholder="Search courses..." class="px-3.5 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <button onclick="resetToOfficialCurriculum()" title="Reset / Reload Official Wollo PCHNM-3073 Curriculum" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-semibold rounded-xl transition flex items-center gap-1.5 whitespace-nowrap">
+            <span>🔄 Reload Curriculum</span>
+          </button>
           <button onclick="openCourseModal()" id="btn-add-course-page" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1.5 whitespace-nowrap">
             <span>+ Add Course</span>
           </button>
@@ -893,7 +899,7 @@
         <div class="grid grid-cols-3 gap-3">
           <div>
             <label class="block font-semibold text-slate-700 mb-1">Course Code</label>
-            <input type="text" id="course-form-id" required placeholder="CRS-NRP-01" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <input type="text" id="course-form-id" required placeholder="CRS-PCHNM-M1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
           </div>
           <div class="col-span-2">
             <label class="block font-semibold text-slate-700 mb-1">Course Title</label>
@@ -992,7 +998,7 @@
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <div>
           <h3 class="font-bold text-slate-900 text-base" id="modal-lessons-header">Manage Lessons</h3>
-          <p class="text-xs text-slate-500" id="modal-lessons-subheader">Course: CRS-NRP-01</p>
+          <p class="text-xs text-slate-500" id="modal-lessons-subheader">Course: CRS-PCHNM-M1</p>
         </div>
         <button onclick="closeLessonsModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
       </div>
@@ -1520,230 +1526,806 @@
     const SPREADSHEET_ID = '1TQcak2SNQ3oT9DBz_nyrOzVh8fWfNRVsWqt7Rk_1uTA';
     let currentLessonsCourseId = '';
 
-    // DEFAULT DATA SEEDS
+    // DEFAULT DATA SEEDS (Wollo University PCHNM-3073 Standard)
     const DEFAULT_COURSES = [
       {
-        id: 'CRS-NRP-01',
-        title: 'Neonatal Resuscitation Program (NRP)',
-        category: 'Resuscitation',
-        instructor: 'Sister Almaz',
-        desc: '### Clinical Resuscitation & The Golden Minute\nComprehensive resuscitation training for newly born infants within the **Golden Minute**.\n- Ventilation and airway clearance algorithms\n- MR. SOPA corrective ventilation sequence\n- Pulse oximetry & ECG target monitoring\n\n> ⚠️ **Clinical Alert:** Positive Pressure Ventilation (PPV) must be initiated within 60 seconds if heart rate < 100 bpm or infant is apneic.',
-        modules: 4,
-        status: 'published',
-        difficulty: 'Intermediate',
-        cmeCredits: '3.0 CPD Hours',
-        thumbnail: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=600&auto=format&fit=crop&q=80'
+            "id": "CRS-PCHNM-M1",
+            "title": "Module 1: Foundations of Neonatology, Physiology & Classification",
+            "category": "Foundational Theory",
+            "instructor": "Sister Almaz",
+            "desc": "Wollo University PCHNM-3073. Focuses on neonatal mortality epidemiology (global, regional, national), transition from fetal to extrauterine life, cardiorespiratory & metabolic adaptation, brown adipose tissue thermogenesis, neonatal reflexes, and gestational age/birth weight classification.",
+            "modules": 3,
+            "status": "published",
+            "difficulty": "Foundational",
+            "cmeCredits": "4.0 CPD Hours",
+            "thumbnail": "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=600&auto=format&fit=crop&q=80"
       },
       {
-        id: 'CRS-THM-02',
-        title: 'NICU Thermoregulation & Neutral Thermal Env',
-        category: 'Thermal Care',
-        instructor: 'Sister Almaz',
-        desc: '### Thermal Chain & Hypothermia Prevention\nServo-controlled radiant warmers, closed incubators, and Kangaroo Mother Care (KMC).\n- Target neonatal core temperature: `36.5°C - 37.5°C`\n- Warm transport protocols and humidity titration\n- Prevention of cold-induced metabolic acidosis',
-        modules: 3,
-        status: 'published',
-        difficulty: 'Foundational',
-        cmeCredits: '2.0 CPD Hours',
-        thumbnail: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?w=600&auto=format&fit=crop&q=80'
+            "id": "CRS-PCHNM-M2",
+            "title": "Module 2: Immediate Care, Assessment & Neonatal Resuscitation (NRP)",
+            "category": "Emergency & Resuscitation",
+            "instructor": "Dr. Dawit",
+            "desc": "Delivery room triage, the 11-step Essential Newborn Care (ENC), APGAR scoring system, The Golden Minute, NRP clinical algorithm, Positive Pressure Ventilation (PPV), MR. SOPA ventilation corrective sequence, 3:1 chest compressions, IV epinephrine via UVC, and targeted pre-ductal SpO2 standards.",
+            "modules": 6,
+            "status": "published",
+            "difficulty": "Intermediate",
+            "cmeCredits": "5.0 CPD Hours",
+            "thumbnail": "https://images.unsplash.com/photo-1516549655169-df83a0774514?w=600&auto=format&fit=crop&q=80"
       },
       {
-        id: 'CRS-BIL-03',
-        title: 'Neonatal Hyperbilirubinemia & Phototherapy',
-        category: 'Pathology',
-        instructor: 'Dr. Dawit',
-        desc: '### Bilirubin Screening & Intensive Phototherapy\nTranscutaneous bilirubinometry (TcB), Bhutani nomogram risk zones, LED phototherapy irradiance, and exchange transfusion thresholds.',
-        modules: 3,
-        status: 'published',
-        difficulty: 'Intermediate',
-        cmeCredits: '2.5 CPD Hours',
-        thumbnail: ''
+            "id": "CRS-PCHNM-M3",
+            "title": "Module 3: Birth Injuries, Respiratory, Haematological & Metabolic Disorders",
+            "category": "Clinical Pathology",
+            "instructor": "Sister Almaz",
+            "desc": "Covers soft tissue, skeletal and neurological birth trauma (caput succedaneum vs cephalohematoma, subgaleal haemorrhage, Erb's & Klumpke's palsies), RDS, TTN, MAS, ABG analysis, neonatal jaundice, phototherapy, double volume exchange transfusion, seizures, HIE Sarnat staging, therapeutic hypothermia, and hypoglycemia.",
+            "modules": 6,
+            "status": "published",
+            "difficulty": "Advanced",
+            "cmeCredits": "6.0 CPD Hours",
+            "thumbnail": "https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=600&auto=format&fit=crop&q=80"
       },
       {
-        id: 'CRS-RDS-04',
-        title: 'Respiratory Distress Syndrome in Preterm Infants',
-        category: 'Respiratory Care',
-        instructor: 'Dr. Dawit',
-        desc: '### Non-Invasive Respiratory Support & CPAP\nEarly CPAP application, bubble CPAP circuit calibration, nasal prong alignment, and surfactant replacement therapy.',
-        modules: 4,
-        status: 'published',
-        difficulty: 'Advanced Specialist',
-        cmeCredits: '3.5 CPD Hours',
-        thumbnail: ''
+            "id": "CRS-PCHNM-M4",
+            "title": "Module 4: Infections, Congenital Anomalies & High-Risk Nutrition",
+            "category": "High-Risk Care",
+            "instructor": "Dr. Dawit",
+            "desc": "Early- and late-onset neonatal sepsis, meningitis, tetanus, nosocomial infection control, Necrotizing Enterocolitis (NEC), Congenital Anomalies (CHD, NTD, Down syndrome, TEF, CDH, omphalocele, gastroschisis), prematurity management, fluid tables, Total Parenteral Nutrition (TPN), Kangaroo Mother Care (KMC), and EPI immunization.",
+            "modules": 6,
+            "status": "published",
+            "difficulty": "Advanced Specialist",
+            "cmeCredits": "6.0 CPD Hours",
+            "thumbnail": "https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?w=600&auto=format&fit=crop&q=80"
+      },
+      {
+            "id": "CRS-PCHNM-M5",
+            "title": "Module 5: Guided Clinical Practice & Practicum (160 Hours)",
+            "category": "Clinical Practicum",
+            "instructor": "Sister Almaz",
+            "desc": "Hands-on guided clinical rotation representing 70% of course weight: 3 weeks in the NICU (120 hrs) covering oxygen therapy, bubble CPAP titration, intubation assist, IV infusions, exchange transfusion, and verified clinical logbooks; 1 week in Maternal/Postnatal Ward (40 hrs) covering essential newborn care, APGAR, and breastfeeding counselling.",
+            "modules": 3,
+            "status": "published",
+            "difficulty": "Clinical Residency",
+            "cmeCredits": "8.0 CPD Hours",
+            "thumbnail": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=600&auto=format&fit=crop&q=80"
+      },
+      {
+            "id": "CRS-PCHNM-M6",
+            "title": "Module 6: Final Assessments, OSCE Evaluation & Continuous Improvement",
+            "category": "Summative & Evaluation",
+            "instructor": "Yaregal Semanew",
+            "desc": "Summative competency validation: Midterm written exam (10%), Master Objective Structured Clinical Examination (OSCE, 20-point rubric across 10 domains, pass mark 16/20 = 80%), Final Comprehensive Written Examination (40%), Portfolio Defence, Three-tier Feedback Strategy with the Pendleton Model, and WCAG 2.1 AA / UDL Course Audit.",
+            "modules": 5,
+            "status": "published",
+            "difficulty": "Mastery Certification",
+            "cmeCredits": "6.0 CPD Hours",
+            "thumbnail": "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?w=600&auto=format&fit=crop&q=80"
       }
-    ];
+];
 
     const DEFAULT_LESSONS = [
       {
-        id: 'LES-01',
-        courseId: 'CRS-NRP-01',
-        moduleNumber: 1,
-        title: 'Initial Assessment & Neonatal Golden Minute',
-        type: 'clinical',
-        duration: 25,
-        mediaUrl: '',
-        body: '### Rapid Assessment at Birth\n1. Is the baby term gestation?\n2. Does the baby have good muscle tone?\n3. Is the baby breathing or crying?\n\n> ⚠️ **Key Protocol:** Dry, position airway, suction secretions if obstructed, and stimulate within the first 60 seconds of life.'
+            "id": "LES-PCHNM-101",
+            "courseId": "CRS-PCHNM-M1",
+            "moduleNumber": 1,
+            "title": "Unit 1.1.1: Introduction to Neonatology, Roles & Global Epidemiology",
+            "type": "clinical",
+            "duration": 30,
+            "mediaUrl": "https://www.youtube.com/watch?v=kYV3VlZ13A0",
+            "resourceUrl": "https://gityar.github.io/MyPortfolio",
+            "body": "# Unit 1.1.1: Introduction to Neonatology, Roles & Global Epidemiology\n\n## 1. Global & Regional Neonatal Mortality Situation\n- **Global burden (2021):** 2.3 million children died in the first month of life \u2014 approximately 6,400 newborn deaths every day.\n- While under-5 child mortality has declined dramatically since 1990, neonatal deaths now account for **47%** of all under-5 deaths globally.\n- **Sub-Saharan Africa:** Bears the highest neonatal mortality rate in the world at **27 deaths per 1,000 live births**. A child born in Sub-Saharan Africa is **10 times more likely** to die in the first month than a child in a high-income country.\n- **Ethiopia Context:** Under-5 mortality declined by 71% (from 204 to 59 per 1,000 live births between 1990 and 2019). However, this reduction was concentrated in post-neonatal children. Consequently, the proportion of under-5 deaths occurring in the neonatal period rose from **43% to 48%**.\n- More than **80% of newborn deaths** are caused by preventable and treatable conditions:\n  1. Neonatal Sepsis and Severe Infections\n  2. Complications of Prematurity and Low Birth Weight\n  3. Intrapartum-related events (Birth Asphyxia)\n\n## 2. The Professional Mandate of the Neonatal Nurse\nThe primary mandate of neonatal nursing training is to reduce neonatal morbidity and mortality through:\n- **Evidence-Based Clinical Practice:** Applying standard resuscitation protocols, aseptic technique, and timely pharmacological interventions.\n- **Compassionate & Family-Centred Care:** Fostering maternal-infant bonding, respectful communication, and parental empowerment.\n- **Thermal Regulation:** Maintaining the warm chain and preventing hypothermia through kangaroo mother care and incubators.\n- **Reflective Practice:** Maintaining clinical logbooks, participating in simulation debriefs, and lifelong learning.\n\n## 3. Reflection Discussion Prompt\n*Reflect on the neonatal mortality drivers in your region. What infrastructure, equipment, or skill gaps contribute most significantly to preventable newborn deaths at primary and referral health facilities?*"
       },
       {
-        id: 'LES-02',
-        courseId: 'CRS-NRP-01',
-        moduleNumber: 1,
-        title: 'Positive Pressure Ventilation (PPV) & Mask Sizing',
-        type: 'video',
-        duration: 35,
-        mediaUrl: 'https://www.youtube.com/watch?v=kYJ5e14kE1w',
-        body: '### PPV Technique & Mask Seal\nSelect proper anatomical round/cushioned mask. Seal securely over nose and mouth without pressing on the eyes.\n- Rate: `40 - 60 breaths/min` (Breathe... Two... Three...)\n- Target initial PIP: `20 - 25 cm H2O`\n- Re-evaluate heart rate after 15 seconds.'
+            "id": "LES-PCHNM-102",
+            "courseId": "CRS-PCHNM-M1",
+            "moduleNumber": 1,
+            "title": "Unit 1.1.2: Fetal-to-Neonatal Transition & Physiological Adaptation",
+            "type": "clinical",
+            "duration": 35,
+            "mediaUrl": "https://www.youtube.com/watch?v=Zf_C1jBv5_E",
+            "resourceUrl": "https://www.who.int/publications/i/item/9789241599887",
+            "body": "# Unit 1.1.2: Fetal-to-Neonatal Transition & Physiological Adaptation\n\nSuccessful transition from intrauterine aquatic existence to extrauterine terrestrial life requires rapid, coordinated adaptations across multiple organ systems.\n\n## 1. Cardiorespiratory Transition\n- **In Utero:** The placenta functions as the organ of respiration. Pulmonary vascular resistance (PVR) is high, pulmonary blood flow is low (~10% of combined cardiac output), and systemic vascular resistance (SVR) is low. Blood shunts right-to-left through the **foramen ovale** and **ductus arteriosus**.\n- **At Birth:**\n  1. Clamping of the umbilical cord removes the low-resistance placental circuit, sharply increasing SVR.\n  2. The initial breath generates negative intrathoracic pressures (-30 to -60 cm H2O), expanding alveoli and displacing fetal lung liquid into lymphatic and capillary beds.\n  3. Increased alveolar oxygen tension (PaO2) triggers pulmonary arteriolar vasodilation, causing a rapid **fall in pulmonary vascular resistance (PVR)**.\n  4. Pulmonary venous return to the left atrium surges, elevating left atrial pressure above right atrial pressure, functionally closing the **foramen ovale**.\n  5. Oxygenated blood and loss of circulating prostaglandin E2 cause smooth muscle constriction of the **ductus arteriosus**.\n\n## 2. Thermoregulatory Adaptation & Brown Fat Metabolism\n- Newborns cannot generate heat through shivering. They rely exclusively on **non-shivering thermogenesis** mediated by **Brown Adipose Tissue (BAT)**.\n- Brown fat is localized around the scapulae, axillae, mediastinum, and perirenal areas.\n- Cold stress triggers norepinephrine release, activating mitochondrial **uncoupling protein-1 (UCP-1)**, uncoupling oxidative phosphorylation to release heat directly instead of synthesizing ATP.\n- **Vulnerabilities:** Preterm infants have depleted brown fat stores, thin skin, high trans-epidermal water loss, and a large surface area-to-mass ratio.\n\n## 3. Metabolic Adaptation & Glucose Homeostasis\n- Abrupt cessation of maternal glucose transfer necessitates glycogenolysis and gluconeogenesis within 2 hours of life.\n- **Diagnostic thresholds:** Whole blood glucose < 40 mg/dL in the first 4 hours of life, or < 45 mg/dL after 4 hours, indicates hypoglycemia requiring intervention.\n\n## 4. Neonatal Reflexes & Behavioral States\n- **Primitive Reflexes:** Moro (startle), rooting, sucking, palmar/plantar grasp, stepping, asymmetric tonic neck (\"fencing\").\n- **Brazelton Behavioral States:** State 1 (Deep sleep), State 2 (Light sleep), State 3 (Drowsy), State 4 (Quiet alert \u2014 optimal for bonding/feeding), State 5 (Active alert), State 6 (Crying)."
       },
       {
-        id: 'LES-03',
-        courseId: 'CRS-NRP-01',
-        moduleNumber: 2,
-        title: 'MR. SOPA Corrective Ventilation Steps',
-        type: 'simulation',
-        duration: 30,
-        mediaUrl: '',
-        checklist: [
-          { step: 'M - Mask adjustment (Ensure tight seal on face)', done: false },
-          { step: 'R - Reposition head (Slight extension, sniffing position)', done: false },
-          { step: 'S - Suction mouth then nose (Clear secretions)', done: false },
-          { step: 'O - Open mouth (Lift mandible forward)', done: false },
-          { step: 'P - Pressure increase (Increase PIP by 5 cm H2O)', done: false },
-          { step: 'A - Alternative airway (Laryngeal mask or ETT)', done: false }
-        ],
-        body: '### Simulation Drill: MR. SOPA\nPerform corrective steps when PPV does not achieve chest rise and heart rate remains < 100 bpm.\nCheck off each corrective action in sequence.'
+            "id": "LES-PCHNM-103",
+            "courseId": "CRS-PCHNM-M1",
+            "moduleNumber": 1,
+            "title": "Unit 1.2.1: Neonatal Classification by Gestational Age & Birth Weight",
+            "type": "clinical",
+            "duration": 25,
+            "mediaUrl": "",
+            "resourceUrl": "https://www.aap.org",
+            "body": "# Unit 1.2.1: Neonatal Classification by Gestational Age & Birth Weight\n\nAccurate clinical classification stratifies mortality risk, guides incubator settings, and directs fluid and caloric titration.\n\n## 1. Classification by Gestational Age (GA)\n- **Preterm:** Born before 37 completed weeks (< 259 days).\n  - Extremely Preterm: < 28 weeks\n  - Very Preterm: 28 to < 32 weeks\n  - Moderate to Late Preterm: 32 to < 37 weeks\n- **Term:** 37 completed weeks up to 41 weeks and 6 days (37 \u2013 41+6 weeks).\n- **Post-term:** 42 completed weeks or more (\u2265 294 days).\n\n## 2. Classification by Birth Weight\n- **Macrosomia:** Birth weight \u2265 4,000 grams.\n- **Normal Birth Weight:** 2,500 \u2013 3,999 grams.\n- **Low Birth Weight (LBW):** Birth weight < 2,500 grams (1,500 \u2013 2,499g).\n- **Very Low Birth Weight (VLBW):** Birth weight < 1,500 grams (1,000 \u2013 1,499g).\n- **Extremely Low Birth Weight (ELBW):** Birth weight < 1,000 grams.\n\n## 3. Classification by Weight-for-Gestational-Age (Fenton / Lubchenco Growth Charts)\n- **Small for Gestational Age (SGA):** Birth weight < 10th percentile for GA. High risk for hypoglycemia, polycythemia, and perinatal asphyxia.\n- **Appropriate for Gestational Age (AGA):** Birth weight between 10th and 90th percentile for GA.\n- **Large for Gestational Age (LGA):** Birth weight > 90th percentile for GA. High risk for birth trauma, shoulder dystocia, hypoglycemia (infant of diabetic mother), and polycythemia.\n\n## 4. Clinical Estimation of Gestational Age\n- First day of the Last Menstrual Period (LMP) \u2014 Naegele's rule.\n- Early obstetric ultrasound (Crown-Rump Length in 1st trimester).\n- **New Ballard Score:** Neuromuscular maturity (posture, square window, arm recoil, popliteal angle, scarf sign, heel to ear) and Physical maturity (skin, lanugo, plantar surface, breast, eye/ear, genitals)."
       },
       {
-        id: 'LES-04',
-        courseId: 'CRS-THM-02',
-        moduleNumber: 1,
-        title: 'Neutral Thermal Environment & Radiant Warmers',
-        type: 'clinical',
-        duration: 30,
-        mediaUrl: '',
-        body: '### Temperature Monitoring & Servo Mode\nMaintain neonatal abdominal skin temperature between `36.5°C` and `37.5°C`.\n- Place servo skin probe over right upper quadrant (not over bone or liver)\n- Pre-warm radiant warmer mattress to 36.5°C prior to delivery\n- Kangaroo Mother Care (KMC) initiated as soon as stable.'
+            "id": "LES-PCHNM-201",
+            "courseId": "CRS-PCHNM-M2",
+            "moduleNumber": 2,
+            "title": "Unit 2.1.1: Assessment and 11-Step Essential Newborn Care at Birth",
+            "type": "clinical",
+            "duration": 30,
+            "mediaUrl": "https://www.youtube.com/watch?v=kYV3VlZ13A0",
+            "resourceUrl": "https://www.who.int",
+            "body": "# Unit 2.1.1: Assessment and 11-Step Essential Newborn Care at Birth\n\nEssential Newborn Care (ENC) is a standardized bundle of evidence-based interventions administered to all infants at birth to optimize survival and transition.\n\n## The 11 Standardized Steps of Essential Newborn Care:\n1. **Immediate Drying & Tactile Stimulation:** Dry whole body immediately with a clean, warm towel on mother's abdomen; remove wet linen to prevent evaporative heat loss.\n2. **Evaluate Breathing:** Assess if baby is crying vigorously. If apnoeic or gasping, call for immediate help, clamp/cut cord rapidly, and transfer to radiant warmer for resuscitation.\n3. **Umbilical Cord Care:** Delay cord clamping for 1\u20133 minutes in vigorous infants to increase neonatal blood volume and iron stores. Clamp and cut with sterile scissors.\n4. **Keep Warm (Thermal Protection):** Direct skin-to-skin contact on mother's chest; cover baby with pre-warmed dry cloth and bonnet. Maintain delivery room at 25\u00b0C\u201328\u00b0C.\n5. **Early Initiation of Breastfeeding:** Assist mother to initiate exclusive breastfeeding within the **first 1 hour of life**. Colostrum provides immunoglobulins (IgA) and prevents hypoglycemia.\n6. **Eye Prophylaxis:** Apply **1% Tetracycline eye ointment** across lower conjunctival sacs within 1 hour of birth to prevent ophthalmia neonatorum (gonococcal/chlamydial).\n7. **Chlorhexidine Cord Care:** Apply **7.1% chlorhexidine digluconate (delivering 4% free chlorhexidine)** to the cord stump to prevent omphalitis and sepsis.\n8. **Vitamin K1 Prophylaxis:** Administer Vitamin K1 IM in the anterolateral thigh to prevent Vitamin K Deficiency Bleeding (VKDB):\n   - **Term & Late Preterm (\u2265 34 weeks):** 1.0 mg IM\n   - **Preterm (< 34 weeks):** 0.5 mg IM\n9. **Identification Bands:** Securely place two verified identification bands (wrist and ankle) containing mother's name, infant gender, date, and time of birth.\n10. **Anthropometric Measurements:** Weigh infant on a calibrated, pre-warmed scale; measure head circumference (HC) and crown-heel length once stabilized.\n11. **Clinical Recording & Monitoring:** Document all findings in the delivery register and neonatal chart.\n\n## APGAR Scoring System (1 and 5 Minutes)\n- **A**ppearance (Color): 0 = blue/pale all over, 1 = acrocyanosis (pink body, blue extremities), 2 = completely pink\n- **P**ulse (Heart Rate): 0 = absent, 1 = < 100 bpm, 2 = \u2265 100 bpm\n- **G**rimace (Reflex): 0 = no response, 1 = grimace only, 2 = vigorous cry, cough, sneeze\n- **A**ctivity (Tone): 0 = limp/flaccid, 1 = some flexion of extremities, 2 = active motion\n- **R**espiration: 0 = absent, 1 = slow, irregular, weak gasp, 2 = good strong cry\n*Scores: 7\u201310 Normal/Vigorous; 4\u20136 Moderate depression; 0\u20133 Severe depression.*"
       },
       {
-        id: 'LES-05',
-        courseId: 'CRS-BIL-03',
-        moduleNumber: 1,
-        title: 'Bilirubin Nomogram & Intensive Phototherapy Guidelines',
-        type: 'pdf',
-        duration: 25,
-        mediaUrl: 'https://www.who.int/publications/i/item/9789240058774',
-        body: '### Clinical Guidelines Summary\n- Plot transcutaneous or total serum bilirubin on Bhutani hour-specific nomogram\n- Blue-green spectrum LED phototherapy with irradiance `> 30 μW/cm²/nm`\n- Eye patches securely placed; monitor hydration and temperature q3h.'
+            "id": "LES-PCHNM-202",
+            "courseId": "CRS-PCHNM-M2",
+            "moduleNumber": 2,
+            "title": "Unit 2.1.2: Clinical Skill Lab \u2014 Delivery Triage & Assessment Setup",
+            "type": "clinical",
+            "duration": 25,
+            "mediaUrl": "",
+            "resourceUrl": "https://www.aap.org/nrp",
+            "body": "# Unit 2.1.2: Clinical Skill Lab \u2014 Delivery Triage & Assessment Setup\n\n## 1. Skill Lab Delivery Station Setup\n- **Warmth:** Radiant warmer pre-heated to 100% manual power; pre-warmed sterile towels; polyethylene occlusive plastic wrap for infants < 32 weeks.\n- **Airway & Suction:** Wall suction calibrated to **80\u2013100 mmHg** (never exceed 100 mmHg in neonates); 8F, 10F, and 12F suction catheters; bulb syringe.\n- **Breathing & Ventilation:** Flow-inflating bag, self-inflating bag (240\u2013450 mL) with pop-off valve (30\u201340 cm H2O), or T-piece resuscitator; cushioned anatomical round/preterm masks (sizes 0/1); blended air/oxygen supply with flowmeter set to 8\u201310 L/min.\n- **Auscultation & Monitoring:** Neonatal stethoscope, pulse oximeter with neonatal sensor placed on **right hand or wrist (pre-ductal)**.\n- **Intubation & Vascular Access:** Laryngoscope with straight Miller blades (size 00 for ELBW, 0 for preterm, 1 for term); un-cuffed ETTs (2.5, 3.0, 3.5 mm); stylets; Umbilical Venous Catheterization (UVC) tray with 3.5F and 5F catheters, scalpel, and purse-string suture.\n\n## 2. Pre-Birth Delivery Room Triage\nEvery birth requires at least one designated professional trained in neonatal resuscitation. Identify four pre-birth questions:\n1. Expected gestational age?\n2. Is the amniotic fluid clear or meconium-stained?\n3. How many babies are expected?\n4. Are there maternal risk factors (preeclampsia, chorioamnionitis, maternal diabetes, non-reassuring fetal heart rate)?"
       },
       {
-        id: 'LES-06',
-        courseId: 'CRS-RDS-04',
-        moduleNumber: 1,
-        title: 'Bubble CPAP Setup & Nasal Prong Fit',
-        type: 'simulation',
-        duration: 40,
-        mediaUrl: '',
-        checklist: [
-          { step: 'Select appropriate binasal prong size (80% nares occlusion without blanching)', done: false },
-          { step: 'Calibrate water seal bottle at 5 cm H2O depth', done: false },
-          { step: 'Set gas flow rate to 6 - 8 L/min ensuring vigorous continuous bubbling', done: false },
-          { step: 'Confirm heated humidifier set to 37°C with inline moisture traps', done: false },
-          { step: 'Check nasal septum every 2 hours to prevent necrosis', done: false }
-        ],
-        body: '### Bubble CPAP Assembly & Verification\nEnsure continuous bubbling in the water chamber. Inspect nasal prongs frequently to prevent pressure ulceration on the columella.'
+            "id": "LES-PCHNM-203",
+            "courseId": "CRS-PCHNM-M2",
+            "moduleNumber": 2,
+            "title": "Unit 2.2.1: The Golden Minute & NRP Clinical Algorithm",
+            "type": "clinical",
+            "duration": 35,
+            "mediaUrl": "https://www.youtube.com/watch?v=kYV3VlZ13A0",
+            "resourceUrl": "https://www.aap.org/nrp",
+            "body": "# Unit 2.2.1: The Golden Minute & NRP Clinical Algorithm\n\nThe **Golden Minute** represents the first 60 seconds of life during which initial steps, rapid evaluation, and initiation of positive pressure ventilation (if indicated) must be completed.\n\n## 1. Rapid Assessment at Birth (3 Questions):\n1. **Term gestation?**\n2. **Good muscle tone?**\n3. **Breathing or crying?**\n- **YES to all 3:** Proceed to standard Essential Newborn Care (keep warm with mother, dry, position, clear airway if needed, promote skin-to-skin).\n- **NO to any:** Bring infant to radiant warmer immediately for initial steps.\n\n## 2. Initial Steps (Completed in First 30 Seconds):\n1. **Warm:** Place under pre-heated radiant warmer.\n2. **Position:** Head in the neutral **\"sniffing\" position** (slight extension). Avoid hyperextension or flexion.\n3. **Clear Airway:** Suction **mouth first, then nose (\"M before N\")** using bulb syringe or suction catheter only if secretions are obstructing breathing.\n4. **Dry:** Thoroughly dry the infant and discard wet linen immediately.\n5. **Stimulate:** Provide tactile stimulation by gently rubbing the back or flicking the soles 2\u20133 times.\n\n## 3. Evaluation of Heart Rate & Breathing (30\u201360 Seconds):\n- Auscultate apical heartbeat with neonatal stethoscope for 6 seconds and multiply by 10.\n- **If HR < 100 bpm, or infant is apnoeic or gasping:**\n  - **Initiate Positive Pressure Ventilation (PPV) immediately within the Golden Minute.**\n  - Rate: **40 to 60 breaths per minute** (cadence: \"Breathe, two, three; breathe, two, three\").\n  - Starting FiO2: **21% (Room air)** for \u2265 35 weeks; **21%\u201330%** for < 35 weeks.\n  - Attach pre-ductal SpO2 sensor to **right wrist**.\n\n## 4. Targeted Pre-Ductal SpO2 Standards (Right Hand/Wrist):\n- **1 minute:** 60% \u2013 65%\n- **2 minutes:** 65% \u2013 70%\n- **3 minutes:** 70% \u2013 75%\n- **4 minutes:** 75% \u2013 80%\n- **5 minutes:** 80% \u2013 85%\n- **10 minutes:** 85% \u2013 95%\n*(Caution: Targeting adult saturations 95%\u2013100% in the first minutes causes hyperoxia and free-radical tissue damage).*\n\n## 5. MR. SOPA Ventilation Corrective Sequence\nIf heart rate does not increase and chest is not moving adequately:\n- **M - Mask adjustment:** Reapply with two-point top-bottom seal.\n- **R - Reposition airway:** Re-establish neutral sniffing posture. *(Try PPV)*\n- **S - Suction mouth & nose:** Clear obstruction.\n- **O - Open mouth:** Lift mandible gently forward. *(Try PPV)*\n- **P - Pressure increase:** Increment PIP by 5\u201310 cm H2O (max 40 cm H2O). *(Try PPV)*\n- **A - Alternative airway:** Insert Endotracheal Tube (ETT) or Laryngeal Mask Airway (LMA).\n\n## 6. Coordinated Chest Compressions (3:1 Ratio)\n- **Indication:** Heart rate remains **< 60 bpm** despite 30 seconds of effective PPV with chest movement.\n- **Technique:** Two-thumb encircling-hands technique on lower third of sternum (just below inter-mammary line).\n- **Ratio:** **3 compressions to 1 ventilation** (90 compressions + 30 breaths = 120 events/minute).\n- **Oxygen:** Increase FiO2 to **100%**.\n\n## 7. Emergency Medication: Epinephrine\n- **Indication:** HR remains < 60 bpm after effective chest compressions and 100% oxygen PPV.\n- **Dose:** **0.02 mg/kg** (0.2 mL/kg of 1:10,000 solution) administered IV via **Umbilical Venous Catheter (UVC)** followed by 0.5\u20131 mL normal saline flush."
+      },
+      {
+            "id": "LES-PCHNM-204",
+            "courseId": "CRS-PCHNM-M2",
+            "moduleNumber": 2,
+            "title": "Unit 2.2.2: Clinical Calculations & Resuscitation Dosage Formulations",
+            "type": "clinical",
+            "duration": 30,
+            "mediaUrl": "",
+            "resourceUrl": "https://gityar.github.io/MyPortfolio",
+            "body": "# Unit 2.2.2: Clinical Calculations & Resuscitation Dosage Formulations\n\nPrecision in fluid rate calculation and drug dilution is vital in neonatal critical care to avoid hypervolemia, intracranial hemorrhage, and fluid overload.\n\n## 1. Neonatal Infusion Fluid Rate Formula\n$$\\text{Total Hourly Rate (mL/hr)} = \\frac{\\text{Weight (kg)} \\times \\text{Desired Daily Fluid (mL/kg/day)}}{24\\text{ hours}}$$\n\n### Worked Clinical Examples:\n- **Case 1:** A 2.0 kg neonate requires 80 mL/kg/day of 10% Dextrose in Water on Day 2 of life.\n  $$\\text{Rate} = \\frac{2.0\\text{ kg} \\times 80\\text{ mL/kg/day}}{24\\text{ hours}} = \\frac{160}{24} = \\mathbf{6.67\\text{ mL/hr}}$$\n- **Case 2:** A 1.8 kg preterm infant requires 100 mL/kg/day intravenous fluid.\n  $$\\text{Rate} = \\frac{1.8\\text{ kg} \\times 100\\text{ mL/kg/day}}{24\\text{ hours}} = \\frac{180}{24} = \\mathbf{7.5\\text{ mL/hr}}$$\n\n## 2. Emergency Epinephrine Resuscitation Dosing\n- **Concentration:** 1:10,000 (0.1 mg/mL).\n- **Recommended IV/UVC dose:** **0.02 mg/kg** = **0.2 mL/kg** of 1:10,000 solution.\n- **Worked example:** For a 3.0 kg term infant with asystole / persistent bradycardia:\n  $$\\text{Volume} = 3.0\\text{ kg} \\times 0.2\\text{ mL/kg} = \\mathbf{0.6\\text{ mL}}\\text{ of 1:10,000 Epinephrine}$$\n  Follow immediately with 1.0 mL 0.9% Normal Saline flush to ensure rapid central delivery via UVC.\n\n## 3. Glucose Infusion Rate (GIR) Calculation\n$$\\text{GIR (mg/kg/min)} = \\frac{\\text{Rate (mL/hr)} \\times \\text{Dextrose Concentration (\\%)} \\times 10}{60 \\times \\text{Weight (kg)}} = \\frac{\\text{Rate (mL/hr)} \\times \\% \\text{Dextrose}}{6 \\times \\text{Weight (kg)}}$$\n- **Normal baseline GIR:** 4 \u2013 6 mg/kg/min."
+      },
+      {
+            "id": "LES-PCHNM-205",
+            "courseId": "CRS-PCHNM-M2",
+            "moduleNumber": 2,
+            "title": "Unit 2.2.3: Interactive Self-Assessment \u2014 NRP Clinical Scenarios",
+            "type": "clinical",
+            "duration": 20,
+            "mediaUrl": "",
+            "resourceUrl": "https://www.aap.org/nrp",
+            "body": "# Unit 2.2.3: Interactive Self-Assessment \u2014 NRP Clinical Scenarios\n\nReview these core delivery room scenarios from the curriculum with evidence-based rationales:\n\n### Question 1: Immediate Action After Initial Steps\n- **Scenario:** A full-term infant is delivered limp and apnoeic. After drying and positioning in sniffing position for 30 seconds, the infant remains gasping with a heart rate of 75 bpm. What is the immediate next nursing action?\n- **Correct Action:** **Initiate Positive Pressure Ventilation (PPV)**.\n- **Rationale:** PPV is indicated if heart rate is below 100 bpm or if infant is gasping/apnoeic after initial steps. Chest compressions are only initiated if heart rate remains below 60 bpm after 30 seconds of effective PPV. Epinephrine follows compressions, not initial PPV.\n\n### Question 2: Oxygen Saturation Target at 5 Minutes\n- **Scenario:** A term newborn is receiving PPV with a pre-ductal saturation probe on the right hand. What SpO2 range should the resuscitation team expect at 5 minutes of life?\n- **Correct Range:** **80% \u2013 85%**.\n- **Rationale:** Normal intra-to-extrauterine transition requires time. At 1 min SpO2 is 60-65%; at 5 min it is 80-85%; only by 10 min does it reach 85-95%. Targeting 95-100% earlier causes dangerous hyperoxia.\n\n### Question 3: Infusion Rate Calculation\n- **Scenario:** A 1.8 kg neonate requires 100 mL/kg/day of intravenous fluid. What hourly rate should be set on the infusion pump?\n- **Correct Setting:** **7.5 mL/hr** ((1.8 * 100) / 24 = 180 / 24 = 7.5 mL/hr).\n\n### Question 4: Compression-to-Ventilation Ratio\n- **Scenario:** A newborn's heart rate remains 50 bpm after 30 seconds of effective PPV with good mask seal and chest rise. Which compression-to-ventilation ratio should the nurse use?\n- **Correct Ratio:** **3:1 Ratio** (90 compressions and 30 breaths = 120 events/min).\n- **Rationale:** 15:2 and 30:2 are adult and pediatric resuscitation ratios and are strictly unsafe in the newborn whose primary arrest etiology is respiratory asphyxia."
+      },
+      {
+            "id": "LES-PCHNM-206",
+            "courseId": "CRS-PCHNM-M2",
+            "moduleNumber": 2,
+            "title": "Unit 2.2.4: Skill Lab Simulation Protocol & Resuscitation Drills",
+            "type": "clinical",
+            "duration": 30,
+            "mediaUrl": "",
+            "resourceUrl": "https://gityar.github.io/MyPortfolio",
+            "body": "# Unit 2.2.4: Skill Lab Simulation Protocol & Resuscitation Drills\n\n## 1. Preparation Checklist (Before Scenario Commences)\n- [ ] Radiant warmer pre-heated to active mode; warm blankets and sterile wrap available.\n- [ ] Suction device tested and calibrated to 80\u2013100 mmHg; 10F/12F catheters at hand.\n- [ ] Self-inflating bag of correct size (240\u2013450 mL) with tight mask seal verified; blender connected and set to 21% FiO2.\n- [ ] Pre-ductal SpO2 probe, stethoscope, and emergency umbilical venous access kit ready.\n- [ ] Hand hygiene performed according to WHO 5 Moments and sterile PPE donned.\n\n## 2. Team Communication Protocol\n- **Role Assignment:** Roles assigned aloud prior to delivery:\n  1. Team Leader (Coordinates decisions, monitors elapsed time).\n  2. Airway Lead (Positions head, manages mask, performs PPV/intubation).\n  3. Compressor (Performs 3:1 compressions, monitors umbilical pulse).\n  4. Medication & Equipment Nurse (Calculates doses, prepares UVC, flushes lines).\n  5. Recorder / Timekeeper (Calls out 30s intervals, logs vitals and interventions).\n- **Closed-Loop Communication:** Orders repeated aloud by the recipient before execution and confirmed upon completion.\n- **Time Announcements:** Elapsed time called out at 30s, 60s, and every subsequent minute.\n\n## 3. OSCE Station Briefing\n- Station Duration: **10 minutes**.\n- Maximum Score: **20 points**. Pass mark: **80% (16 points)**.\n- Candidate conducts complete sequence from preparation to initial care, PPV, MR. SOPA, compressions, UVC access, parental counselling, and debriefing."
+      },
+      {
+            "id": "LES-PCHNM-301",
+            "courseId": "CRS-PCHNM-M3",
+            "moduleNumber": 3,
+            "title": "Unit 3.1.1: Soft Tissue, Skeletal & Neurological Birth Trauma",
+            "type": "clinical",
+            "duration": 30,
+            "mediaUrl": "",
+            "resourceUrl": "https://www.who.int",
+            "body": "# Unit 3.1.1: Soft Tissue, Skeletal & Neurological Birth Trauma\n\n## 1. Differential Diagnosis of Extracranial Swelling:\n1. **Caput Succedaneum:**\n   - Edema of subcutaneous tissue above the periosteum.\n   - **Crosses suture lines**; poorly defined margins; present at birth.\n   - Resolves spontaneously in 2 to 3 days without therapy.\n2. **Cephalohematoma:**\n   - Subperiosteal hemorrhage confined to individual cranial bones.\n   - **Does NOT cross suture lines**; bounded by periosteal attachments; expands over hours/days.\n   - Complications: Hyperbilirubinemia, anemia.\n   - **Management:** Observation. **Incision and needle aspiration are strictly contraindicated** due to high risk of introducing fatal infection.\n3. **Subgaleal Hemorrhage (True Emergency):**\n   - Rupture of emissary veins leading to blood collection under the epicranial aponeurosis.\n   - **Crosses suture lines and fontanelles**, extending from orbital ridges to the nape of the neck.\n   - Can sequester up to 50% of the newborn's blood volume, causing rapid hypovolemic shock, pallor, tachycardia, falling hematocrit, and coagulopathy.\n   - **Management:** Immediate ICU admission, continuous head circumference measurement, urgent packed red blood cell / whole blood transfusion.\n\n## 2. Brachial Plexus Injuries\n- **Erb-Duchenne Palsy (C5\u2013C6):** Most common. Upper trunk lesion resulting in \"waiter's tip\" posture (arm adducted, internally rotated, elbow extended, forearm pronated, wrist flexed). Moro reflex absent on affected side; grasp reflex intact.\n- **Klumpke's Palsy (C7\u2013T1):** Lower trunk lesion causing claw hand deformity, absent palmar grasp, and potential Horner's syndrome (ptosis, miosis, anhidrosis).\n- **Management:** Immobilization for 7\u201310 days post-injury, followed by gentle passive range-of-motion physical therapy."
+      },
+      {
+            "id": "LES-PCHNM-302",
+            "courseId": "CRS-PCHNM-M3",
+            "moduleNumber": 3,
+            "title": "Unit 3.1.2: Problem-Based Learning (PBL 1) \u2014 Severe Birth Trauma Case Session",
+            "type": "clinical",
+            "duration": 35,
+            "mediaUrl": "",
+            "resourceUrl": "https://gityar.github.io/MyPortfolio",
+            "body": "# Unit 3.1.2: Problem-Based Learning (PBL 1) \u2014 Severe Birth Trauma Case Session\n\n## Case Presentation: Baby boy of Mulu\nA 4.2 kg male infant is born to a 28-year-old primigravida after prolonged second-stage labor and difficult vacuum extraction for fetal distress.\n\n### Clinical Findings at 4 Hours of Life:\n- Neurological: Lethargic, weak high-pitched cry, right arm flaccid and internally rotated.\n- Head Exam: Progressive fluctuant, ballotable swelling extending across sagittal and coronal sutures down to the supraorbital ridges. Head circumference increased by 2.5 cm over 3 hours.\n- Vital Signs: HR 185 bpm, RR 68 bpm with mild subcostal retractions, BP 52/28 mmHg (MAP 36 mmHg), Temperature 35.8\u00b0C.\n- Laboratory: Hematocrit 28% (down from cord blood 48%), Blood glucose 42 mg/dL.\n\n### Problem-Solving Framework:\n1. **Clinical Diagnosis:** Massive Subgaleal Hemorrhage complicated by Hypovolemic Shock, secondary Right Erb-Duchenne palsy, and hypothermia.\n2. **Immediate Resuscitation Priorities:**\n   - Airway & Breathing: Supplemental oxygen to maintain pre-ductal SpO2 90%\u201395%.\n   - Vascular Access: Emergency Umbilical Venous Catheter (UVC) placement.\n   - Volume Resuscitation: Immediate 0.9% Normal Saline bolus 10\u201320 mL/kg over 10\u201320 minutes, followed by urgent cross-matched O-negative Packed Red Blood Cells (10\u201315 mL/kg).\n   - Thermal & Metabolic: Radiant warmer servo-controlled to 36.5\u00b0C; 10% Dextrose IV infusion at GIR 6 mg/kg/min."
+      },
+      {
+            "id": "LES-PCHNM-303",
+            "courseId": "CRS-PCHNM-M3",
+            "moduleNumber": 3,
+            "title": "Unit 3.2.1: Respiratory Disorders: RDS, TTN, MAS & ABG Management",
+            "type": "clinical",
+            "duration": 35,
+            "mediaUrl": "",
+            "resourceUrl": "https://www.aap.org",
+            "body": "# Unit 3.2.1: Respiratory Disorders: RDS, TTN, MAS & ABG Management\n\nRespiratory distress affects up to 7% of term and 80% of extremely preterm neonates.\n\n## 1. Respiratory Distress Syndrome (RDS / Hyaline Membrane Disease)\n- **Pathophysiology:** Primary deficiency of pulmonary surfactant produced by Type II pneumocytes. Causes high alveolar surface tension, diffuse micro-atelectasis, ventilation-perfusion mismatch, and hypoxemia.\n- **Chest X-ray:** Diffuse, bilateral reticulogranular (\"ground-glass\") pattern with prominent air bronchograms and hypo-expansion.\n- **Management:** Early bubble CPAP (5\u20137 cm H2O), exogenous surfactant replacement (poractant alfa 200 mg/kg via LISA/InSurE technique), thermoregulation.\n\n## 2. Transient Tachypnea of the Newborn (TTN / \"Wet Lung\")\n- **Pathophysiology:** Delayed resorption and clearance of fetal alveolar lung fluid. Common after elective cesarean section without labor.\n- **Chest X-ray:** Hyperinflation, prominent perihilar vascular markings, and fluid in the interlobar fissures.\n- **Management:** Supportive humidified oxygen; resolves spontaneously within 24 to 72 hours.\n\n## 3. Meconium Aspiration Syndrome (MAS)\n- **Pathophysiology:** Intrauterine hypoxia triggers anal sphincter relaxation and gasping in utero. Aspirated meconium causes airway obstruction (ball-valve effect -> air leak / pneumothorax), chemical pneumonitis, surfactant inactivation, and secondary bacterial pneumonia.\n- **Chest X-ray:** Patchy, asymmetric coarse infiltrates, hyperinflation, and flattening of diaphragms.\n\n## 4. Arterial Blood Gas (ABG) Reference Values in Neonates\n- **pH:** 7.35 \u2013 7.45\n- **PaO2:** 50 \u2013 70 mmHg\n- **PaCO2:** 35 \u2013 45 mmHg\n- **HCO3-:** 20 \u2013 26 mEq/L\n- **Base Excess (BE):** -4 to +4 mEq/L"
+      },
+      {
+            "id": "LES-PCHNM-304",
+            "courseId": "CRS-PCHNM-M3",
+            "moduleNumber": 3,
+            "title": "Unit 3.3.1: Neonatal Jaundice, Hyperbilirubinemia & Exchange Transfusion",
+            "type": "clinical",
+            "duration": 30,
+            "mediaUrl": "",
+            "resourceUrl": "https://www.who.int",
+            "body": "# Unit 3.3.1: Neonatal Jaundice, Hyperbilirubinemia & Exchange Transfusion\n\nJaundice is visible when Total Serum Bilirubin (TSB) exceeds 5\u20137 mg/dL (85\u2013120 \u00b5mol/L) in a cephalocaudal progression (Kramer's zones).\n\n## 1. Physiological vs. Pathological Jaundice\n| Characteristic | Physiological Jaundice | Pathological Jaundice |\n| :--- | :--- | :--- |\n| **Onset** | After 24 hours of life | **Within first 24 hours of life** |\n| **TSB Rise Rate** | < 5 mg/dL/day (< 85 \u00b5mol/L/d) | **> 5 mg/dL/day (> 85 \u00b5mol/L/d)** |\n| **Peak TSB (Term)** | < 12 mg/dL | **> 12 mg/dL** |\n| **Peak TSB (Preterm)**| < 15 mg/dL | **> 15 mg/dL** |\n| **Duration (Term)** | Resolves by Day 7\u201310 | Persists \u2265 14 days |\n| **Conjugated Bilirubin**| < 2 mg/dL | **> 2 mg/dL or > 15% of total** |\n\n## 2. Phototherapy Clinical Protocol\n- **Mechanism:** Bilirubin absorbs blue light at **420 \u2013 470 nm**, undergoing photo-isomerization to water-soluble **lumirubin**, excreted in bile and urine without hepatic conjugation.\n- **Nursing Care:** Cover eyes with opaque shields; keep infant naked except minimal diaper; turn infant every 2\u20133 hours; increase fluid intake by **20\u201330 mL/kg/day** to compensate for insensible fluid loss; monitor irradiance (standard: 8\u201310 \u00b5W/cm2/nm; intensive: \u2265 30 \u00b5W/cm2/nm).\n\n## 3. Double-Volume Exchange Transfusion (DVET)\n- **Calculation:** Volume = **2 \u00d7 Circulating Blood Volume** ($$2 \\times 85\\text{ mL/kg} = \\mathbf{170\\text{ mL/kg}}$$).\n- **Selection of Blood:** Fresh whole blood (< 5 days old), irradiated and cross-matched:\n  - Rh incompatibility: ABO compatible with infant, Rh-negative (same as mother).\n  - ABO incompatibility: O group, Rh compatible with infant.\n- **Procedure:** Push-pull via UVC using 5\u201320 mL aliquots over 90\u2013120 minutes. Administer 1 mL 10% Calcium Gluconate for every 100 mL blood exchanged."
+      },
+      {
+            "id": "LES-PCHNM-305",
+            "courseId": "CRS-PCHNM-M3",
+            "moduleNumber": 3,
+            "title": "Unit 3.3.2: Neurological Crises, Seizures & Metabolic Emergencies",
+            "type": "clinical",
+            "duration": 30,
+            "mediaUrl": "",
+            "resourceUrl": "https://gityar.github.io/MyPortfolio",
+            "body": "# Unit 3.3.2: Neurological Crises, Seizures & Metabolic Emergencies\n\n## 1. Neonatal Seizure Classification\n1. **Subtle Seizures (50% of all cases):** Eye deviation, repetitive blinking, oral-buccal smacking, tongue protrusion, bicycling/pedaling movements, paroxysmal apnea with bradycardia.\n2. **Clonic Seizures:** Rhythmic jerking (1\u20133 Hz), focal or multifocal. Cannot be suppressed by gentle limb restraint (differentiates from benign neonatal jitteriness).\n3. **Tonic Seizures:** Sustained rigid extension or posturing of limbs or trunk.\n4. **Myoclonic Seizures:** Rapid, lightening-fast single or multiple flexor jerks.\n\n## 2. Anticonvulsant Management Protocol\n- **First-Line Drug:** **Phenobarbitone (Phenobarbital)**.\n  - Loading dose: **20 mg/kg IV** infused over 10\u201315 minutes.\n  - If seizures persist after 15 minutes: give additional 5\u201310 mg/kg boluses up to maximum **40 mg/kg**.\n  - Maintenance dose: **3.5 \u2013 5 mg/kg/day** in 2 divided doses starting 12\u201324 hours after loading.\n- **Second-Line Drug:** **Phenytoin** (20 mg/kg loading in normal saline with ECG monitoring) or **Levetiracetam** (40\u201360 mg/kg).\n\n## 3. Metabolic Emergencies: Hypoglycemia & Hypocalcemia\n- **Symptomatic Hypoglycemia (< 40 mg/dL):**\n  - Immediate IV bolus: **2 mL/kg of 10% Dextrose in Water (DW)** over 1 minute.\n  - Follow with maintenance IV glucose infusion at **GIR 6 \u2013 8 mg/kg/min** (approx 90 mL/kg/day of 10% DW).\n- **Symptomatic Hypocalcemia (Total serum Ca < 7.0 mg/dL or Ionized Ca < 4.0 mg/dL):**\n  - **10% Calcium Gluconate:** 2 mL/kg diluted 1:1 with sterile water IV over 10 minutes under continuous cardiac monitoring (risk of bradycardia / arrhythmia)."
+      },
+      {
+            "id": "LES-PCHNM-306",
+            "courseId": "CRS-PCHNM-M3",
+            "moduleNumber": 3,
+            "title": "Unit 3.3.3: Problem-Based Learning (PBL 2) \u2014 HIE & Therapeutic Hypothermia Protocols",
+            "type": "clinical",
+            "duration": 35,
+            "mediaUrl": "",
+            "resourceUrl": "https://www.aap.org",
+            "body": "# Unit 3.3.3: Problem-Based Learning (PBL 2) \u2014 HIE & Therapeutic Hypothermia Protocols\n\n## 1. Hypoxic-Ischemic Encephalopathy (HIE) Sarnat Staging\n- **Stage 1 (Mild):** Hyper-alert, irritable, tachycardia, dilated pupils, exaggerated Moro, normal EEG. Good prognosis (>98% normal outcome).\n- **Stage 2 (Moderate):** Lethargic, hypotonic, miosis, seizures, weak/absent Moro, suppressed EEG. 20%\u201335% mortality or neurodevelopmental disability.\n- **Stage 3 (Severe):** Stupor/coma, flaccid, absent reflexes, non-reactive pupils, status epilepticus, flat/burst-suppression EEG. High mortality; severe disability.\n\n## 2. Therapeutic Hypothermia Protocol\n- **Eligibility Criteria:**\n  1. Gestational age \u2265 36 completed weeks and birth weight \u2265 1,800 grams.\n  2. Age < 6 hours of life at initiation.\n  3. Evidence of perinatal asphyxia: Cord/arterial pH < 7.00 or base deficit \u2265 16 mEq/L, or 10-minute APGAR \u2264 5, or ongoing resuscitation at 10 minutes.\n  4. Moderate to severe encephalopathy (Sarnat Stage 2 or 3).\n- **Target Temperature:** Core rectal/esophageal temperature **33.5\u00b0C (range 33.0\u00b0C \u2013 34.0\u00b0C)**.\n- **Duration:** Maintained continuously for **72 hours**.\n- **Rewarming Phase:** Slow, controlled rewarming at **0.5\u00b0C per hour** until normothermia (36.5\u00b0C) is restored. (Rapid rewarming triggers hypotension and seizures)."
+      },
+      {
+            "id": "LES-PCHNM-401",
+            "courseId": "CRS-PCHNM-M4",
+            "moduleNumber": 4,
+            "title": "Unit 4.1.1: Neonatal Sepsis, Meningitis & Nosocomial Infection Prevention",
+            "type": "clinical",
+            "duration": 35,
+            "mediaUrl": "",
+            "resourceUrl": "https://www.who.int",
+            "body": "# Unit 4.1.1: Neonatal Sepsis, Meningitis & Nosocomial Infection Prevention\n\nNeonatal sepsis is a clinical syndrome of systemic bacteremia in the first 28 days of life and remains a leading cause of preventable neonatal death in developing countries.\n\n## 1. Classification of Neonatal Sepsis\n1. **Early-Onset Sepsis (EOS):**\n   - Onset within the first **72 hours of life**.\n   - Transmission: Vertical transmission from maternal genital tract during labor and delivery.\n   - Pathogens: Klebsiella pneumoniae, Escherichia coli, Group B Streptococcus (GBS), Listeria monocytogenes.\n   - Risk factors: Prolonged rupture of membranes (PROM > 18 hrs), maternal chorioamnionitis, intrapartum maternal fever (> 38\u00b0C).\n2. **Late-Onset Sepsis (LOS):**\n   - Onset between **72 hours and 28 days of life**.\n   - Transmission: Hospital-acquired (nosocomial) via health worker hands, central lines, catheters, or community contact.\n   - Pathogens: Staphylococcus aureus, Coagulase-Negative Staphylococci (CoNS), Klebsiella, Pseudomonas, Acinetobacter.\n\n## 2. Empirical Antibiotic Regimens\n- **First-Line for Neonatal Sepsis:**\n  - **Ampicillin:** 100 mg/kg/day divided IV every 12 hours.\n  - **Gentamicin:** 4 \u2013 5 mg/kg IV once every 24 hours (monitor renal function).\n- **Neonatal Meningitis (Confirmed or High Suspicion):**\n  - **High-Dose Ampicillin:** 200 mg/kg/day divided q6\u20138h PLUS **Cefotaxime:** 100\u2013150 mg/kg/day divided q8\u201312h.\n  - Duration: Minimum 21 days for Gram-negative meningitis; 14 days for Listeria or GBS.\n\n## 3. Infection Prevention & Hand Hygiene Standards\n- **WHO 5 Moments of Hand Hygiene:** Hand washing with soap and clean running water (40\u201360s) or alcohol-based hand rub (20\u201330s).\n- Evidence demonstrates that institutional hand washing compliance **reduces neonatal mortality by 44%**."
+      },
+      {
+            "id": "LES-PCHNM-402",
+            "courseId": "CRS-PCHNM-M4",
+            "moduleNumber": 4,
+            "title": "Unit 4.1.2: Necrotizing Enterocolitis (NEC) \u2014 Pathophysiology & Management",
+            "type": "clinical",
+            "duration": 30,
+            "mediaUrl": "",
+            "resourceUrl": "https://www.aap.org",
+            "body": "# Unit 4.1.2: Necrotizing Enterocolitis (NEC) \u2014 Pathophysiology & Management\n\nNecrotizing Enterocolitis is an acquired gastrointestinal necrosis predominantly affecting premature, formula-fed infants in the NICU.\n\n## 1. Pathophysiology Triad\n- Premature immature intestinal mucosal barrier.\n- Enteral formula feeding (bypassing protective maternal breast milk oligosaccharides and secretory IgA).\n- Bacterial colonisation with virulent flora causing mucosal injury, bacterial translocation, intramural gas formation (**pneumatosis intestinalis**), and full-thickness perforation.\n\n## 2. Modified Bell's Staging Criteria\n- **Stage I (Suspected NEC):** Feeding intolerance, gastric residuals, mild abdominal distension, heme-positive stools. Normal or ileus on abdominal radiograph.\n- **Stage II (Definite NEC):** Prominent abdominal distension, absent bowel sounds, marked tenderness, grossly bloody stools. Abdominal X-ray demonstrates **Pneumatosis Intestinalis** (gas in the bowel wall) and portal venous gas.\n- **Stage III (Advanced NEC):** Septic shock, severe acidosis, coagulopathy (DIC), peritonitis. Abdominal X-ray demonstrates **Pneumoperitoneum** (free air under diaphragm indicating bowel perforation).\n\n## 3. Nursing & Medical Management\n- **Immediate NPO (Nil Per Os):** Decompress stomach with a continuous double-lumen Replogle tube to low intermittent suction.\n- **Parenteral Nutrition & Fluids:** Maintain hydration with TPN.\n- **Broad-Spectrum IV Antibiotics:** Ampicillin, Gentamicin, and Metronidazole (for anaerobic coverage).\n- **Surgical Intervention:** Peritoneal drain placement or exploratory laparotomy with bowel resection and enterostomy for Stage III perforation."
+      },
+      {
+            "id": "LES-PCHNM-403",
+            "courseId": "CRS-PCHNM-M4",
+            "moduleNumber": 4,
+            "title": "Unit 4.2.1: Congenital Malformations & Surgical Emergencies",
+            "type": "clinical",
+            "duration": 35,
+            "mediaUrl": "",
+            "resourceUrl": "https://www.who.int",
+            "body": "# Unit 4.2.1: Congenital Malformations & Surgical Emergencies\n\n## 1. Neural Tube Defects (NTD): Myelomeningocele\n- Protrusion of spinal cord neural placode and meninges through a defective vertebral arch.\n- **Immediate Nursing Actions:**\n  - Cover the defect immediately with a **sterile, warm normal saline-soaked non-adherent gauze**.\n  - Position infant in **prone or lateral position**; avoid pressure on sac.\n  - Strictly avoid latex-containing equipment (high risk of latex sensitization).\n  - Administer prophylactic IV broad-spectrum antibiotics to prevent ascending meningitis.\n\n## 2. Esophageal Atresia (EA) with Tracheoesophageal Fistula (TEF)\n- Esophagus ends in a blind pouch, usually with a fistula connecting trachea to lower esophagus.\n- **Clinical Signs:** Excessive frothy oral secretions, choking, coughing, and cyanosis on initial feeding attempt.\n- **Diagnosis:** Inability to pass a 10F firm catheter beyond 10\u201312 cm from the lips. X-ray confirms coiled tube in upper esophageal pouch.\n- **Management:** Keep NPO, place in **upright (30\u00b0\u201345\u00b0) posture**, continuous low suction in the pouch via Replogle catheter to prevent pulmonary aspiration, urgent surgical repair.\n\n## 3. Congenital Diaphragmatic Hernia (CDH)\n- Defect in the pleuroperitoneal membrane (most commonly left-sided Bochdalek hernia), allowing abdominal viscera to herniate into thorax, causing severe pulmonary hypoplasia.\n- **Signs:** Scaphoid abdomen, barrel chest, shifted heart sounds, severe respiratory distress.\n- **CRITICAL CONTRAINDICATION:** **NEVER perform bag-valve-mask ventilation** (inflates stomach and intestines in thorax, causing fatal lung compression). Immediate endotracheal intubation in delivery room."
+      },
+      {
+            "id": "LES-PCHNM-404",
+            "courseId": "CRS-PCHNM-M4",
+            "moduleNumber": 4,
+            "title": "Unit 4.3.1: Care of Preterm Neonates & Total Parenteral Nutrition (TPN)",
+            "type": "clinical",
+            "duration": 30,
+            "mediaUrl": "",
+            "resourceUrl": "https://gityar.github.io/MyPortfolio",
+            "body": "# Unit 4.3.1: Care of Preterm Neonates & Total Parenteral Nutrition (TPN)\n\n## 1. Daily Fluid Requirements by Birth Weight & Day of Life (mL/kg/day)\n| Birth Weight | Day 1 | Day 2 | Days 3\u20136 | \u2265 Day 7 |\n| :--- | :--- | :--- | :--- | :--- |\n| **< 750 g** | 100\u2013140 | 120\u2013160 | 140\u2013200 | 140\u2013160 |\n| **750 \u2013 1,000 g** | 100\u2013120 | 120\u2013140 | 130\u2013180 | 140\u2013160 |\n| **1,000 \u2013 1,500 g**| 80\u2013100 | 100\u2013120 | 120\u2013160 | 150 |\n| **1,500 \u2013 2,500 g**| 60\u201380 | 80\u2013100 | 120\u2013160 | 150 |\n| **> 2,500 g** | 60\u201380 | 80\u2013100 | 90\u2013150 | 150 |\n\n## 2. Total Parenteral Nutrition (TPN) Principles\n- Indicated for ELBW and VLBW infants unable to tolerate enteral feeding due to gut immaturity.\n- **Amino Acids:** Start at 1.5\u20132.0 g/kg/day on Day 1, advance by 0.5\u20131.0 g/kg/day up to **3.5\u20134.0 g/kg/day**.\n- **Lipids (Intralipid 20%):** Start at 1.0 g/kg/day, titrate up to 3.0 g/kg/day (monitor serum triglycerides).\n- **Electrolytes:** Sodium 3\u20134 mEq/kg/day, Potassium 1\u20132 mEq/kg/day (added once urine output established).\n\n## 3. Minimal Enteral Nutrition (Trophic Priming)\n- Begin within first 24\u201348 hours with **maternal colostrum at 10\u201320 mL/kg/day** in small aliquot feeds (1\u20132 mL q2\u20133h).\n- Purpose is trophic maturation of the intestinal brush border without overburdening metabolic capacity."
+      },
+      {
+            "id": "LES-PCHNM-405",
+            "courseId": "CRS-PCHNM-M4",
+            "moduleNumber": 4,
+            "title": "Unit 4.3.2: Kangaroo Mother Care (KMC) & Developmental Care in NICU",
+            "type": "clinical",
+            "duration": 30,
+            "mediaUrl": "",
+            "resourceUrl": "https://www.who.int",
+            "body": "# Unit 4.3.2: Kangaroo Mother Care (KMC) & Developmental Care in NICU\n\nKangaroo Mother Care is an evidence-based clinical strategy of early, continuous, and prolonged skin-to-skin contact between mother and low birth weight infant.\n\n## 1. The Core Components of KMC\n1. **KMC Position:** Infant placed prone and upright between mother's breasts. Head turned to one side in slightly extended posture to maintain airway patency; hips and arms flexed in a \"frog\" posture. Top of support binder adjusted to ear level.\n2. **KMC Nutrition:** Exclusive breastfeeding or expressed breast milk feeding via cup or NG tube.\n3. **KMC Discharge & Support:** Early discharge in stable KMC position with regular clinical follow-up.\n\n## 2. Evidence-Based Clinical Benefits\n- **Mortality Reduction:** Reduces neonatal mortality in LBW infants by **40%**.\n- **Infection Prevention:** Reduces incidence of severe sepsis and nosocomial infections by 65%.\n- **Thermal Synchrony:** Mother's breast tissue automatically adjusts temperature to warm a hypothermic infant.\n- **Neurodevelopment:** Promotes deep quiet sleep, stable heart rate, and improved weight gain (15\u201320 g/kg/day).\n\n## 3. Discontinuation Criteria for KMC\n- Infant reaches **40 weeks post-menstrual age** or weight reaches **\u2265 2,500 grams**.\n- Infant becomes restless, vigorously kicks limbs out of the binder, and cries when wrapped."
+      },
+      {
+            "id": "LES-PCHNM-406",
+            "courseId": "CRS-PCHNM-M4",
+            "moduleNumber": 4,
+            "title": "Unit 4.3.3: Skill Lab \u2014 Feeding Positioning, Tube Feeding & EPI Immunization",
+            "type": "clinical",
+            "duration": 30,
+            "mediaUrl": "",
+            "resourceUrl": "https://www.who.int",
+            "body": "# Unit 4.3.3: Skill Lab \u2014 Feeding Positioning, Tube Feeding & EPI Immunization\n\n## 1. Nasogastric (NG) / Orogastric (OG) Tube Placement\n- **Measurement (NEX method):** Measure from the tip of the **N**ose to the **E**arlobe, then to the **X**iphoid process (for preterm infants, midpoint between xiphoid and umbilicus).\n- **Confirmation of Placement:**\n  - Aspirate gastric contents and test with pH indicator strip (pH \u2264 5.5).\n  - Auscultate whoosh of 1\u20132 mL air over epigastrium while listening with stethoscope.\n- **Administration:** Feed by gentle gravity flow (barrel of syringe elevated 15\u201320 cm above infant). Never force milk under plunger pressure.\n\n## 2. Cup Feeding Technique\n- Hold infant in semi-upright seated posture on lap.\n- Place small rim of medicinal feeding cup gently against lower lip.\n- Tip cup slightly so milk touches lower lip. **Let infant lap or sip milk using tongue**. Never pour milk directly into the mouth (severe choking and aspiration risk).\n\n## 3. Expanded Program on Immunization (EPI) at Birth\n- **BCG Vaccine (Bacillus Calmette-Gu\u00e9rin):**\n  - Dose: **0.05 mL** reconstituted vaccine.\n  - Route: **Intradermal (ID)** on right upper deltoid.\n  - Technique: 26G needle, bevel facing upward at 10\u00b0\u201315\u00b0 angle; inject slowly to produce a distinct 5\u20136 mm pale wheal.\n- **Hepatitis B Birth Dose:**\n  - Dose: **0.5 mL (10 \u00b5g)**.\n  - Route: **Intramuscular (IM)** on the anterolateral thigh (vastus lateralis) within 24 hours of birth.\n- **Oral Polio Vaccine (OPV 0):**\n  - Dose: **2 drops** orally on tongue."
+      },
+      {
+            "id": "LES-PCHNM-501",
+            "courseId": "CRS-PCHNM-M5",
+            "moduleNumber": 5,
+            "title": "Unit 5.1.1: NICU Practicum (120 Hours) \u2014 Advanced Critical Interventions",
+            "type": "clinical",
+            "duration": 40,
+            "mediaUrl": "",
+            "resourceUrl": "https://gityar.github.io/MyPortfolio",
+            "body": "# Unit 5.1.1: NICU Practicum (120 Hours) \u2014 Advanced Critical Interventions\n\nThe NICU Practicum comprises 3 weeks (120 clinical contact hours) under direct preceptor supervision.\n\n## Clinical Competencies Required in the NICU:\n1. **Oxygen Therapy & CPAP Management:**\n   - Setting up bubble CPAP with heated humidification (37\u00b0C) and water column pressure (5\u20137 cm H2O).\n   - Securing nasal prongs with proper bonnet and chin strap without columellar pressure necrosis.\n2. **Endotracheal Intubation Assistance:**\n   - Pre-oxygenation, positioning, laryngoscope blade selection, ETT depth calculation:\n     $$\\text{ETT Depth (cm at lip)} = 6 + \\text{Weight in kg}$$\n3. **Intravenous Fluid Calculation & Infusion Pumps:**\n   - Precision programming of micro-infusion and syringe pumps; checking for air bubbles to prevent fatal air embolism.\n4. **Phototherapy Irradiance Monitoring:**\n   - Calibrating radiometers, positioning phototherapy units at 35\u201345 cm distance, monitoring infant temperature every 3 hours.\n5. **Exchange Transfusion Assistance:**\n   - Preparing heparinized saline flushes, maintaining the waste and donor blood log, warming blood.\n6. **Arterial & Capillary Blood Gas Sampling:**\n   - Performing Allen test prior to radial artery puncture; proper heel warm-up and lateral plantar border lancing."
+      },
+      {
+            "id": "LES-PCHNM-502",
+            "courseId": "CRS-PCHNM-M5",
+            "moduleNumber": 5,
+            "title": "Unit 5.2.1: Postnatal & Community Rotation (40 Hours) \u2014 Essential Care & Counselling",
+            "type": "clinical",
+            "duration": 30,
+            "mediaUrl": "",
+            "resourceUrl": "https://www.who.int",
+            "body": "# Unit 5.2.1: Postnatal & Community Rotation (40 Hours) \u2014 Essential Care & Counselling\n\nThe Postnatal Ward rotation comprises 1 week (40 clinical contact hours) focused on mother-infant dyad care and community transition.\n\n## Clinical Focus Areas:\n1. **Essential Newborn Care Execution:** Providing standard immediate care, cord antisepsis, thermal preservation, and vitamin K injection.\n2. **Breastfeeding Counselling (LATCH Assessment):**\n   - Latch: Full mouth over areola, flanged lips.\n   - Audible swallowing: Clear rhythmic swallow sounds.\n   - Type of nipple: Everted vs flat/inverted.\n   - Comfort: Pain-free latch.\n   - Hold: C-hold, football, or cross-cradle position.\n3. **Danger Sign Identification for Families:**\n   - Educating parents to seek immediate emergency care if infant exhibits:\n     - Inability to suck or feed\n     - Fast breathing (> 60 breaths/min) or chest in-drawing\n     - Fever (> 37.5\u00b0C) or cold body (< 36.5\u00b0C)\n     - Convulsions or abnormal twitching\n     - Yellow palms or soles of feet\n     - Red, swollen, or foul-smelling cord stump."
+      },
+      {
+            "id": "LES-PCHNM-503",
+            "courseId": "CRS-PCHNM-M5",
+            "moduleNumber": 5,
+            "title": "Unit 5.3.1: Clinical Logbook & Procedural Competency Verification",
+            "type": "clinical",
+            "duration": 25,
+            "mediaUrl": "",
+            "resourceUrl": "https://gityar.github.io/MyPortfolio",
+            "body": "# Unit 5.3.1: Clinical Logbook & Procedural Competency Verification\n\n## Clinical Logbook Requirements\nStudents must complete and record evidence for the following minimum procedure counts:\n- [ ] Neonatal Resuscitation Drill / Golden Minute: Minimum **5 sessions**\n- [ ] Bubble CPAP Assembly and Maintenance: Minimum **5 sessions**\n- [ ] IV Fluid Rate and GIR Calculations: Minimum **10 verified cases**\n- [ ] Phototherapy and Bilirubin Monitoring: Minimum **5 patients**\n- [ ] Kangaroo Mother Care Positioning and Counselling: Minimum **5 mother-infant dyads**\n- [ ] Nasogastric Tube Placement and Tube Feeding: Minimum **5 verified procedures**\n- [ ] EPI Immunization (BCG / Hep B / OPV): Minimum **5 verified administrations**\n- [ ] Parent Discharge Education & Danger Sign Counselling: Minimum **3 sessions**\n\nEvery entry requires the date, hospital registration number, procedure details, reflection on challenges, and clinical preceptor signature."
+      },
+      {
+            "id": "LES-PCHNM-601",
+            "courseId": "CRS-PCHNM-M6",
+            "moduleNumber": 6,
+            "title": "Unit 6.1.1: Midterm Theory Examination Review & Structure (Modules 1\u20133)",
+            "type": "clinical",
+            "duration": 30,
+            "mediaUrl": "",
+            "resourceUrl": "https://gityar.github.io/MyPortfolio",
+            "body": "# Unit 6.1.1: Midterm Theory Examination Review & Structure (Modules 1\u20133)\n\nThe Midterm Written Examination is scheduled at Week 9 and carries **10% of the course grade**.\n\n## Examination Blueprint:\n- **Module 1 (Foundations & Physiology):** 30% weight \u2014 fetal adaptation, mortality indicators, GA and weight classifications.\n- **Module 2 (Immediate Care & NRP):** 40% weight \u2014 11-step ENC, Golden Minute, PPV, MR. SOPA, 3:1 compressions, epinephrine dosing, pre-ductal SpO2 targets.\n- **Module 3 (Pathology & Crises):** 30% weight \u2014 birth trauma differential, RDS vs TTN vs MAS, ABG analysis, phototherapy/exchange transfusion, seizure management.\n\nReview high-yield clinical decision points, formulas, and rationales before attempting the examination."
+      },
+      {
+            "id": "LES-PCHNM-602",
+            "courseId": "CRS-PCHNM-M6",
+            "moduleNumber": 6,
+            "title": "Unit 6.1.2: Master OSCE Station \u2014 10-Minute Resuscitation & 10-Domain Rubric",
+            "type": "clinical",
+            "duration": 40,
+            "mediaUrl": "",
+            "resourceUrl": "https://gityar.github.io/MyPortfolio",
+            "body": "# Unit 6.1.2: Master OSCE Station \u2014 10-Minute Resuscitation & 10-Domain Rubric\n\nThe Objective Structured Clinical Examination (OSCE) carries **20% of the total course grade**. The pass mark is **80% (16 / 20 points)**.\n\n## Master OSCE Scoring Rubric (10 Domains \u00d7 2 Points):\n1. **Preparation & Infection Control (2 pts):** Performs hand hygiene, dons PPE, checks radiant warmer, suction (80-100 mmHg), and PPV equipment prior to delivery.\n2. **Initial Thermal & Airway Management (2 pts):** Dries neonate, discards wet linen, positions head in sniffing position, clears airway appropriately within 30 seconds.\n3. **Rapid Assessment & APGAR (2 pts):** Accurately assesses heart rate by apical auscultation and breathing within 30 seconds; calculates APGAR.\n4. **PPV Execution & Technique (2 pts):** Initiates PPV at 40\u201360 breaths/min with airtight mask seal, observing chest rise within 30 seconds of birth.\n5. **Corrective Measures (MR. SOPA) (2 pts):** Systematically applies MR. SOPA sequence when chest rise is absent during PPV.\n6. **Chest Compressions & Coordination (2 pts):** Delivers 3:1 compressions (90 compressions : 30 breaths) synchronized with 100% oxygen when HR < 60 bpm.\n7. **Medication Administration & Access (2 pts):** Correctly calculates epinephrine dosage (0.02 mg/kg) and identifies umbilical venous catheter (UVC) route.\n8. **Team Communication & Reassessment (2 pts):** Communicates clear, concise updates; re-evaluates heart rate and SpO2 every 30 seconds.\n9. **Family Counselling & Empathy (2 pts):** Delivers clear, compassionate, and culturally sensitive clinical updates to parents post-resuscitation.\n10. **Documentation, Post-Resuscitation Care & Debriefing (2 pts):** Initiates NICU transfer protocols, maintains thermal chain, completes accurate documentation, and articulates a structured Pendleton debrief."
+      },
+      {
+            "id": "LES-PCHNM-603",
+            "courseId": "CRS-PCHNM-M6",
+            "moduleNumber": 6,
+            "title": "Unit 6.1.3: Final Comprehensive Theory Examination & Clinical Portfolio Defence",
+            "type": "clinical",
+            "duration": 30,
+            "mediaUrl": "",
+            "resourceUrl": "https://gityar.github.io/MyPortfolio",
+            "body": "# Unit 6.1.3: Final Comprehensive Theory Examination & Clinical Portfolio Defence\n\n## 1. Final Comprehensive Examination (40% Weight)\n- Comprehensive evaluation administered through the LMS at the conclusion of Week 16.\n- Tests clinical synthesis across all 9 Course Learning Outcomes (CO1 through CO9).\n- Clinical problem-solving scenarios, emergency dosing calculations, and diagnostic decision-making.\n\n## 2. Clinical Portfolio Defence (Weeks 14\u201316)\n- Submission and oral defence of the maintained Clinical Portfolio before a faculty review panel.\n- Assesses professional accountability, evidence-based nursing reflections, verified logbook completion, and multidisciplinary communication."
+      },
+      {
+            "id": "LES-PCHNM-604",
+            "courseId": "CRS-PCHNM-M6",
+            "moduleNumber": 6,
+            "title": "Unit 6.2.1: Three-Tier Feedback Strategy & The Pendleton Debriefing Framework",
+            "type": "clinical",
+            "duration": 25,
+            "mediaUrl": "",
+            "resourceUrl": "https://gityar.github.io/MyPortfolio",
+            "body": "# Unit 6.2.1: Three-Tier Feedback Strategy & The Pendleton Debriefing Framework\n\nConstructive and structured feedback prevents clinical error propagation and builds professional confidence.\n\n## The Three-Tier Feedback Framework:\n1. **Tier 1: Immediate Clinical Debriefing \u2014 The Pendleton Model:**\n   - Carried out immediately after every simulation drill, resuscitation, or bedside procedure:\n     - **Step 1:** The learner states what they did well.\n     - **Step 2:** The instructor reinforces and confirms what went well.\n     - **Step 3:** The learner identifies areas for improvement.\n     - **Step 4:** The instructor provides constructive coaching and actionable correction.\n2. **Tier 2: Automated LMS Diagnostic Feedback:**\n   - Online formative quizzes return instant item-level feedback explaining why an answer is correct or incorrect, linking directly to clinical protocols.\n3. **Tier 3: Mid-Rotation Formative Clinical Review:**\n   - Conducted at Week 11 midway through the clinical practicum. Preceptors review logbooks and conduct one-on-one reviews to bridge gaps prior to the final OSCE."
+      },
+      {
+            "id": "LES-PCHNM-605",
+            "courseId": "CRS-PCHNM-M6",
+            "moduleNumber": 6,
+            "title": "Unit 6.2.2: Universal Design for Learning (UDL) & WCAG 2.1 Level AA Compliance Report",
+            "type": "clinical",
+            "duration": 25,
+            "mediaUrl": "",
+            "resourceUrl": "https://gityar.github.io/MyPortfolio",
+            "body": "# Unit 6.2.2: Universal Design for Learning (UDL) & WCAG 2.1 Level AA Compliance Report\n\n## 1. Web Content Accessibility Guidelines (WCAG 2.1 Level AA) Compliance:\n- **Contrast (1.4.3):** Body text achieves contrast ratio of at least 7.1:1 (dark charcoal on off-white/surface). Deep navy headings provide clear visual hierarchy.\n- **Non-Text Content (1.1.1):** All instructional diagrams (NRP flowchart, APGAR scoring tables) carry structured textual descriptions and alternative text.\n- **Info and Relationships (1.3.1):** Semantic typography headings, scoped table headers, and Unicode mathematical representations.\n- **Keyboard Navigation (2.1.1):** All interactive elements and self-assessment disclosures are fully operable via keyboard and touch gestures.\n- **Captions & Transcripts (1.2.2 & 1.2.5):** Synchronized video demonstrations and downloadable full-text transcripts.\n\n## 2. Universal Design for Learning (UDL) Alignment:\n- **Multiple Means of Representation:** Content provided through multimodal formats (narrated lectures, structured clinical algorithms, interactive calculators, video tutorials).\n- **Multiple Means of Action & Expression:** Mastery demonstrated via written case analyses, oral PBL presentations, high-fidelity OSCE performance, and reflective clinical logbooks.\n- **Multiple Means of Engagement:** Collaborative learning via Think-Pair-Share, interprofessional team drills, self-paced diagnostic quizzes, and bedside clinical rounds."
       }
-    ];
+];
 
     const DEFAULT_ASSESSMENTS = [
       {
-        id: 'ASM-NRP-01',
-        courseId: 'CRS-NRP-01',
-        title: 'Neonatal Resuscitation Program (NRP) Competency Exam',
-        passingScore: 80,
-        timeLimit: 30,
-        type: 'certification',
-        instructions: 'Official clinical competency exam for Neonatal Resuscitation. Answer all questions to qualify for clinical certificate.\n\n> ⚠️ **Standard:** Passing grade of 80% required.'
+            "id": "ASM-PCHNM-QZ1",
+            "courseId": "CRS-PCHNM-M1",
+            "title": "Module 1 Knowledge Check: Neonatal Transition & Classification",
+            "instructions": "Formative quiz assessing understanding of global neonatal mortality, transitional cardiorespiratory adaptation, brown fat thermogenesis, and neonatal classifications.",
+            "passingScore": 80,
+            "timeLimit": 20,
+            "type": "module_quiz"
       },
       {
-        id: 'ASM-THM-02',
-        courseId: 'CRS-THM-02',
-        title: 'NICU Thermoregulation & Neutral Thermal Env Assessment',
-        passingScore: 75,
-        timeLimit: 20,
-        type: 'module_quiz',
-        instructions: 'Evaluate your knowledge of radiant warmer operation, servo probes, and hypothermia avoidance.'
+            "id": "ASM-PCHNM-NRP",
+            "courseId": "CRS-PCHNM-M2",
+            "title": "Module 2: NRP Clinical Scenarios & Calculations Assessment",
+            "instructions": "Core interactive assessment covering the Golden Minute, MR. SOPA steps, 3:1 compression ratios, dosage calculations, and targeted pre-ductal SpO2 standards.",
+            "passingScore": 80,
+            "timeLimit": 25,
+            "type": "module_quiz"
       },
       {
-        id: 'ASM-RDS-03',
-        courseId: 'CRS-RDS-04',
-        title: 'Respiratory Distress Syndrome & Bubble CPAP Clinical Check',
-        passingScore: 80,
-        timeLimit: 25,
-        type: 'case_exam',
-        instructions: 'Clinical scenarios on Silverman-Andersen score, CPAP titration, and surfactant delivery.'
+            "id": "ASM-PCHNM-MID",
+            "courseId": "CRS-PCHNM-M6",
+            "title": "Midterm Theory Examination (PCHNM-3073 Modules 1\u20133)",
+            "instructions": "Summative proctored theory examination (10% of course grade) testing clinical competencies across Foundations, Delivery Room Resuscitation, and Clinical Pathologies.",
+            "passingScore": 80,
+            "timeLimit": 45,
+            "type": "module_quiz"
+      },
+      {
+            "id": "ASM-PCHNM-OSCE",
+            "courseId": "CRS-PCHNM-M6",
+            "title": "Objective Structured Clinical Examination (OSCE \u2014 10-Minute Master Station)",
+            "instructions": "High-fidelity simulated neonatal resuscitation station. 10 assessment domains scored 0\u20132 points each (Total 20 points). Pass mark: 80% (16 points). Accompanying accredited certificate awarded upon successful completion.",
+            "passingScore": 80,
+            "timeLimit": 10,
+            "type": "certification"
+      },
+      {
+            "id": "ASM-PCHNM-FINAL",
+            "courseId": "CRS-PCHNM-M6",
+            "title": "Final Comprehensive Theory Examination (PCHNM-3073 All Modules)",
+            "instructions": "Exit summative examination (40% of course grade) testing clinical synthesis across all 9 Course Learning Outcomes (CO1 to CO9).",
+            "passingScore": 80,
+            "timeLimit": 60,
+            "type": "certification"
       }
-    ];
+];
 
     const DEFAULT_QUESTIONS = [
       {
-        id: 'QST-01',
-        assessmentId: 'ASM-NRP-01',
-        q: 'What is the initial action during the "Golden Minute" of neonatal resuscitation?',
-        type: 'single',
-        options: [
-          'Immediate chest compressions at 3:1 ratio',
-          'Dry, warm, position airway, and stimulate breathing',
-          'Administer 100% supplemental oxygen via blow-by',
-          'Immediate intravenous epinephrine'
-        ],
-        correct: 1,
-        points: 1,
-        difficulty: 'Intermediate',
-        explanation: 'Initial steps within the Golden Minute focus on thermal protection, airway positioning, suctioning if needed, and tactile stimulation.'
+            "id": "QST-PCHNM-101",
+            "assessmentId": "ASM-PCHNM-QZ1",
+            "q": "Globally, what percentage of all under-5 child deaths occur during the first month of life (neonatal period)?",
+            "type": "single",
+            "options": [
+                  "25%",
+                  "35%",
+                  "47%",
+                  "65%"
+            ],
+            "correct": 2,
+            "points": 25,
+            "difficulty": "Clinical Standard",
+            "explanation": "According to WHO/UNICEF 2021 data, neonatal deaths account for approximately 47% of all under-5 child deaths globally (2.3 million deaths annually)."
       },
       {
-        id: 'QST-02',
-        assessmentId: 'ASM-NRP-01',
-        q: 'When should Positive Pressure Ventilation (PPV) be initiated?',
-        type: 'single',
-        options: [
-          'If the newborn is apneic, gasping, or heart rate < 100 bpm after initial steps',
-          'Only after umbilical venous catheterization',
-          'Only if the neonate is crying vigorously',
-          'When core temperature reaches 36.5°C'
-        ],
-        correct: 0,
-        points: 1,
-        difficulty: 'Intermediate',
-        explanation: 'PPV is indicated if the infant remains apneic, gasping, or has a heart rate < 100 bpm within the first 60 seconds.'
+            "id": "QST-PCHNM-102",
+            "assessmentId": "ASM-PCHNM-QZ1",
+            "q": "Which physiological change is responsible for the functional closure of the foramen ovale at birth?",
+            "type": "single",
+            "options": [
+                  "Increase in right atrial pressure due to umbilical vein constriction",
+                  "Rise in left atrial pressure exceeding right atrial pressure as pulmonary venous return increases",
+                  "Direct contraction of smooth muscle fibers stimulated by bradykinin",
+                  "Increase in pulmonary vascular resistance immediately after the first breath"
+            ],
+            "correct": 1,
+            "points": 25,
+            "difficulty": "Clinical Standard",
+            "explanation": "With lung expansion and decreased PVR, pulmonary venous blood flow to the left atrium surges, raising left atrial pressure above right atrial pressure and closing the foramen ovale flap."
       },
       {
-        id: 'QST-03',
-        assessmentId: 'ASM-NRP-01',
-        q: 'Target neutral thermal core temperature for a preterm neonate in NICU is 36.5°C – 37.5°C.',
-        type: 'tf',
-        options: [
-          'True',
-          'False'
-        ],
-        correct: 0,
-        points: 1,
-        difficulty: 'Beginner',
-        explanation: 'WHO and NRP standards mandate maintaining core neonatal temperature between 36.5°C and 37.5°C to avoid metabolic cold stress.'
+            "id": "QST-PCHNM-103",
+            "assessmentId": "ASM-PCHNM-QZ1",
+            "q": "How is an infant born at 31 completed weeks of gestation with a birth weight of 1,200 grams classified?",
+            "type": "single",
+            "options": [
+                  "Late preterm, Low Birth Weight (LBW)",
+                  "Very preterm, Very Low Birth Weight (VLBW)",
+                  "Extremely preterm, Extremely Low Birth Weight (ELBW)",
+                  "Moderate preterm, Normal birth weight"
+            ],
+            "correct": 1,
+            "points": 25,
+            "difficulty": "Clinical Standard",
+            "explanation": "Gestation between 28 and <32 weeks is classified as Very Preterm; a birth weight between 1,000g and 1,499g is classified as Very Low Birth Weight (VLBW)."
       },
       {
-        id: 'QST-04',
-        assessmentId: 'ASM-NRP-01',
-        q: 'Which of the following are confirmed corrective actions in the **MR. SOPA** ventilation sequence? (Select all that apply)',
-        type: 'multi',
-        options: [
-          'Mask adjustment to ensure an airtight seal',
-          'Reposition head into sniffing position',
-          'Suction mouth and nose to clear airway',
-          'Medication delivery of sodium bicarbonate'
-        ],
-        correct: [0, 1, 2],
-        points: 2,
-        difficulty: 'Advanced',
-        explanation: 'MR. SOPA stands for: Mask adjustment, Reposition airway, Suction mouth/nose, Open mouth, Pressure increase, Alternative airway. Medications are not part of MR. SOPA.'
+            "id": "QST-PCHNM-104",
+            "assessmentId": "ASM-PCHNM-QZ1",
+            "q": "What is the primary mechanism of heat production in newborn infants exposed to cold stress?",
+            "type": "single",
+            "options": [
+                  "Vigorous shivering thermogenesis of major skeletal muscles",
+                  "Non-shivering thermogenesis via brown adipose tissue (BAT) metabolism",
+                  "Peripheral cutaneous vasodilation to increase blood flow",
+                  "Immediate acceleration of gluconeogenesis in the brain"
+            ],
+            "correct": 1,
+            "points": 25,
+            "difficulty": "Clinical Standard",
+            "explanation": "Newborns do not shiver. They produce heat via norepinephrine-mediated lipolysis in brown adipose tissue containing uncoupling protein-1 (UCP-1)."
+      },
+      {
+            "id": "QST-PCHNM-201",
+            "assessmentId": "ASM-PCHNM-NRP",
+            "q": "A full-term infant is delivered limp and apnoeic. After drying and positioning for 30 seconds, the infant remains gasping with a heart rate of 75 bpm. What is the immediate next nursing action?",
+            "type": "single",
+            "options": [
+                  "Begin chest compressions at a 3:1 ratio",
+                  "Administer 100% free-flow oxygen via mask",
+                  "Initiate Positive Pressure Ventilation (PPV) at 40-60 breaths/min",
+                  "Administer IV epinephrine via umbilical venous catheter"
+            ],
+            "correct": 2,
+            "points": 25,
+            "difficulty": "Clinical Standard",
+            "explanation": "PPV is indicated if heart rate is < 100 bpm or if the infant is gasping or apnoeic after initial steps. Chest compressions are only initiated if HR remains < 60 bpm after 30 seconds of effective PPV."
+      },
+      {
+            "id": "QST-PCHNM-202",
+            "assessmentId": "ASM-PCHNM-NRP",
+            "q": "A term newborn is receiving PPV with a pre-ductal saturation probe on the right hand. What target SpO2 range should the team expect at 5 minutes of life?",
+            "type": "single",
+            "options": [
+                  "60% \u2013 65%",
+                  "65% \u2013 70%",
+                  "80% \u2013 85%",
+                  "95% \u2013 100%"
+            ],
+            "correct": 2,
+            "points": 25,
+            "difficulty": "Clinical Standard",
+            "explanation": "According to NRP guidelines, the target pre-ductal SpO2 at 5 minutes of life is 80%\u201385%. Targeting 95%\u2013100% too early causes hyperoxic tissue injury."
+      },
+      {
+            "id": "QST-PCHNM-203",
+            "assessmentId": "ASM-PCHNM-NRP",
+            "q": "A 1.8 kg neonate requires 100 mL/kg/day of intravenous fluid. What hourly rate should be set on the infusion pump?",
+            "type": "single",
+            "options": [
+                  "5.4 mL/hr",
+                  "7.5 mL/hr",
+                  "9.0 mL/hr",
+                  "18.0 mL/hr"
+            ],
+            "correct": 1,
+            "points": 25,
+            "difficulty": "Clinical Standard",
+            "explanation": "Rate = (Weight * Desired Fluid) / 24 hours = (1.8 kg * 100 mL/kg/day) / 24 = 180 / 24 = 7.5 mL/hr."
+      },
+      {
+            "id": "QST-PCHNM-204",
+            "assessmentId": "ASM-PCHNM-NRP",
+            "q": "A newborn's heart rate remains 50 bpm after 30 seconds of effective PPV with good mask seal and chest rise. Which compression-to-ventilation ratio should the nurse use?",
+            "type": "single",
+            "options": [
+                  "15:2 ratio",
+                  "30:2 ratio",
+                  "3:1 ratio (90 compressions : 30 breaths/min)",
+                  "5:1 ratio"
+            ],
+            "correct": 2,
+            "points": 25,
+            "difficulty": "Clinical Standard",
+            "explanation": "Neonatal resuscitation uses a 3:1 ratio \u2014 90 compressions and 30 breaths per minute, giving 120 total events per minute. 15:2 and 30:2 are adult/pediatric ratios and are unsafe in newborns."
+      },
+      {
+            "id": "QST-PCHNM-M01",
+            "assessmentId": "ASM-PCHNM-MID",
+            "q": "In distinguishing a cephalohematoma from a caput succedaneum, which physical examination finding is pathognomonic for cephalohematoma?",
+            "type": "single",
+            "options": [
+                  "The swelling crosses the sagittal and lambdoid sutures",
+                  "The swelling is sharply limited by the cranial suture lines",
+                  "The overlying skin is always ecchymotic and warm",
+                  "The swelling resolves completely within 12 hours of delivery"
+            ],
+            "correct": 1,
+            "points": 20,
+            "difficulty": "Clinical Standard",
+            "explanation": "Cephalohematoma is subperiosteal blood accumulation, so it cannot cross cranial suture lines. Caput succedaneum is subcutaneous edema that freely crosses sutures."
+      },
+      {
+            "id": "QST-PCHNM-M02",
+            "assessmentId": "ASM-PCHNM-MID",
+            "q": "What is the recommended initial drug, dose, and route for neonatal seizures that fail to terminate spontaneously?",
+            "type": "single",
+            "options": [
+                  "Phenytoin 10 mg/kg orally",
+                  "Diazepam 0.5 mg/kg rectally",
+                  "Phenobarbitone 20 mg/kg IV infused over 10\u201315 minutes",
+                  "Lorazepam 0.5 mg/kg rapid IV push"
+            ],
+            "correct": 2,
+            "points": 20,
+            "difficulty": "Clinical Standard",
+            "explanation": "Phenobarbitone (Phenobarbital) 20 mg/kg IV over 10\u201315 minutes is the first-line anticonvulsant of choice in neonatal seizures."
+      },
+      {
+            "id": "QST-PCHNM-M03",
+            "assessmentId": "ASM-PCHNM-MID",
+            "q": "For an infant with severe Hypoxic-Ischemic Encephalopathy (HIE) eligible for therapeutic hypothermia, what is the target core temperature and treatment duration?",
+            "type": "single",
+            "options": [
+                  "30.0\u00b0C \u2013 32.0\u00b0C for 24 hours",
+                  "33.0\u00b0C \u2013 34.0\u00b0C (target 33.5\u00b0C) for 72 hours",
+                  "35.0\u00b0C \u2013 36.0\u00b0C for 48 hours",
+                  "32.0\u00b0C \u2013 33.0\u00b0C for 12 hours"
+            ],
+            "correct": 1,
+            "points": 20,
+            "difficulty": "Clinical Standard",
+            "explanation": "Therapeutic hypothermia protocols require core cooling to 33.0\u00b0C\u201334.0\u00b0C (target 33.5\u00b0C) maintained for 72 hours, followed by slow rewarming at 0.5\u00b0C per hour."
+      },
+      {
+            "id": "QST-PCHNM-M04",
+            "assessmentId": "ASM-PCHNM-MID",
+            "q": "What total blood volume is required to perform a Double-Volume Exchange Transfusion in a 3.0 kg neonate with Rh hemolytic disease?",
+            "type": "single",
+            "options": [
+                  "255 mL",
+                  "340 mL",
+                  "510 mL",
+                  "850 mL"
+            ],
+            "correct": 2,
+            "points": 20,
+            "difficulty": "Clinical Standard",
+            "explanation": "Double-volume exchange calculation: 2 * 85 mL/kg * 3.0 kg = 170 mL/kg * 3.0 kg = 510 mL."
+      },
+      {
+            "id": "QST-PCHNM-M05",
+            "assessmentId": "ASM-PCHNM-MID",
+            "q": "When administering epinephrine for neonatal cardiac arrest via an Umbilical Venous Catheter (UVC), what is the correct concentration and dosage?",
+            "type": "single",
+            "options": [
+                  "1:1,000 solution at 0.1 mg/kg",
+                  "1:10,000 solution at 0.02 mg/kg (0.2 mL/kg)",
+                  "1:10,000 solution at 0.1 mg/kg (1.0 mL/kg)",
+                  "1:100,000 solution at 0.005 mg/kg"
+            ],
+            "correct": 1,
+            "points": 20,
+            "difficulty": "Clinical Standard",
+            "explanation": "The NRP standard IV/UVC epinephrine dose is 0.02 mg/kg of the 1:10,000 (0.1 mg/mL) dilution, equivalent to 0.2 mL/kg, followed by normal saline flush."
+      },
+      {
+            "id": "QST-OSCE-01",
+            "assessmentId": "ASM-PCHNM-OSCE",
+            "q": "OSCE Domain 1: In delivery preparation and infection control, what steps earn full Excellent (2 pts) marks?",
+            "type": "single",
+            "options": [
+                  "Washing hands with water alone and turning on the radiant warmer after delivery",
+                  "Performing standard hand hygiene, donning PPE, pre-warming radiant warmer, and systematically testing suction and PPV bag/mask before delivery",
+                  "Wearing gloves only without checking suction pressure or blender concentration",
+                  "Delegating all equipment verification to the nurse after the infant is born"
+            ],
+            "correct": 1,
+            "points": 20,
+            "difficulty": "Clinical Standard",
+            "explanation": "Domain 1 requires prior hand hygiene, complete PPE, radiant warmer preheating, suction check (80-100 mmHg), and bag-mask verification prior to birth."
+      },
+      {
+            "id": "QST-OSCE-02",
+            "assessmentId": "ASM-PCHNM-OSCE",
+            "q": "OSCE Domain 4 & 5: When PPV fails to achieve chest rise and heart rate remains 55 bpm, what is the correct sequential action?",
+            "type": "single",
+            "options": [
+                  "Immediately start chest compressions before checking the mask or airway",
+                  "Systematically perform MR. SOPA (Mask adjustment, Reposition head, Suction mouth/nose, Open mouth, Pressure increase, Alternative airway)",
+                  "Administer high-dose atropine via endotracheal tube",
+                  "Switch off the oxygen blender and increase room temperature"
+            ],
+            "correct": 1,
+            "points": 20,
+            "difficulty": "Clinical Standard",
+            "explanation": "When PPV is ineffective, MR. SOPA corrective steps must be methodically applied before advancing to chest compressions."
+      },
+      {
+            "id": "QST-OSCE-03",
+            "assessmentId": "ASM-PCHNM-OSCE",
+            "q": "OSCE Domain 6: How should chest compressions be coordinated with ventilations in neonatal resuscitation?",
+            "type": "single",
+            "options": [
+                  "15 compressions to 2 breaths asynchronous",
+                  "3 compressions to 1 ventilation (90 compressions and 30 breaths per minute) synchronized with 100% oxygen",
+                  "Continuous rapid compressions at 120/min with asynchronous bagging",
+                  "5 compressions followed by a 5-second pause for breathing"
+            ],
+            "correct": 1,
+            "points": 20,
+            "difficulty": "Clinical Standard",
+            "explanation": "NRP mandates the two-thumb technique at a 3:1 ratio (90 compressions and 30 breaths = 120 events/min) using 100% oxygen."
+      },
+      {
+            "id": "QST-OSCE-04",
+            "assessmentId": "ASM-PCHNM-OSCE",
+            "q": "OSCE Domain 9: What constitutes Excellent (2 pts) communication during post-resuscitation family counselling?",
+            "type": "single",
+            "options": [
+                  "Informing parents of infant death risk using complex medical jargon and dismissing their questions",
+                  "Providing clear, honest, compassionate, and culturally sensitive updates to parents, using understandable language and active listening",
+                  "Instructing parents that they cannot see the infant until tomorrow without explanation",
+                  "Minimizing the clinical severity by falsely claiming the baby was completely healthy"
+            ],
+            "correct": 1,
+            "points": 20,
+            "difficulty": "Clinical Standard",
+            "explanation": "Domain 9 evaluates warmth, empathy, cultural sensitivity, clear understandable language, and supportive presence."
+      },
+      {
+            "id": "QST-OSCE-05",
+            "assessmentId": "ASM-PCHNM-OSCE",
+            "q": "OSCE Domain 10: In the Pendleton Model for post-resuscitation clinical debriefing, what is Step 1?",
+            "type": "single",
+            "options": [
+                  "The instructor immediately criticizes the student's mistakes",
+                  "The learner states what they did well during the resuscitation",
+                  "The team leader assigns disciplinary action for timing delays",
+                  "The nurse writes an incident report before discussing the case"
+            ],
+            "correct": 1,
+            "points": 20,
+            "difficulty": "Clinical Standard",
+            "explanation": "Step 1 of the Pendleton debriefing model empowers the learner to articulate what went well, reinforcing positive actions before coaching improvements."
+      },
+      {
+            "id": "QST-FINAL-01",
+            "assessmentId": "ASM-PCHNM-FINAL",
+            "q": "Which clinical sign is a critical contraindication to Bag-Valve-Mask positive pressure ventilation in a neonate with respiratory distress?",
+            "type": "single",
+            "options": [
+                  "Heart rate of 80 bpm with central cyanosis",
+                  "Scaphoid abdomen with suspected Congenital Diaphragmatic Hernia (CDH)",
+                  "Acrocyanosis with strong crying",
+                  "Birth weight less than 1,500 grams"
+            ],
+            "correct": 1,
+            "points": 25,
+            "difficulty": "Clinical Standard",
+            "explanation": "In Congenital Diaphragmatic Hernia (CDH), mask ventilation forces air into the herniated stomach and intestines in the chest, worsening lung hypoplasia and causing fatal pneumothorax. Immediate endotracheal intubation is required."
+      },
+      {
+            "id": "QST-FINAL-02",
+            "assessmentId": "ASM-PCHNM-FINAL",
+            "q": "What is the recommended empirical first-line antibiotic combination for suspected neonatal early-onset sepsis (EOS)?",
+            "type": "single",
+            "options": [
+                  "Ceftriaxone and Metronidazole",
+                  "Ampicillin and Gentamicin",
+                  "Vancomycin and Meropenem",
+                  "Ciprofloxacin and Erythromycin"
+            ],
+            "correct": 1,
+            "points": 25,
+            "difficulty": "Clinical Standard",
+            "explanation": "Ampicillin (for Gram-positive organisms and Listeria) plus Gentamicin (for Gram-negative enteric bacilli) is the global and national first-line regimen for neonatal EOS."
+      },
+      {
+            "id": "QST-FINAL-03",
+            "assessmentId": "ASM-PCHNM-FINAL",
+            "q": "At what gestational age and weight should Kangaroo Mother Care (KMC) generally be discontinued as the infant transitions out of kangaroo wraps?",
+            "type": "single",
+            "options": [
+                  "At 34 weeks gestation or weight of 1,800 grams",
+                  "At 40 weeks post-menstrual age or weight \u2265 2,500 grams (when the infant wriggles uncomfortably)",
+                  "Immediately when the infant reaches 14 days of life",
+                  "Only when the mother returns to work"
+            ],
+            "correct": 1,
+            "points": 25,
+            "difficulty": "Clinical Standard",
+            "explanation": "KMC is typically discontinued when the infant reaches term equivalent (40 weeks) or \u2265 2,500g and begins fussing or wriggling out of the binder."
+      },
+      {
+            "id": "QST-FINAL-04",
+            "assessmentId": "ASM-PCHNM-FINAL",
+            "q": "What is the correct dose, needle route, and anatomical site for administering BCG immunization at birth?",
+            "type": "single",
+            "options": [
+                  "0.5 mL subcutaneous in the abdomen",
+                  "0.05 mL intradermal in the right upper deltoid using a 26G needle to form a wheal",
+                  "0.1 mL intramuscular in the anterolateral thigh",
+                  "1.0 mL orally on the tongue"
+            ],
+            "correct": 1,
+            "points": 25,
+            "difficulty": "Clinical Standard",
+            "explanation": "BCG is given as a 0.05 mL intradermal injection into the right upper deltoid with a fine 26G needle bevel up, producing a characteristic 5\u20136 mm wheal."
       }
-    ];
+];
 
     const SHEET_TABS = [
       'Users', 'Courses', 'Lessons', 'Enrollments',
@@ -1760,18 +2342,49 @@
     ];
 
     const DEFAULT_ENROLLMENTS = [
-      { id: 'ENR-01', courseId: 'CRS-NRP-01', userId: 'USR-NURSE-01', progress: 50, enrolledDate: '2026-10-01' }
-    ];
+      {
+            "id": "ENR-PCHNM-01",
+            "courseId": "CRS-PCHNM-M1",
+            "userId": "USR-NURSE-01",
+            "progress": 100,
+            "enrolledDate": "2026-10-01"
+      },
+      {
+            "id": "ENR-PCHNM-02",
+            "courseId": "CRS-PCHNM-M2",
+            "userId": "USR-NURSE-01",
+            "progress": 65,
+            "enrolledDate": "2026-10-01"
+      },
+      {
+            "id": "ENR-PCHNM-03",
+            "courseId": "CRS-PCHNM-M2",
+            "userId": "USR-NURSE-02",
+            "progress": 40,
+            "enrolledDate": "2026-10-08"
+      }
+];
 
     const DEFAULT_ATTEMPTS = [
-      { id: 'ATT-01', userId: 'USR-NURSE-01', learnerName: 'Nurse Tigist Mengistu', courseId: 'CRS-NRP-01', courseTitle: 'Neonatal Resuscitation Program (NRP)', score: 4, total: 4, percentage: 100, passed: true, date: '2026-10-01' }
-    ];
+      {
+            "id": "ATT-PCHNM-01",
+            "userId": "USR-NURSE-01",
+            "learnerName": "Nurse Tigist Mengistu",
+            "courseId": "CRS-PCHNM-M6",
+            "courseTitle": "Objective Structured Clinical Examination (OSCE \u2014 10-Minute Master Station)",
+            "score": 18,
+            "total": 20,
+            "percentage": 90,
+            "passed": true,
+            "date": "2026-10-15"
+      }
+];
 
     // STORAGE STATE
     let courses = JSON.parse(localStorage.getItem('lms_courses')) || DEFAULT_COURSES;
     let lessons = JSON.parse(localStorage.getItem('lms_lessons')) || DEFAULT_LESSONS;
     let assessmentsList = JSON.parse(localStorage.getItem('lms_assessments_list')) || DEFAULT_ASSESSMENTS;
-    let activeAssessmentId = localStorage.getItem('lms_active_assessment_id') || 'ASM-NRP-01';
+    let activeAssessmentId = localStorage.getItem('lms_active_assessment_id') || 'ASM-PCHNM-QZ1';
     let questions = JSON.parse(localStorage.getItem('lms_questions')) || DEFAULT_QUESTIONS;
     let users = JSON.parse(localStorage.getItem('lms_users')) || DEFAULT_USERS;
     let currentUser = JSON.parse(localStorage.getItem('lms_current_user')) || null;
@@ -1779,6 +2392,54 @@
     let attempts = JSON.parse(localStorage.getItem('lms_attempts')) || DEFAULT_ATTEMPTS;
     let assessmentSettings = JSON.parse(localStorage.getItem('lms_assessment_settings')) || DEFAULT_ASSESSMENTS[0];
     let userAnswers = {};
+
+    // AUTOMATIC CURRICULUM VERSION MIGRATION
+    const CURRENT_CURRICULUM_VERSION = 'Wollo-PCHNM-3073-v2';
+    const storedCurriculumVer = localStorage.getItem('lms_curriculum_version');
+    const hasLegacyCourses = courses.some(c => c.id === 'CRS-NRP-01' || c.id === 'CRS-THM-02' || c.id === 'CRS-BIL-03' || c.id === 'CRS-RDS-04');
+    const isMissingCurriculum = !courses.some(c => c.id === 'CRS-PCHNM-M1');
+
+    if (storedCurriculumVer !== CURRENT_CURRICULUM_VERSION || hasLegacyCourses || isMissingCurriculum) {
+      console.log('Upgrading local browser storage to Wollo University PCHNM-3073 Neonatal Nursing curriculum...');
+      courses = DEFAULT_COURSES;
+      lessons = DEFAULT_LESSONS;
+      assessmentsList = DEFAULT_ASSESSMENTS;
+      questions = DEFAULT_QUESTIONS;
+      enrollments = DEFAULT_ENROLLMENTS;
+      attempts = DEFAULT_ATTEMPTS;
+      assessmentSettings = DEFAULT_ASSESSMENTS[0];
+      activeAssessmentId = DEFAULT_ASSESSMENTS[0].id;
+      localStorage.setItem('lms_curriculum_version', CURRENT_CURRICULUM_VERSION);
+      // Synchronize state to localStorage and IndexedDB
+      localStorage.setItem('lms_courses', JSON.stringify(courses));
+      localStorage.setItem('lms_lessons', JSON.stringify(lessons));
+      localStorage.setItem('lms_assessments_list', JSON.stringify(assessmentsList));
+      localStorage.setItem('lms_active_assessment_id', activeAssessmentId);
+      localStorage.setItem('lms_questions', JSON.stringify(questions));
+      localStorage.setItem('lms_enrollments', JSON.stringify(enrollments));
+      localStorage.setItem('lms_attempts', JSON.stringify(attempts));
+      localStorage.setItem('lms_assessment_settings', JSON.stringify(assessmentSettings));
+    }
+
+    function resetToOfficialCurriculum() {
+      if (confirm('Synchronize and reset all courses, lessons, quizzes, and OSCE assessments to the official Wollo University PCHNM-3073 curriculum? (Your user accounts and logins will be kept intact)')) {
+        courses = DEFAULT_COURSES;
+        lessons = DEFAULT_LESSONS;
+        assessmentsList = DEFAULT_ASSESSMENTS;
+        questions = DEFAULT_QUESTIONS;
+        enrollments = DEFAULT_ENROLLMENTS;
+        attempts = DEFAULT_ATTEMPTS;
+        assessmentSettings = DEFAULT_ASSESSMENTS[0];
+        activeAssessmentId = DEFAULT_ASSESSMENTS[0].id;
+        localStorage.setItem('lms_curriculum_version', CURRENT_CURRICULUM_VERSION);
+        saveState();
+        renderCourses();
+        renderAssessmentSelector();
+        renderQuizEditor();
+        updateCounts();
+        showToast('✓ Successfully synchronized Wollo University PCHNM-3073 curriculum!', 'ok');
+      }
+    }
 
     // ==================== RICH TEXT & FORMATTING TOOLBAR ENGINE ====================
     function insertFormat(textareaId, type) {
@@ -2455,7 +3116,7 @@
           const titleInput = document.getElementById('setting-exam-title');
           if (titleInput) titleInput.value = assessmentSettings.title;
           const linkedCourse = document.getElementById('setting-linked-course');
-          if (linkedCourse) linkedCourse.value = assessmentSettings.courseId || 'CRS-NRP-01';
+          if (linkedCourse) linkedCourse.value = assessmentSettings.courseId || 'CRS-PCHNM-M1';
         } else {
           settingsPanel.classList.add('hidden');
           settingsPanel.style.display = 'none';
@@ -4620,7 +5281,7 @@
         document.getElementById('modal-asm-id').value = 'ASM-' + Math.random().toString(36).substring(2, 6).toUpperCase();
         document.getElementById('modal-asm-id').disabled = false;
         document.getElementById('modal-asm-title').value = '';
-        document.getElementById('modal-asm-course').value = courses[0] ? courses[0].id : 'CRS-NRP-01';
+        document.getElementById('modal-asm-course').value = courses[0] ? courses[0].id : 'CRS-PCHNM-M1';
         document.getElementById('modal-asm-type').value = 'certification';
         document.getElementById('modal-asm-pass-score').value = 80;
         document.getElementById('modal-asm-time-limit').value = 30;
@@ -5351,7 +6012,7 @@
           id: 'ATT-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
           userId: currentUser.id,
           learnerName: currentUser.fullName,
-          courseId: currentAsm ? currentAsm.courseId : 'CRS-NRP-01',
+          courseId: currentAsm ? currentAsm.courseId : 'CRS-PCHNM-M1',
           courseTitle: currentAsm ? currentAsm.title : 'Neonatal Resuscitation Program (NRP)',
           score: earnedPoints,
           total: totalPoints,

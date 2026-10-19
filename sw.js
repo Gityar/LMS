@@ -3,7 +3,7 @@
  * Enables complete offline learning, course studying, and quiz taking.
  */
 
-const CACHE_NAME = 'neonatal-lms-v2';
+const CACHE_NAME = 'neonatal-lms-v3';
 const STATIC_ASSETS = [
   './',
   './index.html',
