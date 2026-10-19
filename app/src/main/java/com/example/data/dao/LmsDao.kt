@@ -44,6 +44,27 @@ interface LmsDao {
     @Query("DELETE FROM courses WHERE courseId = :courseId")
     suspend fun deleteCourseById(courseId: String)
 
+    @Query("DELETE FROM courses")
+    suspend fun clearAllCourses()
+
+    @Query("DELETE FROM lessons")
+    suspend fun clearAllLessons()
+
+    @Query("DELETE FROM resources")
+    suspend fun clearAllResources()
+
+    @Query("DELETE FROM assignments")
+    suspend fun clearAllAssignments()
+
+    @Query("DELETE FROM submissions")
+    suspend fun clearAllSubmissions()
+
+    @Query("DELETE FROM assessments")
+    suspend fun clearAllAssessments()
+
+    @Query("DELETE FROM questions")
+    suspend fun clearAllQuestions()
+
     // --- LESSONS ---
     @Query("SELECT * FROM lessons WHERE courseId = :courseId ORDER BY orderIndex ASC, moduleNumber ASC")
     fun getLessonsForCourse(courseId: String): Flow<List<LessonEntity>>
