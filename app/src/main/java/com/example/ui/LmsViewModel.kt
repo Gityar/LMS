@@ -790,6 +790,11 @@ class LmsViewModel(application: Application) : AndroidViewModel(application) {
 
     // --- PULL SYNC FROM GOOGLE SHEETS DATABASE ---
     fun pullSyncFromGoogleSheets() {
+        val user = currentUser.value
+        if (user == null || user.role.lowercase() == "learner") {
+            showToast("err", "Access Denied", "Learners are not authorized to sync the curriculum or database.")
+            return
+        }
         val webAppUrl = _sheetSyncStatus.value.webAppUrl
         if (webAppUrl.isBlank()) {
             showToast("info", "Web App URL Needed", "Set deployed Web App URL in Sheets tab to pull cloud records.")

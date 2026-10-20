@@ -371,14 +371,16 @@ fun DashboardScreen(
                             Text("Open Live Web Portal", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
 
-                        OutlinedButton(
-                            onClick = { viewModel.pullSyncFromGoogleSheets() },
-                            shape = RoundedCornerShape(8.dp),
-                            modifier = Modifier.testTag("btn_sync_db_dashboard")
-                        ) {
-                            Icon(Icons.Default.Sync, contentDescription = null, tint = Color(0xFF0F9D58), modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("Sync Database", fontSize = 12.sp)
+                        if (currentUser?.role?.lowercase() in listOf("admin", "instructor")) {
+                            OutlinedButton(
+                                onClick = { viewModel.pullSyncFromGoogleSheets() },
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.testTag("btn_sync_db_dashboard")
+                            ) {
+                                Icon(Icons.Default.Sync, contentDescription = null, tint = Color(0xFF0F9D58), modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Sync Database", fontSize = 12.sp)
+                            }
                         }
                     }
                 }

@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Wollo University PCHNM-3073 | Neonatal Nursing LMS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -122,7 +125,7 @@
         <button onclick="switchTab('sheets')" id="nav-sheets" class="hidden px-3.5 py-1.5 rounded-lg hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5 text-indigo-700 bg-indigo-50/50">
           <span class="w-2 h-2 rounded-full bg-emerald-500"></span> ⚙️ Database Admin
         </button>
-        <button onclick="resetToOfficialCurriculum()" title="Reload Official Wollo University PCHNM-3073 Curriculum" class="px-2.5 py-1.5 rounded-lg text-emerald-700 hover:bg-emerald-50 text-xs font-semibold transition flex items-center gap-1 border border-emerald-200">
+        <button onclick="resetToOfficialCurriculum()" id="btn-sync-curriculum-nav" style="display: none;" disabled title="Reload Official Wollo University PCHNM-3073 Curriculum" class="hidden px-2.5 py-1.5 rounded-lg text-emerald-700 hover:bg-emerald-50 text-xs font-semibold transition items-center gap-1 border border-emerald-200">
           <span>🔄</span> Sync Curriculum
         </button>
       </nav>
@@ -171,18 +174,18 @@
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="glass-card rounded-xl p-5 shadow-sm">
           <div class="text-xs font-medium text-slate-500">Active Courses</div>
-          <div class="text-2xl font-bold text-slate-900 mt-1" id="stat-courses-count">4</div>
+          <div class="text-2xl font-bold text-slate-900 mt-1" id="stat-courses-count">6</div>
           <div class="text-xs text-indigo-600 font-semibold mt-1">Editable in real-time</div>
         </div>
         <div class="glass-card rounded-xl p-5 shadow-sm">
           <div class="text-xs font-medium text-slate-500">Total Lesson Units</div>
-          <div class="text-2xl font-bold text-slate-900 mt-1" id="stat-lessons-count">6</div>
+          <div class="text-2xl font-bold text-slate-900 mt-1" id="stat-lessons-count">29</div>
           <div class="text-xs text-emerald-600 font-semibold mt-1">Clinical Protocols & Lectures</div>
         </div>
         <div class="glass-card rounded-xl p-5 shadow-sm">
           <div class="text-xs font-medium text-slate-500">Assessment Questions</div>
-          <div class="text-2xl font-bold text-slate-900 mt-1" id="stat-questions-count">4</div>
-          <div class="text-xs text-indigo-600 font-semibold mt-1" id="stat-passing-label">80% Passing Threshold</div>
+          <div class="text-2xl font-bold text-slate-900 mt-1" id="stat-questions-count">22</div>
+          <div class="text-xs text-indigo-600 font-semibold mt-1" id="stat-passing-label">70% Passing Threshold</div>
         </div>
         <div class="glass-card rounded-xl p-5 shadow-sm">
           <div class="text-xs font-medium text-slate-500">Accreditation Status</div>
@@ -212,7 +215,7 @@
         </div>
         <div class="flex items-center gap-3">
           <input type="text" id="course-search-input" oninput="filterCourses()" placeholder="Search courses..." class="px-3.5 py-2 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
-          <button onclick="resetToOfficialCurriculum()" title="Reset / Reload Official Wollo PCHNM-3073 Curriculum" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-semibold rounded-xl transition flex items-center gap-1.5 whitespace-nowrap">
+          <button onclick="resetToOfficialCurriculum()" id="btn-reload-curriculum-page" style="display: none;" disabled title="Reset / Reload Official Wollo PCHNM-3073 Curriculum" class="hidden px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-semibold rounded-xl transition items-center gap-1.5 whitespace-nowrap">
             <span>🔄 Reload Curriculum</span>
           </button>
           <button onclick="openCourseModal()" id="btn-add-course-page" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-xl shadow-sm transition flex items-center gap-1.5 whitespace-nowrap">
@@ -2394,10 +2397,10 @@
     let userAnswers = {};
 
     // AUTOMATIC CURRICULUM VERSION MIGRATION
-    const CURRENT_CURRICULUM_VERSION = 'Wollo-PCHNM-3073-v2';
+    const CURRENT_CURRICULUM_VERSION = 'Wollo-PCHNM-3073-v4';
     const storedCurriculumVer = localStorage.getItem('lms_curriculum_version');
     const hasLegacyCourses = courses.some(c => c.id === 'CRS-NRP-01' || c.id === 'CRS-THM-02' || c.id === 'CRS-BIL-03' || c.id === 'CRS-RDS-04');
-    const isMissingCurriculum = !courses.some(c => c.id === 'CRS-PCHNM-M1');
+    const isMissingCurriculum = !courses.some(c => c.id === 'CRS-PCHNM-M1') || courses.length < 6;
 
     if (storedCurriculumVer !== CURRENT_CURRICULUM_VERSION || hasLegacyCourses || isMissingCurriculum) {
       console.log('Upgrading local browser storage to Wollo University PCHNM-3073 Neonatal Nursing curriculum...');
@@ -2422,6 +2425,10 @@
     }
 
     function resetToOfficialCurriculum() {
+      if (!currentUser || currentUser.role === 'learner' || !canManageCurriculum()) {
+        showToast('Access Denied: Learners are not authorized to sync or reload the curriculum.', 'err');
+        return;
+      }
       if (confirm('Synchronize and reset all courses, lessons, quizzes, and OSCE assessments to the official Wollo University PCHNM-3073 curriculum? (Your user accounts and logins will be kept intact)')) {
         courses = DEFAULT_COURSES;
         lessons = DEFAULT_LESSONS;
@@ -3104,6 +3111,35 @@
 
       const addQBtn = document.getElementById('btn-add-question-quiz');
       if (addQBtn) addQBtn.style.display = canManageCurriculum() ? 'inline-flex' : 'none';
+
+      // Sync & Reload Curriculum buttons (Strictly prohibited for Learners)
+      const syncNavBtn = document.getElementById('btn-sync-curriculum-nav');
+      const reloadPageBtn = document.getElementById('btn-reload-curriculum-page');
+      const canAccessCurriculumAdmin = !!(currentUser && (currentUser.role === 'admin' || currentUser.role === 'instructor') && canManageCurriculum());
+
+      if (syncNavBtn) {
+        if (canAccessCurriculumAdmin) {
+          syncNavBtn.classList.remove('hidden');
+          syncNavBtn.style.display = 'inline-flex';
+          syncNavBtn.disabled = false;
+        } else {
+          syncNavBtn.classList.add('hidden');
+          syncNavBtn.style.display = 'none';
+          syncNavBtn.disabled = true;
+        }
+      }
+
+      if (reloadPageBtn) {
+        if (canAccessCurriculumAdmin) {
+          reloadPageBtn.classList.remove('hidden');
+          reloadPageBtn.style.display = 'inline-flex';
+          reloadPageBtn.disabled = false;
+        } else {
+          reloadPageBtn.classList.add('hidden');
+          reloadPageBtn.style.display = 'none';
+          reloadPageBtn.disabled = true;
+        }
+      }
 
       // Adapt assessment settings panel (Strictly for Admin & Instructor only)
       const settingsPanel = document.getElementById('assessment-settings-panel');
@@ -6261,12 +6297,27 @@
         activeNav.classList.add('text-indigo-600', 'bg-indigo-50', 'font-semibold');
       }
 
-      // Guard Admin navigation tabs
+      // Guard Admin navigation tabs & Curriculum buttons
       const isAdmin = checkPermission('admin');
       const sheetsNav = document.getElementById('nav-sheets');
       if (sheetsNav) sheetsNav.classList.toggle('hidden', !isAdmin);
       const usersNav = document.getElementById('nav-users');
       if (usersNav) usersNav.classList.toggle('hidden', !isAdmin);
+
+      // Enforce strict hiding of sync and reload curriculum buttons for Learners
+      const syncNavBtn = document.getElementById('btn-sync-curriculum-nav');
+      const reloadPageBtn = document.getElementById('btn-reload-curriculum-page');
+      const canAccessCurriculumAdmin = !!(currentUser && (currentUser.role === 'admin' || currentUser.role === 'instructor') && canManageCurriculum());
+      if (syncNavBtn && !canAccessCurriculumAdmin) {
+        syncNavBtn.classList.add('hidden');
+        syncNavBtn.style.display = 'none';
+        syncNavBtn.disabled = true;
+      }
+      if (reloadPageBtn && !canAccessCurriculumAdmin) {
+        reloadPageBtn.classList.add('hidden');
+        reloadPageBtn.style.display = 'none';
+        reloadPageBtn.disabled = true;
+      }
 
       if (tab === 'learning') {
         renderLearningTab();
@@ -6286,10 +6337,13 @@
 
     // INITIALIZATION & OFFLINE ENGINE BOOTSTRAP
     window.addEventListener('DOMContentLoaded', async () => {
-      // 1. Register Service Worker for offline app shell caching
+      // 1. Register Service Worker for offline app shell caching with cache busting
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('LMS Service Worker active:', reg.scope))
+        navigator.serviceWorker.register('./sw.js?v=4', { updateViaCache: 'none' })
+          .then(reg => {
+            console.log('LMS Service Worker active:', reg.scope);
+            reg.update();
+          })
           .catch(err => console.warn('LMS Service Worker registration notice:', err));
       }
 
@@ -6361,6 +6415,7 @@
 
       renderAuthUI();
       renderCourses();
+      updateCounts();
       renderAssessmentSelector();
       renderQuizEditor();
       renderSheetTabs();

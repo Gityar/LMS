@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ui.LmsViewModel
 
 class WebAppInterface(
@@ -118,34 +119,39 @@ fun WebPortalScreen(
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    // Sync Database with Sheet
-                    IconButton(
-                        onClick = {
-                            viewModel.pullSyncFromGoogleSheets()
-                            webViewInstance?.reload()
-                        },
-                        modifier = Modifier.testTag("btn_portal_sync")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Sync,
-                            contentDescription = "Sync Cloud Database",
-                            tint = Color(0xFF0F9D58)
-                        )
-                    }
+                    val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
+                    val canSyncOrReload = currentUser?.role?.lowercase() in listOf("admin", "instructor")
 
-                    // Reload (Bypassing cache)
-                    IconButton(
-                        onClick = {
-                            webViewInstance?.clearCache(true)
-                            webViewInstance?.reload()
-                        },
-                        modifier = Modifier.testTag("btn_portal_reload")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "Reload Page",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    if (canSyncOrReload) {
+                        // Sync Database with Sheet (Staff Only)
+                        IconButton(
+                            onClick = {
+                                viewModel.pullSyncFromGoogleSheets()
+                                webViewInstance?.reload()
+                            },
+                            modifier = Modifier.testTag("btn_portal_sync")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Sync,
+                                contentDescription = "Sync Cloud Database",
+                                tint = Color(0xFF0F9D58)
+                            )
+                        }
+
+                        // Reload Bypassing Cache (Staff Only)
+                        IconButton(
+                            onClick = {
+                                webViewInstance?.clearCache(true)
+                                webViewInstance?.reload()
+                            },
+                            modifier = Modifier.testTag("btn_portal_reload")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Reload Page",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
 
                     // Open External Browser
@@ -202,6 +208,18 @@ fun WebPortalScreen(
                         override fun onPageFinished(view: WebView?, url: String?) {
                             isLoading = false
                             view?.title?.let { t -> if (t.isNotBlank()) currentTitle = t }
+                            val isLearner = viewModel.currentUser.value?.role?.lowercase() == "learner"
+                            if (isLearner) {
+                                val hideScript = """
+                                    (function() {
+                                        var b1 = document.getElementById('btn-sync-curriculum-nav');
+                                        if (b1) { b1.style.display = 'none'; b1.disabled = true; }
+                                        var b2 = document.getElementById('btn-reload-curriculum-page');
+                                        if (b2) { b2.style.display = 'none'; b2.disabled = true; }
+                                    })();
+                                """.trimIndent()
+                                view?.evaluateJavascript(hideScript, null)
+                            }
                         }
 
                         override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
